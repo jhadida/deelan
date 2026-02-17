@@ -1,0 +1,7 @@
+:root[data-theme='light'] {
+  --bg: #f5f4ef;
+  --fg: #181818;
+  --muted: #6b6b6b;
+  --accent: #0b6e4f;
+  --surface: #ffffff;
+}

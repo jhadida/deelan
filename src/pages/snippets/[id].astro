@@ -1,0 +1,23 @@
+---
+import '../../styles/global.css';
+
+export function getStaticPaths() {
+  return [{ params: { id: 'pandas-groupby-snippet' } }];
+}
+
+const { id } = Astro.params;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{id} | DEELAN Snippet</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Snippet: {id}</h1>
+      <p>Snippet detail scaffold with metadata pane to be added.</p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+import { validateTags } from '@/lib/tags/validate';
+
+export type ContentType = 'post' | 'snippet';
+
+const ALLOWED_TYPES: ReadonlySet<string> = new Set(['post', 'snippet']);
+const ALLOWED_STATUS: ReadonlySet<string> = new Set(['draft', 'published', 'archived']);
+const ID_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export interface ContentFrontmatter {
+  id: string;
+  type: ContentType;
+  title: string;
+  tags: string[];
+  version: string;
+  summary?: string;
+  notes?: string;
+  related_ids?: string[];
+  created_at?: string;
+  updated_at?: string;
+  status?: 'draft' | 'published' | 'archived';
+}
+
+export interface ValidatedContent {
+  filePath: string;
+  body: string;
+  frontmatter: ContentFrontmatter;
+}
+
+interface ValidationResult {
+  value?: ContentFrontmatter;
+  errors: string[];
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isIsoDate(value: string): boolean {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed);
+}
+
+function ensureStringArray(value: unknown, field: string, errors: string[]): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) {
+    errors.push(`field \`${field}\` must be an array of strings.`);
+    return undefined;
+  }
+  const nonStrings = value.filter((item) => typeof item !== 'string');
+  if (nonStrings.length > 0) {
+    errors.push(`field \`${field}\` must only contain strings.`);
+    return undefined;
+  }
+  return value;
+}
+
+export function validateFrontmatter(
+  data: unknown,
+  filePath: string,
+  expectedType: ContentType
+): ValidationResult {
+  const errors: string[] = [];
+
+  if (!isObject(data)) {
+    return { errors: ['frontmatter must be a YAML object.'] };
+  }
+
+  const allowedFields = new Set([
+    'id',
+    'type',
+    'title',
+    'tags',
+    'version',
+    'summary',
+    'notes',
+    'related_ids',
+    'created_at',
+    'updated_at',
+    'status'
+  ]);
+
+  for (const key of Object.keys(data)) {
+    if (!allowedFields.has(key)) {
+      errors.push(`unknown frontmatter field \`${key}\`.`);
+    }
+  }
+
+  const id = data.id;
+  if (typeof id !== 'string' || id.trim().length === 0) {
+    errors.push('field `id` is required and must be a non-empty string.');
+  } else if (!ID_REGEX.test(id)) {
+    errors.push('field `id` must match /^[a-z0-9]+(?:-[a-z0-9]+)*$/.');
+  }
+
+  const type = data.type;
+  if (typeof type !== 'string' || !ALLOWED_TYPES.has(type)) {
+    errors.push('field `type` is required and must be `post` or `snippet`.');
+  } else if (type !== expectedType) {
+    errors.push(`field \`type\` must be \`${expectedType}\` for this path.`);
+  }
+
+  const title = data.title;
+  if (typeof title !== 'string' || title.trim().length === 0) {
+    errors.push('field `title` is required and must be a non-empty string.');
+  }
+
+  const version = data.version;
+  if (typeof version !== 'string' || version.trim().length === 0) {
+    errors.push('field `version` is required and must be a non-empty string.');
+  }
+
+  const tags = ensureStringArray(data.tags, 'tags', errors);
+  if (!tags || tags.length === 0) {
+    errors.push('field `tags` is required and must be a non-empty array.');
+  } else {
+    const invalidTags = validateTags(tags);
+    if (invalidTags.length > 0) {
+      errors.push(
+        `field \`tags\` contains invalid hierarchical tag(s): ${invalidTags.join(', ')}.`
+      );
+    }
+  }
+
+  const relatedIds = ensureStringArray(data.related_ids, 'related_ids', errors);
+  if (relatedIds) {
+    const invalidRelatedIds = relatedIds.filter((value) => !ID_REGEX.test(value));
+    if (invalidRelatedIds.length > 0) {
+      errors.push(
+        `field \`related_ids\` contains invalid id(s): ${invalidRelatedIds.join(', ')}.`
+      );
+    }
+  }
+
+  if (data.summary !== undefined && typeof data.summary !== 'string') {
+    errors.push('field `summary` must be a string when provided.');
+  }
+
+  if (data.notes !== undefined && typeof data.notes !== 'string') {
+    errors.push('field `notes` must be a string when provided.');
+  }
+
+  if (data.created_at !== undefined) {
+    if (typeof data.created_at !== 'string' || !isIsoDate(data.created_at)) {
+      errors.push('field `created_at` must be an ISO-compatible datetime string when provided.');
+    }
+  }
+
+  if (data.updated_at !== undefined) {
+    if (typeof data.updated_at !== 'string' || !isIsoDate(data.updated_at)) {
+      errors.push('field `updated_at` must be an ISO-compatible datetime string when provided.');
+    }
+  }
+
+  if (data.status !== undefined) {
+    if (typeof data.status !== 'string' || !ALLOWED_STATUS.has(data.status)) {
+      errors.push('field `status` must be one of `draft`, `published`, `archived` when provided.');
+    }
+  }
+
+  if (errors.length > 0) {
+    return { errors };
+  }
+
+  return {
+    errors,
+    value: {
+      id: id as string,
+      type: type as ContentType,
+      title: title as string,
+      tags: tags as string[],
+      version: version as string,
+      summary: data.summary as string | undefined,
+      notes: data.notes as string | undefined,
+      related_ids: relatedIds,
+      created_at: data.created_at as string | undefined,
+      updated_at: data.updated_at as string | undefined,
+      status: data.status as 'draft' | 'published' | 'archived' | undefined
+    }
+  };
+}
+
+export function inferTypeFromPath(filePath: string): ContentType | null {
+  if (filePath.includes('/content/posts/')) return 'post';
+  if (filePath.includes('/content/snippets/')) return 'snippet';
+  return null;
+}

@@ -1,0 +1,23 @@
+---
+import '../../styles/global.css';
+
+export function getStaticPaths() {
+  return [{ params: { id: 'de-partitioning-primer' } }];
+}
+
+const { id } = Astro.params;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{id} | DEELAN</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Post: {id}</h1>
+      <p>Reader view scaffold.</p>
+    </main>
+  </body>
+</html>

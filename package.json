@@ -1,0 +1,27 @@
+{
+  "name": "deelan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Data Engineering Electronic LAboratory Notebook",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "validate": "tsx scripts/validate-content.ts",
+    "prebuild": "npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
+    "build": "astro build",
+    "preview": "astro preview",
+    "export": "tsx scripts/export-item.ts"
+  },
+  "dependencies": {
+    "astro": "^5.2.0",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
