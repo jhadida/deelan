@@ -4,7 +4,7 @@ site_url: https://example.github.io/deelan/
 repo_url: https://github.com/example/deelan
 repo_name: example/deelan
 
-site_dir: .site
+site_dir: .site-docs
 
 theme:
   name: material

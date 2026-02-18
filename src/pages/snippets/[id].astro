@@ -61,7 +61,7 @@ const renderedHtml = await renderMarkdown(parsed.content);
   </Fragment>
 
   <div class="container snippet-page">
-    <aside class="panel">
+    <aside class="panel section-block">
       <h2>Metadata</h2>
       <p><strong>ID:</strong> {item.id}</p>
       <p><strong>Version:</strong> {item.version}</p>
@@ -72,13 +72,14 @@ const renderedHtml = await renderMarkdown(parsed.content);
       <p><strong>Commits:</strong> {commitCount}</p>
     </aside>
 
-    <section class="panel markdown-body">
-      <h1>{item.title}</h1>
+    <section class="panel markdown-body section-block">
+      <span class="eyebrow">Snippet</span>
+      <h1 class="page-title">{item.title}</h1>
       {item.notes ? <p>{item.notes}</p> : null}
       <article set:html={renderedHtml}></article>
     </section>
 
-    <aside class="panel">
+    <aside class="panel section-block">
       <h2>Related</h2>
       <h3>Posts</h3>
       {
@@ -109,7 +110,7 @@ const renderedHtml = await renderMarkdown(parsed.content);
   </div>
 
   <div class="container stack">
-    <section class="panel">
+    <section class="panel section-block">
       <h2>Timeline</h2>
       {
         !itemTimeline || itemTimeline.timeline.length === 0 ? (

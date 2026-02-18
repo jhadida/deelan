@@ -1,7 +1,12 @@
 :root[data-theme='light'] {
   --bg: #f5f4ef;
   --fg: #181818;
-  --muted: #6b6b6b;
+  --muted: #5f5a50;
   --accent: #0b6e4f;
   --surface: #ffffff;
+  --surface-elevated: #fcfbf7;
+  --line: #d9d3c2;
+  --line-strong: #b8ad92;
+  --focus-ring: #136f4f;
+  --overlay: rgba(41, 37, 24, 0.2);
 }

@@ -1,0 +1,16 @@
+---
+import TimelineItem from './TimelineItem.astro';
+
+interface Props {
+  commit: string;
+  date: string;
+  message: string;
+  author: string;
+}
+
+const { commit, date, message, author } = Astro.props;
+---
+
+<ul class="timeline-list" style="padding: 0; margin: 0;">
+  <TimelineItem commit={commit} date={date} message={message} author={author} />
+</ul>

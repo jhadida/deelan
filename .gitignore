@@ -2,15 +2,13 @@
 node_modules/
 
 # build outputs
-dist/
+.codex/
 .astro/
-.site/
-.cache/mkdocs/
-
-# generated artifacts
-generated/search/*.json
-generated/timeline/*.json
-generated/manifests/*.json
+.site-docs/
+.site-deelan/
+.site-storybook/
+.generated/
+.cache/
 
 # local exports and temp files
 exports/
@@ -23,6 +21,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+debug-storybook.log
 
 # env
 .env

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.local/schemas/frontmatter.schema.json",
+  "$id": "https://example.local/src/schemas/frontmatter.schema.json",
   "title": "DEELAN Frontmatter",
   "type": "object",
   "additionalProperties": false,

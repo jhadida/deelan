@@ -4,11 +4,20 @@ import SiteShell from '../components/layout/SiteShell.astro';
 
 <SiteShell>
   <div class="container stack">
-    <h1>DEELAN</h1>
-    <p>Data Engineering Electronic LAboratory Notebook</p>
-    <ul>
-      <li><a href="/posts">Posts</a></li>
-      <li><a href="/snippets">Snippets</a></li>
-    </ul>
+    <header class="page-header reader-width">
+      <span class="eyebrow">Notebook Home</span>
+      <h1 class="page-title">DEELAN</h1>
+      <p>Data Engineering Electronic LAboratory Notebook.</p>
+      <p class="page-subtitle">Browse long-form writing in Posts, or use Snippets for quick lookup workflows.</p>
+    </header>
+
+    <section class="panel reader-width section-block">
+      <h2>Explore</h2>
+      <ul>
+        <li><a href="/posts">Posts</a></li>
+        <li><a href="/snippets">Snippets</a></li>
+        <li><a href="/ui-lab">UI Lab</a></li>
+      </ul>
+    </section>
   </div>
 </SiteShell>

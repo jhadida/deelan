@@ -1,0 +1,14 @@
+---
+interface Props {
+  label: string;
+  variant?: 'default' | 'primary' | 'danger';
+  disabled?: boolean;
+}
+
+const { label, variant = 'default', disabled = false } = Astro.props;
+
+const variantClass =
+  variant === 'primary' ? 'btn-primary' : variant === 'danger' ? 'btn-danger' : '';
+---
+
+<button class={`btn ${variantClass}`.trim()} type="button" disabled={disabled}>{label}</button>

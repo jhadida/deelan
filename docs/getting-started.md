@@ -61,7 +61,7 @@ Serve docs locally:
 npm run docs:serve
 ```
 
-Build docs (output in `.site/`):
+Build docs (output in `.site-docs/`):
 
 ```bash
 npm run docs:build

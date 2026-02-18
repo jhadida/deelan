@@ -67,7 +67,7 @@ async function readJsonOrDefault<T>(filePath: string, fallback: T): Promise<T> {
 }
 
 export async function loadPostsIndex(): Promise<GeneratedIndexFile> {
-  return readJsonOrDefault(path.join(ROOT, 'generated', 'search', 'posts-index.json'), {
+  return readJsonOrDefault(path.join(ROOT, '.generated', 'search', 'posts-index.json'), {
     generated_at: new Date(0).toISOString(),
     total: 0,
     items: []
@@ -75,7 +75,7 @@ export async function loadPostsIndex(): Promise<GeneratedIndexFile> {
 }
 
 export async function loadSnippetsIndex(): Promise<GeneratedIndexFile> {
-  return readJsonOrDefault(path.join(ROOT, 'generated', 'search', 'snippets-index.json'), {
+  return readJsonOrDefault(path.join(ROOT, '.generated', 'search', 'snippets-index.json'), {
     generated_at: new Date(0).toISOString(),
     total: 0,
     items: []
@@ -83,7 +83,7 @@ export async function loadSnippetsIndex(): Promise<GeneratedIndexFile> {
 }
 
 export async function loadTimeline(): Promise<GeneratedTimelineFile> {
-  return readJsonOrDefault(path.join(ROOT, 'generated', 'timeline', 'versions.json'), {
+  return readJsonOrDefault(path.join(ROOT, '.generated', 'timeline', 'versions.json'), {
     generated_at: new Date(0).toISOString(),
     total: 0,
     items: {}

@@ -21,7 +21,9 @@
     "prebuild": "npm run prepare:mathjax && npm run sync:search-core && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
     "build": "astro build",
     "preview": "astro preview",
-    "export": "tsx scripts/export-item.ts"
+    "export": "tsx scripts/export-item.ts",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build-storybook": "storybook build --output-dir .site-storybook"
   },
   "dependencies": {
     "astro": "^5.2.0",
@@ -35,6 +37,10 @@
     "shiki": "^3.22.0"
   },
   "devDependencies": {
+    "@storybook/addon-docs": "^10.2.10",
+    "@storybook/builder-vite": "^10.2.10",
+    "storybook": "^10.2.10",
+    "storybook-astro": "^0.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

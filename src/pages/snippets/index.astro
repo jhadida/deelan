@@ -13,16 +13,17 @@ function effectiveDate(id: string, fallback: string | null): string | null {
 
 <SiteShell pageTitle="Snippets">
   <div class="container stack">
-    <header>
-      <h1>Snippets</h1>
-      <p class="muted">
+    <header class="page-header">
+      <span class="eyebrow">Library</span>
+      <h1 class="page-title">Snippets</h1>
+      <p class="page-subtitle">
         <span id="snippets-visible-count">{snippets.total}</span> / {snippets.total} item(s). Indexed at{' '}
         {new Date(snippets.generated_at).toLocaleString()}.
       </p>
     </header>
 
     <section class="split-view">
-      <aside class="panel">
+      <aside class="panel section-block">
         <label for="snippet-filter">Filter snippets</label>
         <input
           id="snippet-filter"
@@ -56,7 +57,7 @@ function effectiveDate(id: string, fallback: string | null): string | null {
         </ul>
       </aside>
 
-      <section class="panel">
+      <section class="panel section-block">
         <h2>Quick Explorer</h2>
         <p>
           This view is optimized for instant list filtering. Use boolean expressions and structured

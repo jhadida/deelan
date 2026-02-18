@@ -56,25 +56,26 @@ const renderedHtml = await renderMarkdown(parsed.content);
   </Fragment>
 
   <div class="container stack">
-    <header>
-      <h1>{item.title}</h1>
-      <p class="muted">{item.id}</p>
+    <header class="page-header reader-width">
+      <span class="eyebrow">Post</span>
+      <h1 class="page-title">{item.title}</h1>
+      <p class="page-subtitle">{item.id}</p>
     </header>
 
     <section class="meta-grid">
-      <div><strong>Version</strong><div>{item.version}</div></div>
-      <div><strong>Status</strong><div>{item.status}</div></div>
-      <div><strong>Tags</strong><div>{item.tags.join(', ')}</div></div>
-      <div><strong>Created</strong><div>{createdAt}</div></div>
-      <div><strong>Updated</strong><div>{updatedAt}</div></div>
-      <div><strong>Commits</strong><div>{commitCount}</div></div>
+      <div class="meta-item"><strong>Version</strong><div>{item.version}</div></div>
+      <div class="meta-item"><strong>Status</strong><div>{item.status}</div></div>
+      <div class="meta-item"><strong>Tags</strong><div>{item.tags.join(', ')}</div></div>
+      <div class="meta-item"><strong>Created</strong><div>{createdAt}</div></div>
+      <div class="meta-item"><strong>Updated</strong><div>{updatedAt}</div></div>
+      <div class="meta-item"><strong>Commits</strong><div>{commitCount}</div></div>
     </section>
 
-    {item.summary ? <p>{item.summary}</p> : null}
+    {item.summary ? <p class="reader-width">{item.summary}</p> : null}
 
     <article class="reader markdown-body" set:html={renderedHtml}></article>
 
-    <section>
+    <section class="panel section-block reader-width">
       <h2>Related</h2>
       {
         related.length === 0 ? (
@@ -89,7 +90,7 @@ const renderedHtml = await renderMarkdown(parsed.content);
       }
     </section>
 
-    <section>
+    <section class="section-block">
       <h2>Timeline</h2>
       {
         !itemTimeline || itemTimeline.timeline.length === 0 ? (

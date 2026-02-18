@@ -13,9 +13,10 @@ function effectiveDate(id: string, fallback: string | null): string | null {
 
 <SiteShell pageTitle="Posts">
   <div class="container stack">
-    <header>
-      <h1>Posts</h1>
-      <p class="muted">
+    <header class="page-header">
+      <span class="eyebrow">Library</span>
+      <h1 class="page-title">Posts</h1>
+      <p class="page-subtitle">
         <span id="posts-visible-count">{posts.total}</span> / {posts.total} item(s). Indexed at{' '}
         {new Date(posts.generated_at).toLocaleString()}.
       </p>
@@ -50,7 +51,7 @@ function effectiveDate(id: string, fallback: string | null): string | null {
       <button id="posts-view-list" type="button" aria-pressed="false">List</button>
     </section>
 
-    <div id="posts-table-view">
+    <div id="posts-table-view" class="table-wrap">
       <table class="table">
         <thead>
           <tr>

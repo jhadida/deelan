@@ -1,0 +1,21 @@
+---
+interface Item {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="meta-grid">
+  {items.map((item) => (
+    <div class="meta-item">
+      <strong>{item.label}</strong>
+      <div>{item.value}</div>
+    </div>
+  ))}
+</div>

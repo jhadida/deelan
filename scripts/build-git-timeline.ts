@@ -12,7 +12,7 @@ import {
 
 const ROOT = process.cwd();
 const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
-const OUTPUT = path.join(ROOT, 'generated', 'timeline', 'versions.json');
+const OUTPUT = path.join(ROOT, '.generated', 'timeline', 'versions.json');
 
 interface TimelineEntry {
   commit: string;

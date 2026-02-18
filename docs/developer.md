@@ -23,10 +23,10 @@
 
 ## Key Build Artifacts
 
-- `generated/search/posts-index.json`
-- `generated/search/snippets-index.json`
-- `generated/manifests/content-manifest.json`
-- `generated/timeline/versions.json`
+- `.generated/search/posts-index.json`
+- `.generated/search/snippets-index.json`
+- `.generated/manifests/content-manifest.json`
+- `.generated/timeline/versions.json`
 
 These are generated files and should not be treated as source-of-truth content.
 

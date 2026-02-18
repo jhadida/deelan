@@ -19,6 +19,7 @@ const fullTitle = pageTitle ? `${pageTitle} | ${config.blog_title}` : config.blo
     <slot name="head" />
   </head>
   <body>
+    <a class="visually-hidden-focusable" href="#main-content">Skip to content</a>
     <header class="topbar">
       <div class="topbar-inner">
         <a href="/" class="brand">{config.blog_title}</a>
@@ -32,7 +33,7 @@ const fullTitle = pageTitle ? `${pageTitle} | ${config.blog_title}` : config.blo
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <slot />
     </main>
 

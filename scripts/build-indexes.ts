@@ -12,8 +12,8 @@ import {
 
 const ROOT = process.cwd();
 const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
-const SEARCH_DIR = path.join(ROOT, 'generated', 'search');
-const MANIFEST_DIR = path.join(ROOT, 'generated', 'manifests');
+const SEARCH_DIR = path.join(ROOT, '.generated', 'search');
+const MANIFEST_DIR = path.join(ROOT, '.generated', 'manifests');
 
 interface IndexItem {
   id: string;
