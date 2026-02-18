@@ -213,6 +213,23 @@ a {
   gap: 1rem;
 }
 
+.timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline-item {
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: var(--surface);
+}
+
+.timeline-item + .timeline-item {
+  margin-top: 0.6rem;
+}
+
 @media (max-width: 960px) {
   .split-view,
   .snippet-page,

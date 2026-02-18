@@ -34,6 +34,9 @@ const relatedSnippetItems = snippets.items
   .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
 
 const itemTimeline = timeline.items[item.id];
+const createdAt = itemTimeline?.effective_created_at ?? item.created_at ?? 'N/A';
+const updatedAt = itemTimeline?.effective_updated_at ?? item.updated_at ?? 'N/A';
+const commitCount = itemTimeline?.commit_count ?? 0;
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
@@ -64,7 +67,9 @@ const renderedHtml = await renderMarkdown(parsed.content);
       <p><strong>Version:</strong> {item.version}</p>
       <p><strong>Status:</strong> {item.status}</p>
       <p><strong>Tags:</strong> {item.tags.join(', ')}</p>
-      <p><strong>Updated:</strong> {itemTimeline?.effective_updated_at ?? 'N/A'}</p>
+      <p><strong>Created:</strong> {createdAt}</p>
+      <p><strong>Updated:</strong> {updatedAt}</p>
+      <p><strong>Commits:</strong> {commitCount}</p>
     </aside>
 
     <section class="panel markdown-body">
@@ -101,5 +106,31 @@ const renderedHtml = await renderMarkdown(parsed.content);
         )
       }
     </aside>
+  </div>
+
+  <div class="container stack">
+    <section class="panel">
+      <h2>Timeline</h2>
+      {
+        !itemTimeline || itemTimeline.timeline.length === 0 ? (
+          <p class="muted">No git timeline data yet.</p>
+        ) : (
+          <>
+            <p class="muted">Showing {itemTimeline.timeline.length} commit(s), newest first.</p>
+            <ul class="timeline-list">
+              {itemTimeline.timeline.map((entry) => (
+                <li class="timeline-item">
+                  <div>
+                    <code>{entry.commit.slice(0, 8)}</code> <strong>{entry.date}</strong>
+                  </div>
+                  <div>{entry.message}</div>
+                  <div class="muted">{entry.author}</div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </section>
   </div>
 </SiteShell>

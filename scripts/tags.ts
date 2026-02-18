@@ -96,6 +96,28 @@ function printTagList(counts: Map<string, number>): void {
   console.log(`\nTotal unique tags: ${tags.length}`);
 }
 
+function printTagStats(content: ContentFile[], counts: Map<string, number>): void {
+  const totalItems = content.length;
+  const totalTagAssignments = [...counts.values()].reduce((a, b) => a + b, 0);
+  const avg = totalItems > 0 ? totalTagAssignments / totalItems : 0;
+
+  const posts = content.filter((item) => item.frontmatter.type === 'post').length;
+  const snippets = content.filter((item) => item.frontmatter.type === 'snippet').length;
+
+  const top = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 10);
+
+  console.log(`Items: ${totalItems} (posts=${posts}, snippets=${snippets})`);
+  console.log(`Unique tags: ${counts.size}`);
+  console.log(`Tag assignments: ${totalTagAssignments}`);
+  console.log(`Average tags/item: ${avg.toFixed(2)}`);
+  console.log('\nTop tags:');
+  for (const [tag, count] of top) {
+    console.log(`- ${tag}: ${count}`);
+  }
+}
+
 interface TreeNode {
   children: Map<string, TreeNode>;
   count: number;
@@ -196,13 +218,33 @@ function mapTag(tag: string, from: string, to: string, subtree: boolean): string
   return tag === from ? to : tag;
 }
 
+function impactedTagSet(allTags: string[], from: string, subtree: boolean): string[] {
+  return allTags.filter((tag) => (subtree ? tag === from || tag.startsWith(`${from}.`) : tag === from));
+}
+
 async function applyTagRewrite(
   content: ContentFile[],
   from: string,
   to: string,
   subtree: boolean,
-  apply: boolean
+  apply: boolean,
+  confirmSubtree: boolean
 ): Promise<void> {
+  const allDistinctTags = Array.from(new Set(content.flatMap((item) => item.frontmatter.tags))).sort();
+  const impacted = impactedTagSet(allDistinctTags, from, subtree);
+
+  if (subtree) {
+    console.log(`Subtree mode enabled for prefix: ${from}`);
+    console.log(`Impacted distinct tags (${impacted.length}):`);
+    for (const tag of impacted) {
+      console.log(`- ${tag}`);
+    }
+
+    if (apply && !confirmSubtree) {
+      throw new Error('Refusing subtree write without --confirm-subtree. Run dry-run first, then re-run with --apply --confirm-subtree.');
+    }
+  }
+
   let changedFiles = 0;
   let changedTags = 0;
 
@@ -241,22 +283,62 @@ async function applyTagRewrite(
   }
 }
 
+async function generateWordCloud(counts: Map<string, number>, outPath: string): Promise<void> {
+  const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const max = entries.length > 0 ? entries[0][1] : 1;
+
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DEELAN Tag Word Cloud</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 2rem; }
+      .cloud { display: flex; flex-wrap: wrap; gap: 0.7rem; line-height: 1.2; }
+      .tag { color: #0b6e4f; }
+      .muted { color: #666; margin-bottom: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Tag Word Cloud</h1>
+    <p class="muted">Generated from ${entries.length} unique tag(s).</p>
+    <div class="cloud">
+      ${entries
+        .map(([tag, count]) => {
+          const weight = 0.85 + (count / max) * 1.9;
+          return `<span class="tag" style="font-size:${weight.toFixed(2)}rem" title="${count}">${tag}</span>`;
+        })
+        .join('\n')}
+    </div>
+  </body>
+</html>`;
+
+  await fs.mkdir(path.dirname(outPath), { recursive: true });
+  await fs.writeFile(outPath, html, 'utf8');
+  console.log(`Word cloud written: ${outPath}`);
+}
+
 function printHelp(): void {
   console.log(`DEELAN tags CLI
 
 Commands:
   list
+  stats
   tree
   duplicates [--distance <n>]
-  rename --from <tag|prefix> --to <tag|prefix> [--subtree] [--apply]
-  merge --from <tag|prefix> --to <tag|prefix> [--subtree] [--apply]
+  rename --from <tag|prefix> --to <tag|prefix> [--subtree] [--apply] [--confirm-subtree]
+  merge --from <tag|prefix> --to <tag|prefix> [--subtree] [--apply] [--confirm-subtree]
+  wordcloud [--out <path>]
 
 Examples:
   npm run tags -- list
+  npm run tags -- stats
   npm run tags -- tree
   npm run tags -- duplicates --distance 2
   npm run tags -- rename --from data.etl --to data.pipeline --subtree
-  npm run tags -- merge --from python.panda.groupby --to python.pandas.groupby --apply
+  npm run tags -- rename --from data.etl --to data.pipeline --subtree --apply --confirm-subtree
+  npm run tags -- wordcloud --out ./exports/tag-wordcloud.html
 `);
 }
 
@@ -275,6 +357,11 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === 'stats') {
+    printTagStats(content, counts);
+    return;
+  }
+
   if (command === 'tree') {
     const tree = buildTagTree(counts);
     printTree(tree);
@@ -288,10 +375,17 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === 'wordcloud') {
+    const outPath = getStringFlag(flags, 'out') ?? path.join(process.cwd(), 'exports', 'tag-wordcloud.html');
+    await generateWordCloud(counts, outPath);
+    return;
+  }
+
   if (command === 'rename' || command === 'merge') {
     const from = getStringFlag(flags, 'from');
     const to = getStringFlag(flags, 'to');
     const apply = getBoolFlag(flags, 'apply');
+    const confirmSubtree = getBoolFlag(flags, 'confirm-subtree');
     const subtree = getBoolFlag(flags, 'subtree') || (from?.endsWith('.*') ?? false);
 
     if (!from || !to) {
@@ -301,7 +395,7 @@ async function main(): Promise<void> {
     const normalizedFrom = from.endsWith('.*') ? from.slice(0, -2) : from;
     const normalizedTo = to.endsWith('.*') ? to.slice(0, -2) : to;
 
-    await applyTagRewrite(content, normalizedFrom, normalizedTo, subtree, apply);
+    await applyTagRewrite(content, normalizedFrom, normalizedTo, subtree, apply, confirmSubtree);
     return;
   }
 

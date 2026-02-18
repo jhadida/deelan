@@ -78,7 +78,108 @@ header {
   padding-top: 1rem;
   color: var(--muted);
 }
+img {
+  max-width: 100%;
+  height: auto;
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  body {
+    background: #fff;
+  }
+  pre, blockquote, table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  h1, h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
 `;
+}
+
+function isLocalAssetReference(value: string): boolean {
+  if (!value || value.startsWith('#')) return false;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
+  if (value.startsWith('//')) return false;
+  return true;
+}
+
+function sanitizeName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+async function rewriteHtmlAssets(html: string, sourceFilePath: string, exportDir: string): Promise<string> {
+  const sourceDir = path.dirname(path.join(process.cwd(), sourceFilePath));
+  const mediaDir = path.join(exportDir, 'media');
+  await fs.mkdir(mediaDir, { recursive: true });
+
+  const map = new Map<string, string>();
+  const usedNames = new Set<string>();
+
+  async function copyLocalAsset(original: string): Promise<string | null> {
+    if (!isLocalAssetReference(original)) return null;
+    if (original.startsWith('/')) return original;
+
+    const normalized = original.split('?')[0].split('#')[0];
+    const absPath = path.resolve(sourceDir, normalized);
+
+    try {
+      await fs.access(absPath);
+    } catch {
+      return null;
+    }
+
+    if (map.has(original)) return map.get(original) ?? null;
+
+    const parsed = path.parse(absPath);
+    let candidate = sanitizeName(parsed.base || 'asset');
+    if (!candidate) candidate = 'asset';
+    let index = 1;
+    while (usedNames.has(candidate)) {
+      candidate = `${sanitizeName(parsed.name)}-${index}${parsed.ext}`;
+      index += 1;
+    }
+    usedNames.add(candidate);
+
+    const relPath = `./media/${candidate}`;
+    await fs.copyFile(absPath, path.join(mediaDir, candidate));
+    map.set(original, relPath);
+    return relPath;
+  }
+
+  const imgRegex = /(<img\b[^>]*\bsrc=")([^"]+)(")/g;
+  let output = html;
+  for (const match of html.matchAll(imgRegex)) {
+    const original = match[2];
+    const replacement = await copyLocalAsset(original);
+    if (!replacement || replacement === original) continue;
+    output = output.replace(`src="${original}"`, `src="${replacement}"`);
+  }
+
+  const linkRegex = /(<a\b[^>]*\bhref=")([^"]+)(")/g;
+  for (const match of output.matchAll(linkRegex)) {
+    const original = match[2];
+    if (!isLocalAssetReference(original)) continue;
+    if (original.startsWith('/') || original.startsWith('./media/')) continue;
+
+    if (original.endsWith('.md')) {
+      const target = original.replace(/\.md$/i, '.html');
+      output = output.replace(`href="${original}"`, `href="${target}"`);
+      continue;
+    }
+
+    const copied = await copyLocalAsset(original);
+    if (copied && copied !== original) {
+      output = output.replace(`href="${original}"`, `href="${copied}"`);
+    }
+  }
+
+  return output;
 }
 
 export async function exportHtml(context: ExportContext): Promise<{ htmlPath: string; exportDir: string }> {
@@ -103,6 +204,7 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
   }
 
   const updated = item.frontmatter.updated_at ?? item.frontmatter.created_at ?? 'N/A';
+  const contentHtml = await rewriteHtmlAssets(renderedHtml, item.filePath, exportDir);
   const html = `<!doctype html>
 <html lang="en" data-theme="${theme}">
   <head>
@@ -137,7 +239,7 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
         <div><strong>Updated</strong><div>${updated}</div></div>
       </section>
 
-      <article class="markdown-body">${renderedHtml}</article>
+      <article class="markdown-body">${contentHtml}</article>
 
       <footer class="footer">${config.footer_text}</footer>
     </main>

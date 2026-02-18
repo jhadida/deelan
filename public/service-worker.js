@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'deelan-v1';
+const CACHE_VERSION = 'deelan-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -6,7 +6,9 @@ const CORE_ASSETS = [
   '/',
   '/posts/',
   '/snippets/',
+  '/offline.html',
   '/js/filter.js',
+  '/js/search-core.js',
   '/js/pwa-register.js',
   '/mathjax/tex-mml-chtml.js'
 ];
@@ -36,7 +38,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
@@ -61,10 +63,32 @@ async function networkFirst(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
 
-    const fallback = await caches.match('/');
+    const fallback = await caches.match('/offline.html');
     if (fallback) return fallback;
     throw new Error('Offline and no fallback cached.');
   }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    fetchPromise.catch(() => null);
+    return cached;
+  }
+
+  const fresh = await fetchPromise;
+  if (fresh) return fresh;
+
+  return new Response('', { status: 503, statusText: 'Offline' });
 }
 
 self.addEventListener('fetch', (event) => {
@@ -86,6 +110,11 @@ self.addEventListener('fetch', (event) => {
 
   if (isStaticAsset) {
     event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  if (url.pathname.endsWith('.json')) {
+    event.respondWith(staleWhileRevalidate(request));
     return;
   }
 

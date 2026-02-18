@@ -9,7 +9,8 @@
   },
   "scripts": {
     "prepare:mathjax": "tsx scripts/prepare-mathjax.ts",
-    "dev": "npm run prepare:mathjax && astro dev",
+    "sync:search-core": "tsx scripts/sync-search-core.ts",
+    "dev": "npm run prepare:mathjax && npm run sync:search-core && astro dev",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "tags": "tsx scripts/tags.ts",
     "validate": "tsx scripts/validate-content.ts",
@@ -17,7 +18,7 @@
     "docs:serve": "mkdocs serve -w mkdocs.yml -w docs/",
     "docs:build": "mkdocs build",
     "docs:deploy": "mkdocs gh-deploy --force",
-    "prebuild": "npm run prepare:mathjax && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
+    "prebuild": "npm run prepare:mathjax && npm run sync:search-core && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
     "build": "astro build",
     "preview": "astro preview",
     "export": "tsx scripts/export-item.ts"

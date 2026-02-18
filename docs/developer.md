@@ -5,10 +5,11 @@
 `npm run build` executes:
 
 1. `prepare:mathjax`
-2. `validate`
-3. `build-indexes`
-4. `build-git-timeline`
-5. `astro build`
+2. `sync:search-core`
+3. `validate`
+4. `build-indexes`
+5. `build-git-timeline`
+6. `astro build`
 
 ## Test Workflow
 
@@ -41,11 +42,14 @@ Example:
 
 ## Search Architecture
 
-- Parser/evaluator for search query semantics:
+- Shared search core (single source of truth):
+  - `src/lib/search/search-core.js`
+- TypeScript wrappers:
   - `src/lib/search/query-parser.ts`
   - `src/lib/search/query-eval.ts`
-- Browser-side filter behavior for list views:
+- Browser usage:
   - `public/js/filter.js`
+  - `public/js/search-core.js` (synced by `scripts/sync-search-core.ts`)
 
 ## Markdown/Math Rendering
 
@@ -69,4 +73,3 @@ Example:
 
 - Index-list filtering is currently client-side only.
 - Query parser has no explicit syntax-error UI feedback.
-- Export pipeline still needs full HTML/PDF implementation.

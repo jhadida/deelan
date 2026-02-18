@@ -29,6 +29,9 @@ const related = [...snippets.items]
   .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
 
 const itemTimeline = timeline.items[item.id];
+const createdAt = itemTimeline?.effective_created_at ?? item.created_at ?? 'N/A';
+const updatedAt = itemTimeline?.effective_updated_at ?? item.updated_at ?? 'N/A';
+const commitCount = itemTimeline?.commit_count ?? 0;
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
@@ -62,7 +65,9 @@ const renderedHtml = await renderMarkdown(parsed.content);
       <div><strong>Version</strong><div>{item.version}</div></div>
       <div><strong>Status</strong><div>{item.status}</div></div>
       <div><strong>Tags</strong><div>{item.tags.join(', ')}</div></div>
-      <div><strong>Updated</strong><div>{itemTimeline?.effective_updated_at ?? 'N/A'}</div></div>
+      <div><strong>Created</strong><div>{createdAt}</div></div>
+      <div><strong>Updated</strong><div>{updatedAt}</div></div>
+      <div><strong>Commits</strong><div>{commitCount}</div></div>
     </section>
 
     {item.summary ? <p>{item.summary}</p> : null}
@@ -90,13 +95,20 @@ const renderedHtml = await renderMarkdown(parsed.content);
         !itemTimeline || itemTimeline.timeline.length === 0 ? (
           <p class="muted">No git timeline data yet.</p>
         ) : (
-          <ul>
-            {itemTimeline.timeline.map((entry) => (
-              <li>
-                <code>{entry.commit.slice(0, 8)}</code> - {entry.date} - {entry.message}
-              </li>
-            ))}
-          </ul>
+          <>
+            <p class="muted">Showing {itemTimeline.timeline.length} commit(s), newest first.</p>
+            <ul class="timeline-list">
+              {itemTimeline.timeline.map((entry) => (
+                <li class="timeline-item">
+                  <div>
+                    <code>{entry.commit.slice(0, 8)}</code> <strong>{entry.date}</strong>
+                  </div>
+                  <div>{entry.message}</div>
+                  <div class="muted">{entry.author}</div>
+                </li>
+              ))}
+            </ul>
+          </>
         )
       }
     </section>

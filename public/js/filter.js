@@ -1,164 +1,4 @@
-function tokenize(input) {
-  const tokens = [];
-  let i = 0;
-
-  while (i < input.length) {
-    const ch = input[i];
-    if (/\s/.test(ch)) {
-      i += 1;
-      continue;
-    }
-
-    if (ch === '&' || ch === '|' || ch === '(' || ch === ')') {
-      tokens.push(ch);
-      i += 1;
-      continue;
-    }
-
-    if (ch === '"') {
-      let j = i + 1;
-      while (j < input.length && input[j] !== '"') j += 1;
-      tokens.push(input.slice(i + 1, j));
-      i = j < input.length ? j + 1 : j;
-      continue;
-    }
-
-    let j = i;
-    while (j < input.length && !/\s/.test(input[j]) && !['&', '|', '(', ')'].includes(input[j])) {
-      j += 1;
-    }
-
-    tokens.push(input.slice(i, j));
-    i = j;
-  }
-
-  return tokens;
-}
-
-function parseStructured(raw) {
-  const tokens = raw.split(/\s+/).filter(Boolean);
-  const filters = { tags: [], from: null, to: null };
-  const rest = [];
-
-  for (const token of tokens) {
-    if (token.startsWith('tag:')) {
-      const value = token.slice(4).trim();
-      if (value) filters.tags.push(value.toLowerCase());
-      continue;
-    }
-    if (token.startsWith('from:')) {
-      const value = token.slice(5).trim();
-      if (value) filters.from = value;
-      continue;
-    }
-    if (token.startsWith('to:')) {
-      const value = token.slice(3).trim();
-      if (value) filters.to = value;
-      continue;
-    }
-    rest.push(token);
-  }
-
-  return { text: rest.join(' '), filters };
-}
-
-function parseExpr(raw) {
-  const tokens = tokenize(raw);
-  let pos = 0;
-
-  function peek() {
-    return tokens[pos] ?? null;
-  }
-
-  function next() {
-    const t = tokens[pos] ?? null;
-    if (t !== null) pos += 1;
-    return t;
-  }
-
-  function parseOr() {
-    let left = parseAnd();
-    while (peek() === '|') {
-      next();
-      left = { type: 'or', left, right: parseAnd() };
-    }
-    return left;
-  }
-
-  function parseAnd() {
-    let left = parsePrimary();
-    while (peek() === '&') {
-      next();
-      left = { type: 'and', left, right: parsePrimary() };
-    }
-    return left;
-  }
-
-  function parsePrimary() {
-    const token = peek();
-    if (!token) return null;
-
-    if (token === '(') {
-      next();
-      const inner = parseOr();
-      if (peek() === ')') next();
-      return inner;
-    }
-
-    if (token === ')' || token === '&' || token === '|') {
-      next();
-      return null;
-    }
-
-    next();
-    return { type: 'term', value: token.toLowerCase() };
-  }
-
-  return parseOr();
-}
-
-function evalExpr(ast, text) {
-  if (!ast) return true;
-  const hay = text.toLowerCase();
-
-  if (ast.type === 'term') {
-    return !ast.value || hay.includes(ast.value);
-  }
-
-  if (ast.type === 'and') {
-    return evalExpr(ast.left, hay) && evalExpr(ast.right, hay);
-  }
-
-  return evalExpr(ast.left, hay) || evalExpr(ast.right, hay);
-}
-
-function matchesTag(queryTag, tags) {
-  if (queryTag.endsWith('.*')) {
-    const base = queryTag.slice(0, -2);
-    return tags.some((tag) => tag === base || tag.startsWith(base + '.'));
-  }
-  return tags.includes(queryTag);
-}
-
-function matchesDate(filters, rawDate) {
-  if (!filters.from && !filters.to) return true;
-  if (!rawDate) return false;
-
-  const value = Date.parse(rawDate);
-  if (!Number.isFinite(value)) return false;
-
-  if (filters.from) {
-    const from = Date.parse(filters.from);
-    if (Number.isFinite(from) && value < from) return false;
-  }
-
-  if (filters.to) {
-    const to = Date.parse(`${filters.to}T23:59:59.999`);
-    if (Number.isFinite(to) && value > to) return false;
-  }
-
-  return true;
-}
+import { parseQuery, evaluateQuery } from '/js/search-core.js';
 
 export function initFilter(config) {
   const queryInput = document.querySelector(config.querySelector);
@@ -169,8 +9,7 @@ export function initFilter(config) {
   const countEl = config.countSelector ? document.querySelector(config.countSelector) : null;
 
   function apply() {
-    const textRaw = queryInput ? queryInput.value : '';
-    const parsed = parseStructured(textRaw.trim());
+    const parsed = parseQuery((queryInput ? queryInput.value : '').trim());
 
     if (tagInput && tagInput.value.trim()) {
       parsed.filters.tags.push(tagInput.value.trim().toLowerCase());
@@ -182,31 +21,26 @@ export function initFilter(config) {
       parsed.filters.to = toInput.value;
     }
 
-    const ast = parseExpr(parsed.text);
-
     let shown = 0;
     const visibleKeys = new Set();
+
     for (const item of items) {
-      const text = item.getAttribute('data-text') || '';
-      const tags = (item.getAttribute('data-tags') || '')
-        .split(',')
-        .map((value) => value.trim().toLowerCase())
-        .filter(Boolean);
-      const date = item.getAttribute('data-date') || null;
+      const target = {
+        text: item.getAttribute('data-text') || '',
+        tags: (item.getAttribute('data-tags') || '')
+          .split(',')
+          .map((value) => value.trim().toLowerCase())
+          .filter(Boolean),
+        date: item.getAttribute('data-date') || null
+      };
 
-      const matchText = evalExpr(ast, text);
-      const matchTags = parsed.filters.tags.every((tag) => matchesTag(tag, tags));
-      const matchDateRange = matchesDate(parsed.filters, date);
-      const visible = matchText && matchTags && matchDateRange;
-
+      const visible = evaluateQuery(parsed.expression, parsed.filters, target);
       item.style.display = visible ? '' : 'none';
+
       if (visible) {
         const key = item.getAttribute('data-key') || null;
-        if (key) {
-          visibleKeys.add(key);
-        } else {
-          shown += 1;
-        }
+        if (key) visibleKeys.add(key);
+        else shown += 1;
       }
     }
 
@@ -214,9 +48,7 @@ export function initFilter(config) {
       shown = visibleKeys.size;
     }
 
-    if (countEl) {
-      countEl.textContent = String(shown);
-    }
+    if (countEl) countEl.textContent = String(shown);
   }
 
   [queryInput, tagInput, fromInput, toInput].forEach((el) => {

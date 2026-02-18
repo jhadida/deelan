@@ -21,6 +21,13 @@ export async function exportPdf(htmlPath: string, outDir: string): Promise<strin
   try {
     const page = await browser.newPage();
     await page.goto(pathToFileURL(absoluteHtmlPath).href, { waitUntil: 'networkidle' });
+    await page.emulateMedia({ media: 'print' });
+    await page.evaluate(async () => {
+      const mathJax = (window as unknown as { MathJax?: { typesetPromise?: () => Promise<void> } }).MathJax;
+      if (mathJax?.typesetPromise) {
+        await mathJax.typesetPromise();
+      }
+    });
 
     await page.pdf({
       path: pdfPath,
