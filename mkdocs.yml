@@ -8,19 +8,23 @@ site_dir: .site
 
 theme:
   name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: indigo
   features:
     - navigation.sections
     - navigation.instant
     - content.code.copy
 
 nav:
-  - Home: docs/index.md
-  - Getting Started: docs/getting-started.md
-  - Tag CLI: docs/tag-cli.md
-  - Editor Integration: docs/editor-integration.md
-  - Developer Notes: docs/developer.md
-  - Search Grammar: docs/search-grammar.md
-  - PWA: docs/pwa.md
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Tag CLI: tag-cli.md
+  - Editor Integration: editor-integration.md
+  - Developer Notes: developer.md
+  - Search Grammar: search-grammar.md
+  - PWA: pwa.md
 
 markdown_extensions:
   - admonition
