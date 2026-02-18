@@ -4,6 +4,8 @@ node_modules/
 # build outputs
 dist/
 .astro/
+.site/
+.cache/mkdocs/
 
 # generated artifacts
 generated/search/*.json

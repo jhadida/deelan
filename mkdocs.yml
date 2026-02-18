@@ -1,0 +1,31 @@
+site_name: DEELAN
+site_description: Data Engineering Electronic LAboratory Notebook
+site_url: https://example.github.io/deelan/
+repo_url: https://github.com/example/deelan
+repo_name: example/deelan
+
+site_dir: .site
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.instant
+    - content.code.copy
+
+nav:
+  - Home: docs/index.md
+  - Getting Started: docs/getting-started.md
+  - Tag CLI: docs/tag-cli.md
+  - Editor Integration: docs/editor-integration.md
+  - Developer Notes: docs/developer.md
+  - Search Grammar: docs/search-grammar.md
+  - PWA: docs/pwa.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.highlight

@@ -1,17 +1,81 @@
 ---
-import '../../styles/global.css';
+import SiteShell from '../../components/layout/SiteShell.astro';
+import { loadSnippetsIndex, loadTimeline } from '../../lib/content/generated';
+
+const snippets = await loadSnippetsIndex();
+const timeline = await loadTimeline();
+
+function effectiveDate(id: string, fallback: string | null): string | null {
+  const item = timeline.items[id];
+  return item?.effective_updated_at ?? item?.effective_created_at ?? fallback;
+}
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>DEELAN Snippets</title>
-  </head>
-  <body>
-    <main class="container">
+<SiteShell pageTitle="Snippets">
+  <div class="container stack">
+    <header>
       <h1>Snippets</h1>
-      <p>Phase 1 scaffold: instant filtering sidebar UI will be added next.</p>
-    </main>
-  </body>
-</html>
+      <p class="muted">
+        <span id="snippets-visible-count">{snippets.total}</span> / {snippets.total} item(s). Indexed at{' '}
+        {new Date(snippets.generated_at).toLocaleString()}.
+      </p>
+    </header>
+
+    <section class="split-view">
+      <aside class="panel">
+        <label for="snippet-filter">Filter snippets</label>
+        <input
+          id="snippet-filter"
+          type="search"
+          placeholder="Use &, |, (), plus tag:, from:, to:"
+          autocomplete="off"
+        />
+
+        <label for="snippet-tag">Tag</label>
+        <input id="snippet-tag" type="search" placeholder="e.g. python.pandas.*" autocomplete="off" />
+
+        <label for="snippet-from">From</label>
+        <input id="snippet-from" type="date" />
+
+        <label for="snippet-to">To</label>
+        <input id="snippet-to" type="date" />
+
+        <ul id="snippet-list" class="snippet-list">
+          {snippets.items.map((snippet) => (
+            <li
+              data-snippet-item
+              data-key={snippet.id}
+              data-text={`${snippet.title} ${snippet.notes ?? ''} ${snippet.content_text}`}
+              data-tags={snippet.tags.join(',')}
+              data-date={effectiveDate(snippet.id, snippet.updated_at ?? snippet.created_at) ?? ''}
+            >
+              <a href={`/snippets/${snippet.id}`}>{snippet.title}</a>
+              <div class="muted">{snippet.tags.join(', ')}</div>
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      <section class="panel">
+        <h2>Quick Explorer</h2>
+        <p>
+          This view is optimized for instant list filtering. Use boolean expressions and structured
+          filters to narrow results quickly, then open any snippet for full details.
+        </p>
+      </section>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initFilter } from '/js/filter.js';
+
+    initFilter({
+      querySelector: '#snippet-filter',
+      tagSelector: '#snippet-tag',
+      fromSelector: '#snippet-from',
+      toSelector: '#snippet-to',
+      itemSelector: '[data-snippet-item]',
+      countSelector: '#snippets-visible-count'
+    });
+  </script>
+</SiteShell>

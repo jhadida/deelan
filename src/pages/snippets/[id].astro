@@ -1,23 +1,105 @@
 ---
-import '../../styles/global.css';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import matter from 'gray-matter';
+import SiteShell from '../../components/layout/SiteShell.astro';
+import {
+  loadPostsIndex,
+  loadSnippetsIndex,
+  loadTimeline,
+  type GeneratedIndexItem
+} from '../../lib/content/generated';
+import { renderMarkdown } from '../../lib/content/render-markdown';
 
-export function getStaticPaths() {
-  return [{ params: { id: 'pandas-groupby-snippet' } }];
+export async function getStaticPaths() {
+  const snippets = await loadSnippetsIndex();
+  return snippets.items.map((item) => ({
+    params: { id: item.id },
+    props: { item }
+  }));
 }
 
-const { id } = Astro.params;
+const { item } = Astro.props as { item: GeneratedIndexItem };
+
+const timeline = await loadTimeline();
+const posts = await loadPostsIndex();
+const snippets = await loadSnippetsIndex();
+
+const relatedPostItems = posts.items
+  .filter((candidate) => item.related_ids.includes(candidate.id))
+  .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/posts/${candidate.id}` }));
+
+const relatedSnippetItems = snippets.items
+  .filter((candidate) => candidate.id !== item.id && item.related_ids.includes(candidate.id))
+  .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
+
+const itemTimeline = timeline.items[item.id];
+
+const sourcePath = path.join(process.cwd(), item.file_path);
+const raw = await fs.readFile(sourcePath, 'utf8');
+const parsed = matter(raw);
+const renderedHtml = await renderMarkdown(parsed.content);
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{id} | DEELAN Snippet</title>
-  </head>
-  <body>
-    <main class="container">
-      <h1>Snippet: {id}</h1>
-      <p>Snippet detail scaffold with metadata pane to be added.</p>
-    </main>
-  </body>
-</html>
+<SiteShell pageTitle={item.title}>
+  <Fragment slot="head">
+    <script is:inline>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="/mathjax/tex-mml-chtml.js"></script>
+  </Fragment>
+
+  <div class="container snippet-page">
+    <aside class="panel">
+      <h2>Metadata</h2>
+      <p><strong>ID:</strong> {item.id}</p>
+      <p><strong>Version:</strong> {item.version}</p>
+      <p><strong>Status:</strong> {item.status}</p>
+      <p><strong>Tags:</strong> {item.tags.join(', ')}</p>
+      <p><strong>Updated:</strong> {itemTimeline?.effective_updated_at ?? 'N/A'}</p>
+    </aside>
+
+    <section class="panel markdown-body">
+      <h1>{item.title}</h1>
+      {item.notes ? <p>{item.notes}</p> : null}
+      <article set:html={renderedHtml}></article>
+    </section>
+
+    <aside class="panel">
+      <h2>Related</h2>
+      <h3>Posts</h3>
+      {
+        relatedPostItems.length === 0 ? (
+          <p class="muted">None</p>
+        ) : (
+          <ul>
+            {relatedPostItems.map((entry) => (
+              <li><a href={entry.href}>{entry.title}</a></li>
+            ))}
+          </ul>
+        )
+      }
+
+      <h3>Snippets</h3>
+      {
+        relatedSnippetItems.length === 0 ? (
+          <p class="muted">None</p>
+        ) : (
+          <ul>
+            {relatedSnippetItems.map((entry) => (
+              <li><a href={entry.href}>{entry.title}</a></li>
+            ))}
+          </ul>
+        )
+      }
+    </aside>
+  </div>
+</SiteShell>

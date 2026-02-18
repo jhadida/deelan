@@ -1,23 +1,104 @@
 ---
-import '../../styles/global.css';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import matter from 'gray-matter';
+import SiteShell from '../../components/layout/SiteShell.astro';
+import {
+  loadPostsIndex,
+  loadSnippetsIndex,
+  loadTimeline,
+  type GeneratedIndexItem
+} from '../../lib/content/generated';
+import { renderMarkdown } from '../../lib/content/render-markdown';
 
-export function getStaticPaths() {
-  return [{ params: { id: 'de-partitioning-primer' } }];
+export async function getStaticPaths() {
+  const posts = await loadPostsIndex();
+  return posts.items.map((item) => ({
+    params: { id: item.id },
+    props: { item }
+  }));
 }
 
-const { id } = Astro.params;
+const { item } = Astro.props as { item: GeneratedIndexItem };
+
+const timeline = await loadTimeline();
+const snippets = await loadSnippetsIndex();
+
+const related = [...snippets.items]
+  .filter((candidate) => item.related_ids.includes(candidate.id))
+  .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
+
+const itemTimeline = timeline.items[item.id];
+
+const sourcePath = path.join(process.cwd(), item.file_path);
+const raw = await fs.readFile(sourcePath, 'utf8');
+const parsed = matter(raw);
+const renderedHtml = await renderMarkdown(parsed.content);
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{id} | DEELAN</title>
-  </head>
-  <body>
-    <main class="container">
-      <h1>Post: {id}</h1>
-      <p>Reader view scaffold.</p>
-    </main>
-  </body>
-</html>
+<SiteShell pageTitle={item.title}>
+  <Fragment slot="head">
+    <script is:inline>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="/mathjax/tex-mml-chtml.js"></script>
+  </Fragment>
+
+  <div class="container stack">
+    <header>
+      <h1>{item.title}</h1>
+      <p class="muted">{item.id}</p>
+    </header>
+
+    <section class="meta-grid">
+      <div><strong>Version</strong><div>{item.version}</div></div>
+      <div><strong>Status</strong><div>{item.status}</div></div>
+      <div><strong>Tags</strong><div>{item.tags.join(', ')}</div></div>
+      <div><strong>Updated</strong><div>{itemTimeline?.effective_updated_at ?? 'N/A'}</div></div>
+    </section>
+
+    {item.summary ? <p>{item.summary}</p> : null}
+
+    <article class="reader markdown-body" set:html={renderedHtml}></article>
+
+    <section>
+      <h2>Related</h2>
+      {
+        related.length === 0 ? (
+          <p class="muted">No related items.</p>
+        ) : (
+          <ul>
+            {related.map((entry) => (
+              <li><a href={entry.href}>{entry.title}</a> ({entry.id})</li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+
+    <section>
+      <h2>Timeline</h2>
+      {
+        !itemTimeline || itemTimeline.timeline.length === 0 ? (
+          <p class="muted">No git timeline data yet.</p>
+        ) : (
+          <ul>
+            {itemTimeline.timeline.map((entry) => (
+              <li>
+                <code>{entry.commit.slice(0, 8)}</code> - {entry.date} - {entry.message}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+  </div>
+</SiteShell>

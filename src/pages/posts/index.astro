@@ -1,17 +1,127 @@
 ---
-import '../../styles/global.css';
+import SiteShell from '../../components/layout/SiteShell.astro';
+import { loadPostsIndex, loadTimeline } from '../../lib/content/generated';
+
+const posts = await loadPostsIndex();
+const timeline = await loadTimeline();
+
+function effectiveDate(id: string, fallback: string | null): string | null {
+  const item = timeline.items[id];
+  return item?.effective_updated_at ?? item?.effective_created_at ?? fallback;
+}
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>DEELAN Posts</title>
-  </head>
-  <body>
-    <main class="container">
+<SiteShell pageTitle="Posts">
+  <div class="container stack">
+    <header>
       <h1>Posts</h1>
-      <p>Phase 1 scaffold: list/table views and filters will be added next.</p>
-    </main>
-  </body>
-</html>
+      <p class="muted">
+        <span id="posts-visible-count">{posts.total}</span> / {posts.total} item(s). Indexed at{' '}
+        {new Date(posts.generated_at).toLocaleString()}.
+      </p>
+    </header>
+
+    <section class="panel filter-grid">
+      <label>
+        Query
+        <input
+          id="posts-query"
+          type="search"
+          placeholder="Use &, |, (), plus tag:, from:, to:"
+          autocomplete="off"
+        />
+      </label>
+      <label>
+        Tag
+        <input id="posts-tag" type="search" placeholder="e.g. data.lake.*" autocomplete="off" />
+      </label>
+      <label>
+        From
+        <input id="posts-from" type="date" />
+      </label>
+      <label>
+        To
+        <input id="posts-to" type="date" />
+      </label>
+    </section>
+
+    <section class="view-toggle">
+      <button id="posts-view-table" type="button" aria-pressed="true">Table</button>
+      <button id="posts-view-list" type="button" aria-pressed="false">List</button>
+    </section>
+
+    <div id="posts-table-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Version</th>
+            <th>Status</th>
+            <th>Updated</th>
+            <th>Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.items.map((post) => (
+            <tr
+              data-post-item
+              data-key={post.id}
+              data-text={`${post.title} ${post.summary ?? ''} ${post.content_text}`}
+              data-tags={post.tags.join(',')}
+              data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
+            >
+              <td>
+                <a href={`/posts/${post.id}`}>{post.title}</a>
+                <div class="muted">{post.id}</div>
+              </td>
+              <td>{post.version}</td>
+              <td>{post.status}</td>
+              <td>{effectiveDate(post.id, post.updated_at ?? post.created_at) ?? 'N/A'}</td>
+              <td>{post.tags.join(', ')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="posts-list-view" style="display: none;">
+      <ul class="cards">
+        {posts.items.map((post) => (
+          <li
+            class="panel"
+            data-post-item
+            data-key={post.id}
+            data-text={`${post.title} ${post.summary ?? ''} ${post.content_text}`}
+            data-tags={post.tags.join(',')}
+            data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
+          >
+            <h2><a href={`/posts/${post.id}`}>{post.title}</a></h2>
+            <p class="muted">{post.id}</p>
+            {post.summary ? <p>{post.summary}</p> : null}
+            <p class="muted">{post.tags.join(', ')}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initFilter, initViewToggle } from '/js/filter.js';
+
+    initFilter({
+      querySelector: '#posts-query',
+      tagSelector: '#posts-tag',
+      fromSelector: '#posts-from',
+      toSelector: '#posts-to',
+      itemSelector: '[data-post-item]',
+      countSelector: '#posts-visible-count'
+    });
+
+    initViewToggle({
+      tableButtonSelector: '#posts-view-table',
+      listButtonSelector: '#posts-view-list',
+      tableSelector: '#posts-table-view',
+      listSelector: '#posts-list-view'
+    });
+  </script>
+</SiteShell>

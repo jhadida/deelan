@@ -1,21 +1,14 @@
 ---
-import '../styles/global.css';
+import SiteShell from '../components/layout/SiteShell.astro';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>DEELAN</title>
-  </head>
-  <body>
-    <main class="container">
-      <h1>DEELAN</h1>
-      <p>Data Engineering Electronic LAboratory Notebook</p>
-      <ul>
-        <li><a href="/posts">Posts</a></li>
-        <li><a href="/snippets">Snippets</a></li>
-      </ul>
-    </main>
-  </body>
-</html>
+<SiteShell>
+  <div class="container stack">
+    <h1>DEELAN</h1>
+    <p>Data Engineering Electronic LAboratory Notebook</p>
+    <ul>
+      <li><a href="/posts">Posts</a></li>
+      <li><a href="/snippets">Snippets</a></li>
+    </ul>
+  </div>
+</SiteShell>

@@ -1,5 +1,50 @@
 # Export Spec
 
-Phase 1 target:
-- HTML + sidecar assets directory
-- PDF via headless Chromium
+## CLI
+
+```bash
+npm run export -- --id <content-id> --format html --out ./exports
+npm run export -- --id <content-id> --format pdf --out ./exports
+```
+
+Arguments:
+
+- `--id` (required): content ID from frontmatter
+- `--format` (optional): `html` (default) or `pdf`
+- `--out` (optional): output directory (default: `./exports`)
+- `--theme` (optional): `light` or `dark`
+
+Theme behavior:
+
+- If `--theme` is provided, export uses that theme.
+- Otherwise export defaults to `default_theme` from `deelan.config.yml`.
+
+## HTML Export
+
+Outputs:
+
+- `<id>/index.html`
+- `<id>/style.css`
+- `<id>/mathjax/...`
+
+This keeps each export self-contained in a single directory while avoiding large single-file HTML output by default.
+
+## PDF Export
+
+PDF is generated from the exported HTML via Playwright/Chromium.
+Output path:
+
+- `<id>/<id>.pdf`
+
+Playwright browser binaries are **not guaranteed to be present** after npm install in every environment.
+
+If Chromium is not installed yet, run:
+
+```bash
+npx playwright install chromium
+```
+
+## Notes
+
+- Export validates content frontmatter before generating output.
+- Export fails on duplicate IDs.

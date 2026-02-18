@@ -8,9 +8,16 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "prepare:mathjax": "tsx scripts/prepare-mathjax.ts",
+    "dev": "npm run prepare:mathjax && astro dev",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "tags": "tsx scripts/tags.ts",
     "validate": "tsx scripts/validate-content.ts",
-    "prebuild": "npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
+    "docs:install": "python3 -m pip install -r requirements-docs.txt",
+    "docs:serve": "mkdocs serve",
+    "docs:build": "mkdocs build",
+    "docs:deploy": "mkdocs gh-deploy --force",
+    "prebuild": "npm run prepare:mathjax && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
     "build": "astro build",
     "preview": "astro preview",
     "export": "tsx scripts/export-item.ts"
@@ -18,7 +25,13 @@
   "dependencies": {
     "astro": "^5.2.0",
     "fast-glob": "^3.3.3",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
+    "marked": "^17.0.3",
+    "marked-highlight": "^2.2.3",
+    "mathjax": "^4.1.0",
+    "playwright": "^1.58.2",
+    "shiki": "^3.22.0"
   },
   "devDependencies": {
     "tsx": "^4.19.2",

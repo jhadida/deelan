@@ -11,12 +11,212 @@ body {
   color: var(--fg);
 }
 
+a {
+  color: var(--accent);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in oklab, var(--surface) 90%, var(--bg));
+  border-bottom: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+}
+
+.topbar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+}
+
+.theme-toggle {
+  margin-left: auto;
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
 .container {
-  max-width: 960px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
-a {
-  color: var(--accent);
+.site-footer {
+  margin-top: 2rem;
+  padding: 1.2rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+}
+
+.stack > * + * {
+  margin-top: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+}
+
+.table th,
+.table td {
+  text-align: left;
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  padding: 0.6rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.filter-grid label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-toggle button {
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--surface);
+  padding: 1rem;
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  border-radius: 8px;
+}
+
+.panel input[type='search'] {
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+.snippet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.snippet-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--muted) 25%, transparent);
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.reader pre,
+.snippet-page pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: color-mix(in oklab, var(--surface) 85%, var(--bg));
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.markdown-body {
+  line-height: 1.65;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  line-height: 1.2;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote,
+.markdown-body table {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+
+.markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
+}
+
+.markdown-body pre {
+  overflow: auto;
+  white-space: pre;
+}
+
+.markdown-body pre.shiki {
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+  padding: 0.5rem;
+}
+
+.snippet-page {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  gap: 1rem;
+}
+
+@media (max-width: 960px) {
+  .split-view,
+  .snippet-page,
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
 }
