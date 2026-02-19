@@ -1,0 +1,31 @@
+# Build outputs / generated artifacts
+.generated/
+.site-deelan/
+.site-docs/
+.site-storybook/
+exports/
+
+# Local automation/context
+.codex/
+
+# VCS / editor / OS noise
+.git/
+.github/
+.vscode/
+.DS_Store
+
+# Tests and docs source (keep package lean for alpha)
+tests/
+docs/
+mkdocs.yml
+requirements-docs.txt
+
+# Local env and logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage
+coverage/

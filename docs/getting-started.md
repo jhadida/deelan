@@ -37,6 +37,12 @@ npm run validate
 - `npm test` - unit tests
 - `npm run validate` - content/frontmatter validation
 - `npm run tags -- <command>` - tag management (`list`, `tree`, `duplicates`, `rename`, `merge`)
+- `npm run storybook:serve` - Storybook dev server
+- `npm run storybook:build` - static Storybook build
+
+Wrapper CLI (repository-local):
+
+- `node ./bin/deelan.mjs --help`
 
 ## Content Authoring
 

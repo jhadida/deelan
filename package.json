@@ -4,26 +4,33 @@
   "private": true,
   "description": "Data Engineering Electronic LAboratory Notebook",
   "type": "module",
+  "bin": {
+    "deelan": "./bin/deelan.mjs"
+  },
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "prepare:mathjax": "tsx scripts/prepare-mathjax.ts",
-    "sync:search-core": "tsx scripts/sync-search-core.ts",
-    "dev": "npm run prepare:mathjax && npm run sync:search-core && astro dev",
+    "build:prepare-mathjax": "tsx scripts/prepare-mathjax.ts",
+    "build:sync-search-core": "tsx scripts/sync-search-core.ts",
+    "build:indexes": "tsx scripts/build-indexes.ts",
+    "build:timeline": "tsx scripts/build-git-timeline.ts",
+    "build:preflight": "npm run build:prepare-mathjax && npm run build:sync-search-core && npm run validate && npm run build:indexes && npm run build:timeline",
+    "validate": "node ./bin/deelan.mjs validate",
+    "dev": "npm run build:prepare-mathjax && npm run build:sync-search-core && astro dev",
     "test": "node --import tsx --test tests/**/*.test.ts",
-    "tags": "tsx scripts/tags.ts",
-    "validate": "tsx scripts/validate-content.ts",
+    "tags": "node ./bin/deelan.mjs tags",
     "docs:install": "python3 -m pip install -r requirements-docs.txt",
     "docs:serve": "mkdocs serve -w docs/ -w mkdocs.yml --livereload",
     "docs:build": "mkdocs build",
     "docs:deploy": "mkdocs gh-deploy --force",
-    "prebuild": "npm run prepare:mathjax && npm run sync:search-core && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
+    "prebuild": "npm run build:preflight",
     "build": "astro build",
-    "preview": "astro preview",
-    "export": "tsx scripts/export.ts",
-    "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build --output-dir .site-storybook"
+    "serve": "astro preview",
+    "preview": "npm run serve",
+    "export": "node ./bin/deelan.mjs export",
+    "storybook:serve": "storybook dev -p 6006 --no-open",
+    "storybook:build": "storybook build --output-dir .site-storybook"
   },
   "dependencies": {
     "astro": "^5.2.0",

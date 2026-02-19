@@ -4,12 +4,28 @@
 
 `npm run build` executes:
 
-1. `prepare:mathjax`
-2. `sync:search-core`
+1. `build:prepare-mathjax`
+2. `build:sync-search-core`
 3. `validate`
 4. `build-indexes`
 5. `build-git-timeline`
 6. `astro build`
+
+### Command Intent
+
+- `build:prepare-mathjax`:
+  - Copies MathJax assets to `public/mathjax` for offline usage.
+  - Used by `dev` and `build` preflight.
+- `build:sync-search-core`:
+  - Syncs shared search core from `src/lib/search/search-core.js` to `public/js/search-core.js`.
+  - Used by `dev` and `build` preflight to keep browser/runtime logic aligned.
+- `validate`:
+  - Validates frontmatter, cross-references, and content constraints before indexing/build.
+  - Safe to run independently while authoring content.
+- `build:preflight`:
+  - Internal orchestration command used by npm `prebuild`.
+  - Runs asset prep + sync + validation + index/timeline generation.
+  - Uses npm-only build-scoped commands (`build:indexes`, `build:timeline`) rather than end-user CLI wrapper commands.
 
 ## Test Workflow
 
@@ -49,14 +65,14 @@ Example:
   - `src/lib/search/query-eval.ts`
 - Browser usage:
   - `public/js/filter.js`
-  - `public/js/search-core.js` (synced by `scripts/sync-search-core.ts`)
+  - `public/js/search-core.js` (synced by `scripts/sync-search-core.ts` via `build:sync-search-core`)
 
 ## Markdown/Math Rendering
 
 - Markdown + code highlighting:
   - `src/lib/content/render-markdown.ts`
 - MathJax asset preparation:
-  - `scripts/prepare-mathjax.ts`
+  - `scripts/prepare-mathjax.ts` (via `build:prepare-mathjax`)
 - Offline MathJax runtime assets:
   - `public/mathjax/`
 

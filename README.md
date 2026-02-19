@@ -21,6 +21,14 @@ Open [http://localhost:4321](http://localhost:4321).
 - `npm run preview` - preview built site
 - `npm run tags -- <command>` - tag management CLI
 - `npm run export -- --id <id> --format html|pdf` - export content item
+- `npm run storybook:serve` - run Storybook locally
+- `npm run storybook:build` - build static Storybook
+
+Thin wrapper CLI is also available:
+
+- `node ./bin/deelan.mjs --help`
+- `node ./bin/deelan.mjs tags --help`
+- `node ./bin/deelan.mjs export --help`
 
 ## Documentation
 
@@ -29,7 +37,6 @@ Open [http://localhost:4321](http://localhost:4321).
 - Install docs tooling: `npm run docs:install`
 - Serve docs locally: `npm run docs:serve`
 - Build docs: `npm run docs:build`
-- Deploy docs to `gh-pages`: `npm run docs:deploy`
 
 ## Astro Site URL
 
