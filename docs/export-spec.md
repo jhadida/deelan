@@ -13,6 +13,7 @@ Arguments:
 - `--format` (optional): `html` (default) or `pdf`
 - `--out` (optional): output directory (default: `./exports`)
 - `--theme` (optional): `light` or `dark`
+- `--pdf-scale` (optional): PDF scale factor (`> 0` and `<= 2`, default: `1`)
 
 Theme behavior:
 
@@ -35,6 +36,12 @@ PDF is generated from the exported HTML via Playwright/Chromium.
 Output path:
 
 - `<id>/<id>.pdf`
+
+Scale can be tuned to fit page content density:
+
+```bash
+npm run export -- --id post--de-partitioning-primer --format pdf --pdf-scale 0.95
+```
 
 Playwright browser binaries are **not guaranteed to be present** after npm install in every environment.
 

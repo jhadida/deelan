@@ -2,11 +2,12 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
-export async function exportPdf(htmlPath: string, outDir: string): Promise<string> {
+export async function exportPdf(htmlPath: string, outDir: string, options?: { scale?: number }): Promise<string> {
   const absoluteHtmlPath = path.resolve(htmlPath);
   const exportDir = path.dirname(absoluteHtmlPath);
   const itemId = path.basename(exportDir);
   const pdfPath = path.resolve(outDir, itemId, `${itemId}.pdf`);
+  const scale = options?.scale ?? 1;
 
   let browser;
   try {
@@ -20,24 +21,32 @@ export async function exportPdf(htmlPath: string, outDir: string): Promise<strin
 
   try {
     const page = await browser.newPage();
-    await page.goto(pathToFileURL(absoluteHtmlPath).href, { waitUntil: 'networkidle' });
+    await page.goto(pathToFileURL(absoluteHtmlPath).href, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
     await page.emulateMedia({ media: 'print' });
-    await page.evaluate(async () => {
-      const mathJax = (window as unknown as { MathJax?: { typesetPromise?: () => Promise<void> } }).MathJax;
-      if (mathJax?.typesetPromise) {
-        await mathJax.typesetPromise();
-      }
-    });
+    await page
+      .evaluate(async () => {
+        const mathJax = (window as unknown as { MathJax?: { typesetPromise?: () => Promise<void> } }).MathJax;
+        if (mathJax?.typesetPromise) {
+          await Promise.race([
+            mathJax.typesetPromise(),
+            new Promise((resolve) => setTimeout(resolve, 10000))
+          ]);
+        }
+      })
+      .catch(() => undefined);
 
     await page.pdf({
       path: pdfPath,
       printBackground: true,
       format: 'A4',
+      preferCSSPageSize: true,
+      scale,
       margin: {
-        top: '16mm',
-        right: '14mm',
-        bottom: '16mm',
-        left: '14mm'
+        top: '0',
+        right: '0',
+        bottom: '0',
+        left: '0'
       }
     });
 

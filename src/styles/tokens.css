@@ -55,6 +55,7 @@
 
   --container-max: 1100px;
   --reader-max: 72ch;
+  --detail-max: var(--container-max);
   --control-height: 2.5rem;
   --tag-scale: 1.05;
 }

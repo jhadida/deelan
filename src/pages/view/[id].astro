@@ -81,7 +81,7 @@ function buildCommitUrl(template: string, commitSha: string): string | null {
   </Fragment>
 
   <div class="container stack">
-    <header class={item.type === 'post' ? 'page-header reader-width' : 'page-header'}>
+    <header class="page-header detail-width">
       <span class="eyebrow">{item.type === 'post' ? 'Post' : 'Snippet'}</span>
       <h1 class="page-title">{item.title}</h1>
       <p class="page-subtitle">
@@ -93,21 +93,28 @@ function buildCommitUrl(template: string, commitSha: string): string | null {
       </p>
     </header>
 
-    {item.type === 'post' && item.summary ? <p class="reader-width">{item.summary}</p> : null}
-    {item.type === 'snippet' && item.notes ? <p>{item.notes}</p> : null}
+    {item.type === 'post' && item.summary ? <p class="detail-width">{item.summary}</p> : null}
+    {item.type === 'snippet' && item.notes ? <p class="detail-width">{item.notes}</p> : null}
 
-    <article class={item.type === 'post' ? 'reader markdown-body' : 'panel markdown-body section-block snippet-single'} set:html={renderedHtml}></article>
+    <article
+      class={
+        item.type === 'post'
+          ? 'detail-width markdown-body'
+          : 'panel markdown-body section-block detail-width'
+      }
+      set:html={renderedHtml}
+    ></article>
 
-    <hr class={`section-separator ${item.type === 'post' ? 'reader-width' : ''}`.trim()} />
+    <hr class="section-separator detail-width" />
 
-    <section class={`section-block ${item.type === 'post' ? 'reader-width' : ''}`.trim()}>
+    <section class="section-block detail-width">
       <h2>Related</h2>
       <RelatedList items={related} showIds={item.type === 'post'} />
     </section>
 
     {
       item.type === 'post' ? (
-        <section class="section-block reader-width">
+        <section class="section-block detail-width">
           <h2>Timeline</h2>
           {
             timelineEntries.length === 0 ? (

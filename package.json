@@ -21,7 +21,7 @@
     "prebuild": "npm run prepare:mathjax && npm run sync:search-core && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",
     "build": "astro build",
     "preview": "astro preview",
-    "export": "tsx scripts/export-item.ts",
+    "export": "tsx scripts/export.ts",
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build --output-dir .site-storybook"
   },

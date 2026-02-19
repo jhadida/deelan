@@ -16,11 +16,24 @@ interface CliOptions {
   format: ExportFormat;
   outDir: string;
   theme: SiteTheme | null;
+  pdfScale: number;
+  help: boolean;
 }
 
 const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 
 function parseArgs(argv: string[]): CliOptions {
+  if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) {
+    return {
+      id: '',
+      format: 'html',
+      outDir: path.join(process.cwd(), 'exports'),
+      theme: null,
+      pdfScale: 1,
+      help: true
+    };
+  }
+
   const args = new Map<string, string>();
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -40,6 +53,7 @@ function parseArgs(argv: string[]): CliOptions {
   const format = (args.get('format') ?? 'html') as ExportFormat;
   const outDir = args.get('out') ?? path.join(process.cwd(), 'exports');
   const themeRaw = args.get('theme');
+  const pdfScaleRaw = args.get('pdf-scale');
 
   if (!id) {
     throw new Error('Missing required argument: --id <content-id>');
@@ -53,7 +67,39 @@ function parseArgs(argv: string[]): CliOptions {
     throw new Error('Invalid theme. Use --theme light or --theme dark');
   }
 
-  return { id, format, outDir, theme: (themeRaw as SiteTheme | undefined) ?? null };
+  const pdfScale = pdfScaleRaw ? Number(pdfScaleRaw) : 1;
+  if (!Number.isFinite(pdfScale) || pdfScale <= 0 || pdfScale > 2) {
+    throw new Error('Invalid pdf scale. Use --pdf-scale <number> where number is > 0 and <= 2.');
+  }
+
+  return {
+    id,
+    format,
+    outDir,
+    theme: (themeRaw as SiteTheme | undefined) ?? null,
+    pdfScale,
+    help: false
+  };
+}
+
+function printHelp(): void {
+  console.log(`DEELAN export CLI
+
+Usage:
+  npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>]
+
+Arguments:
+  --id       Required. Generated ID (e.g. post--de-partitioning-primer)
+  --format   Optional. html (default) or pdf
+  --out      Optional. Output directory (default: ./exports)
+  --theme    Optional. light or dark. Overrides default_theme in deelan.config.yml
+  --pdf-scale Optional. PDF scaling factor (>0 and <=2). Default: 1. Example: 0.95
+
+Examples:
+  npm run export -- --id post--de-partitioning-primer
+  npm run export -- --id snippet--pandas-groupby-snippet --format html --theme light
+  npm run export -- --id post--de-partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
+`);
 }
 
 async function loadValidatedItems(): Promise<ValidatedContent[]> {
@@ -102,6 +148,10 @@ function findById(items: ValidatedContent[], id: string): ExportItem {
 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
+  if (options.help) {
+    printHelp();
+    return;
+  }
   await fs.mkdir(options.outDir, { recursive: true });
 
   const items = await loadValidatedItems();
@@ -121,7 +171,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const pdfPath = await exportPdf(htmlResult.htmlPath, options.outDir);
+  const pdfPath = await exportPdf(htmlResult.htmlPath, options.outDir, { scale: options.pdfScale });
   console.log(`Exported PDF: ${pdfPath}`);
 }
 
