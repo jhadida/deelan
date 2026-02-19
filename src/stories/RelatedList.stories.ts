@@ -2,8 +2,12 @@ import type { Meta, StoryObj } from 'storybook-astro';
 import RelatedList from '../components/RelatedList.astro';
 
 const baseItems = [
-  { id: 'post-alpha', title: 'Partitioning Primer', href: '/posts/partitioning-primer' },
-  { id: 'snippet-beta', title: 'Pandas GroupBy Snippet', href: '/snippets/pandas-groupby-snippet' }
+  { id: 'post--partitioning-primer', title: 'Partitioning Primer', href: '/view/post--partitioning-primer' },
+  {
+    id: 'snippet--pandas-groupby-snippet',
+    title: 'Pandas GroupBy Snippet',
+    href: '/view/snippet--pandas-groupby-snippet'
+  }
 ];
 
 const meta = {

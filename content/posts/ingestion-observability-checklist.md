@@ -1,6 +1,4 @@
 ---
-id: ingestion-observability-checklist
-type: post
 title: Ingestion Observability Checklist
 tags:
   - data.ingestion
@@ -8,8 +6,8 @@ tags:
 version: 1.0.0
 summary: A compact checklist for instrumenting ingestion jobs before production rollout.
 related_ids:
-  - sql-window-dedupe-snippet
-  - pandas-groupby-snippet
+  - snippet--sql-window-dedupe-snippet
+  - snippet--pandas-groupby-snippet
 created_at: "2026-02-10T08:30:00Z"
 updated_at: "2026-02-12T16:20:00Z"
 status: published

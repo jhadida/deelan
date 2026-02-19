@@ -2,7 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
-import { inferTypeFromPath, validateFrontmatter, type ContentFrontmatter } from '../src/lib/content/schema';
+import {
+  inferContentIdentity,
+  validateFrontmatter,
+  type ContentFrontmatter
+} from '../src/lib/content/schema';
 
 const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 
@@ -57,10 +61,14 @@ async function loadContent(): Promise<ContentFile[]> {
     const raw = await fs.readFile(absPath, 'utf8');
     const parsed = matter(raw);
 
-    const expectedType = inferTypeFromPath(absPath);
-    if (!expectedType) continue;
+    const identity = inferContentIdentity(absPath);
+    if (!identity) continue;
+    if (!identity.validFileName) {
+      console.warn(`tags warning: ${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
+      continue;
+    }
 
-    const valid = validateFrontmatter(parsed.data, filePath, expectedType);
+    const valid = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
     if (!valid.value) {
       throw new Error(`Invalid frontmatter in ${filePath}: ${valid.errors.join('; ')}`);
     }

@@ -1,6 +1,4 @@
 ---
-id: de-partitioning-primer
-type: post
 title: Partitioning Primer for Data Lakes
 tags:
   - data.lake.partitioning
@@ -8,7 +6,7 @@ tags:
 version: 1.0.0
 summary: Why and how to partition for practical query performance.
 related_ids:
-  - pandas-groupby-snippet
+  - snippet--pandas-groupby-snippet
 status: published
 ---
 

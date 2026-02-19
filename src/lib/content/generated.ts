@@ -10,8 +10,8 @@ export interface GeneratedIndexItem {
   title: string;
   summary: string | null;
   notes: string | null;
-  version: string;
-  status: GeneratedStatus;
+  version: string | null;
+  status: GeneratedStatus | null;
   tags: string[];
   tag_ancestors: string[];
   related_ids: string[];
@@ -38,7 +38,7 @@ export interface GeneratedTimelineItem {
   id: string;
   type: GeneratedType;
   path: string;
-  version: string;
+  version: string | null;
   created_at_override: string | null;
   updated_at_override: string | null;
   created_at_git: string | null;

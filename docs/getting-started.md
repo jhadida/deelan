@@ -47,6 +47,11 @@ Add markdown files under:
 
 Use frontmatter fields documented in `docs/content-schema.md`.
 
+Detail pages are generated under `/view/<id>` where `<id>` is auto-derived from filename:
+
+- `post--<slug>` for posts
+- `snippet--<slug>` for snippets
+
 ## DEELAN Configuration
 
 Project-level app settings are configured in `deelan.config.yml` (root).

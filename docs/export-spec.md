@@ -9,7 +9,7 @@ npm run export -- --id <content-id> --format pdf --out ./exports
 
 Arguments:
 
-- `--id` (required): content ID from frontmatter
+- `--id` (required): generated content ID (`post--<slug>` or `snippet--<slug>`)
 - `--format` (optional): `html` (default) or `pdf`
 - `--out` (optional): output directory (default: `./exports`)
 - `--theme` (optional): `light` or `dark`
@@ -47,4 +47,5 @@ npx playwright install chromium
 ## Notes
 
 - Export validates content frontmatter before generating output.
+- IDs are generated from file path and filename (not read from frontmatter).
 - Export fails on duplicate IDs.
