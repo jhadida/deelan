@@ -23,11 +23,11 @@ function resolveRelatedItems(relatedIds: string[]) {
     .map((id) => {
       const snippet = snippetsById.get(id);
       if (snippet && snippet.type === 'snippet') {
-        return { id: snippet.id, title: snippet.title, href: `/snippets/${snippet.id}` };
+        return { id: snippet.id, title: snippet.title, href: `/view/${snippet.id}` };
       }
       const post = postsById.get(id);
       if (post) {
-        return { id: post.id, title: post.title, href: `/posts/${post.id}` };
+        return { id: post.id, title: post.title, href: `/view/${post.id}` };
       }
       return null;
     })

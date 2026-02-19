@@ -3,7 +3,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import {
-  inferTypeFromPath,
+  inferContentIdentity,
   validateFrontmatter,
   type ContentFrontmatter,
   type ValidatedContent
@@ -17,9 +17,15 @@ interface ItemError {
   errors: string[];
 }
 
+interface ItemWarning {
+  filePath: string;
+  warning: string;
+}
+
 async function loadAndValidateFile(filePath: string): Promise<{
   item?: ValidatedContent;
   issue?: ItemError;
+  warning?: ItemWarning;
 }> {
   const absPath = path.join(ROOT, filePath);
   const raw = await fs.readFile(absPath, 'utf8');
@@ -37,8 +43,8 @@ async function loadAndValidateFile(filePath: string): Promise<{
     };
   }
 
-  const expectedType = inferTypeFromPath(absPath);
-  if (!expectedType) {
+  const identity = inferContentIdentity(absPath);
+  if (!identity) {
     return {
       issue: {
         filePath,
@@ -47,7 +53,16 @@ async function loadAndValidateFile(filePath: string): Promise<{
     };
   }
 
-  const result = validateFrontmatter(parsed.data, filePath, expectedType);
+  if (!identity.validFileName) {
+    return {
+      warning: {
+        filePath,
+        warning: identity.warning ?? 'invalid filename.'
+      }
+    };
+  }
+
+  const result = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
   if (!result.value) {
     return {
       issue: {
@@ -113,6 +128,17 @@ function printIssues(issues: ItemError[]): void {
   }
 }
 
+function printWarnings(warnings: ItemWarning[]): void {
+  if (warnings.length === 0) return;
+
+  console.warn(`\nContent validation warnings (${warnings.length}):`);
+  for (const warning of warnings) {
+    console.warn(`- ${warning.filePath}`);
+    console.warn(`  - ${warning.warning}`);
+    console.warn('  - excluded from validation/build artifacts');
+  }
+}
+
 function summarize(items: ValidatedContent[]): void {
   const counters: Record<ContentFrontmatter['type'], number> = { post: 0, snippet: 0 };
   for (const item of items) {
@@ -133,14 +159,17 @@ async function main(): Promise<void> {
   }
 
   const issues: ItemError[] = [];
+  const warnings: ItemWarning[] = [];
   const items: ValidatedContent[] = [];
 
   for (const filePath of files.sort()) {
     const result = await loadAndValidateFile(filePath);
     if (result.issue) issues.push(result.issue);
+    if (result.warning) warnings.push(result.warning);
     if (result.item) items.push(result.item);
   }
 
+  printWarnings(warnings);
   issues.push(...validateCrossReferences(items));
 
   if (issues.length > 0) {

@@ -204,6 +204,11 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
   }
 
   const updated = item.frontmatter.updated_at ?? item.frontmatter.created_at ?? 'N/A';
+  const isPost = item.frontmatter.type === 'post';
+  const postMeta = isPost
+    ? `<div><strong>Version</strong><div>${item.frontmatter.version}</div></div>
+        <div><strong>Status</strong><div>${item.frontmatter.status ?? 'published'}</div></div>`
+    : '';
   const contentHtml = await rewriteHtmlAssets(renderedHtml, item.filePath, exportDir);
   const html = `<!doctype html>
 <html lang="en" data-theme="${theme}">
@@ -234,8 +239,7 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
 
       <section class="meta">
         <div><strong>Type</strong><div>${item.frontmatter.type}</div></div>
-        <div><strong>Version</strong><div>${item.frontmatter.version}</div></div>
-        <div><strong>Status</strong><div>${item.frontmatter.status ?? 'published'}</div></div>
+        ${postMeta}
         <div><strong>Updated</strong><div>${updated}</div></div>
       </section>
 

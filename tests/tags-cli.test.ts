@@ -15,7 +15,6 @@ const TSX_BIN = path.join(REPO_ROOT, 'node_modules', '.bin', 'tsx');
 const TAG_SCRIPT = path.join(REPO_ROOT, 'scripts', 'tags.ts');
 
 const POST = `---
-id: post-one
 type: post
 title: Post One
 tags:
@@ -28,12 +27,10 @@ Body
 `;
 
 const SNIPPET = `---
-id: snippet-one
 type: snippet
 title: Snippet One
 tags:
   - data.pipeline.airflow
-version: 1.0.0
 ---
 
 Body

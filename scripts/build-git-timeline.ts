@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import {
-  inferTypeFromPath,
+  inferContentIdentity,
   validateFrontmatter,
   type ContentType,
   type ContentFrontmatter
@@ -25,7 +25,7 @@ interface TimelineItem {
   id: string;
   type: ContentType;
   path: string;
-  version: string;
+  version: string | null;
   created_at_override: string | null;
   updated_at_override: string | null;
   created_at_git: string | null;
@@ -91,7 +91,7 @@ function buildTimelineItem(
     id: frontmatter.id,
     type: frontmatter.type,
     path: toPosixPath(filePath),
-    version: frontmatter.version,
+    version: frontmatter.type === 'post' ? frontmatter.version : null,
     created_at_override: frontmatter.created_at ?? null,
     updated_at_override: frontmatter.updated_at ?? null,
     created_at_git: createdAtGit,
@@ -106,6 +106,7 @@ function buildTimelineItem(
 async function main(): Promise<void> {
   const files = (await fg(CONTENT_GLOB, { cwd: ROOT, onlyFiles: true })).sort();
   const issues: string[] = [];
+  const warnings: string[] = [];
   const itemsById: Record<string, TimelineItem> = {};
 
   for (const filePath of files) {
@@ -121,13 +122,18 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const expectedType = inferTypeFromPath(absPath);
-    if (!expectedType) {
+    const identity = inferContentIdentity(absPath);
+    if (!identity) {
       issues.push(`${filePath}: unable to infer content type from path`);
       continue;
     }
 
-    const validation = validateFrontmatter(parsed.data, filePath, expectedType);
+    if (!identity.validFileName) {
+      warnings.push(`${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
+      continue;
+    }
+
+    const validation = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
     if (!validation.value) {
       for (const err of validation.errors) {
         issues.push(`${filePath}: ${err}`);
@@ -143,6 +149,10 @@ async function main(): Promise<void> {
 
     const history = getGitHistory(filePath);
     itemsById[frontmatter.id] = buildTimelineItem(filePath, frontmatter, history);
+  }
+
+  for (const warning of warnings) {
+    console.warn(`build-git-timeline warning: ${warning}`);
   }
 
   if (issues.length > 0) {

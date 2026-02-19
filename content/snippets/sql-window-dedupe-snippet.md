@@ -1,18 +1,14 @@
 ---
-id: sql-window-dedupe-snippet
-type: snippet
 title: SQL Window Deduplication Pattern
 tags:
   - sql.window
   - data.quality
-version: 1.0.0
 notes: Keep latest event per business key using `row_number`.
 related_ids:
-  - ingestion-observability-checklist
-  - de-partitioning-primer
+  - post--ingestion-observability-checklist
+  - post--de-partitioning-primer
 created_at: "2026-02-09T12:00:00Z"
 updated_at: "2026-02-11T09:15:00Z"
-status: published
 ---
 
 ```sql

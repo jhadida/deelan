@@ -3,7 +3,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { renderMarkdown } from '../src/lib/content/render-markdown';
-import { inferTypeFromPath, validateFrontmatter, type ValidatedContent } from '../src/lib/content/schema';
+import { inferContentIdentity, validateFrontmatter, type ValidatedContent } from '../src/lib/content/schema';
 import { exportHtml } from '../src/lib/export/html';
 import { exportPdf } from '../src/lib/export/pdf';
 import type { ExportItem } from '../src/lib/export/types';
@@ -66,10 +66,11 @@ async function loadValidatedItems(): Promise<ValidatedContent[]> {
     const raw = await fs.readFile(absPath, 'utf8');
     const parsed = matter(raw);
 
-    const expectedType = inferTypeFromPath(absPath);
-    if (!expectedType) continue;
+    const identity = inferContentIdentity(absPath);
+    if (!identity) continue;
+    if (!identity.validFileName) continue;
 
-    const result = validateFrontmatter(parsed.data, filePath, expectedType);
+    const result = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
     if (!result.value) {
       const details = result.errors.join('; ');
       throw new Error(`Invalid frontmatter in ${filePath}: ${details}`);

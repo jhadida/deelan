@@ -4,21 +4,32 @@ export type ContentType = 'post' | 'snippet';
 
 const ALLOWED_TYPES: ReadonlySet<string> = new Set(['post', 'snippet']);
 const ALLOWED_STATUS: ReadonlySet<string> = new Set(['draft', 'published', 'archived']);
-const ID_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ID_REGEX = /^(post|snippet)--[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const FILE_NAME_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/;
 
-export interface ContentFrontmatter {
+interface ContentFrontmatterBase {
   id: string;
   type: ContentType;
   title: string;
   tags: string[];
-  version: string;
   summary?: string;
   notes?: string;
   related_ids?: string[];
   created_at?: string;
   updated_at?: string;
+}
+
+export interface PostFrontmatter extends ContentFrontmatterBase {
+  type: 'post';
+  version: string;
   status?: 'draft' | 'published' | 'archived';
 }
+
+export interface SnippetFrontmatter extends ContentFrontmatterBase {
+  type: 'snippet';
+}
+
+export type ContentFrontmatter = PostFrontmatter | SnippetFrontmatter;
 
 export interface ValidatedContent {
   filePath: string;
@@ -31,8 +42,20 @@ interface ValidationResult {
   errors: string[];
 }
 
+export interface ContentIdentity {
+  type: ContentType;
+  id: string;
+  fileName: string;
+  validFileName: boolean;
+  warning?: string;
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toPosixPath(filePath: string): string {
+  return filePath.replace(/\\/g, '/');
 }
 
 function isIsoDate(value: string): boolean {
@@ -57,7 +80,8 @@ function ensureStringArray(value: unknown, field: string, errors: string[]): str
 export function validateFrontmatter(
   data: unknown,
   filePath: string,
-  expectedType: ContentType
+  expectedType: ContentType,
+  generatedId: string
 ): ValidationResult {
   const errors: string[] = [];
 
@@ -65,19 +89,21 @@ export function validateFrontmatter(
     return { errors: ['frontmatter must be a YAML object.'] };
   }
 
-  const allowedFields = new Set([
-    'id',
-    'type',
-    'title',
-    'tags',
-    'version',
-    'summary',
-    'notes',
-    'related_ids',
-    'created_at',
-    'updated_at',
-    'status'
-  ]);
+  const allowedFields =
+    expectedType === 'post'
+      ? new Set([
+          'type',
+          'title',
+          'tags',
+          'version',
+          'summary',
+          'notes',
+          'related_ids',
+          'created_at',
+          'updated_at',
+          'status'
+        ])
+      : new Set(['type', 'title', 'tags', 'summary', 'notes', 'related_ids', 'created_at', 'updated_at']);
 
   for (const key of Object.keys(data)) {
     if (!allowedFields.has(key)) {
@@ -85,18 +111,13 @@ export function validateFrontmatter(
     }
   }
 
-  const id = data.id;
-  if (typeof id !== 'string' || id.trim().length === 0) {
-    errors.push('field `id` is required and must be a non-empty string.');
-  } else if (!ID_REGEX.test(id)) {
-    errors.push('field `id` must match /^[a-z0-9]+(?:-[a-z0-9]+)*$/.');
-  }
-
   const type = data.type;
-  if (typeof type !== 'string' || !ALLOWED_TYPES.has(type)) {
-    errors.push('field `type` is required and must be `post` or `snippet`.');
-  } else if (type !== expectedType) {
-    errors.push(`field \`type\` must be \`${expectedType}\` for this path.`);
+  if (type !== undefined) {
+    if (typeof type !== 'string' || !ALLOWED_TYPES.has(type)) {
+      errors.push('field `type` must be `post` or `snippet` when provided.');
+    } else if (type !== expectedType) {
+      errors.push(`field \`type\` must be \`${expectedType}\` for this path.`);
+    }
   }
 
   const title = data.title;
@@ -104,9 +125,11 @@ export function validateFrontmatter(
     errors.push('field `title` is required and must be a non-empty string.');
   }
 
-  const version = data.version;
-  if (typeof version !== 'string' || version.trim().length === 0) {
-    errors.push('field `version` is required and must be a non-empty string.');
+  if (expectedType === 'post') {
+    const version = data.version;
+    if (typeof version !== 'string' || version.trim().length === 0) {
+      errors.push('field `version` is required for posts and must be a non-empty string.');
+    }
   }
 
   const tags = ensureStringArray(data.tags, 'tags', errors);
@@ -161,26 +184,70 @@ export function validateFrontmatter(
     return { errors };
   }
 
+  if (expectedType === 'post') {
+    return {
+      errors,
+      value: {
+        id: generatedId,
+        type: 'post',
+        title: title as string,
+        tags: tags as string[],
+        version: (data.version as string).trim(),
+        summary: data.summary as string | undefined,
+        notes: data.notes as string | undefined,
+        related_ids: relatedIds,
+        created_at: data.created_at as string | undefined,
+        updated_at: data.updated_at as string | undefined,
+        status: data.status as 'draft' | 'published' | 'archived' | undefined
+      }
+    };
+  }
+
   return {
     errors,
     value: {
-      id: id as string,
-      type: type as ContentType,
+      id: generatedId,
+      type: 'snippet',
       title: title as string,
       tags: tags as string[],
-      version: version as string,
       summary: data.summary as string | undefined,
       notes: data.notes as string | undefined,
       related_ids: relatedIds,
       created_at: data.created_at as string | undefined,
-      updated_at: data.updated_at as string | undefined,
-      status: data.status as 'draft' | 'published' | 'archived' | undefined
+      updated_at: data.updated_at as string | undefined
     }
   };
 }
 
 export function inferTypeFromPath(filePath: string): ContentType | null {
-  if (filePath.includes('/content/posts/')) return 'post';
-  if (filePath.includes('/content/snippets/')) return 'snippet';
+  const normalized = toPosixPath(filePath);
+  if (normalized.includes('/content/posts/') || normalized.startsWith('content/posts/')) return 'post';
+  if (normalized.includes('/content/snippets/') || normalized.startsWith('content/snippets/')) return 'snippet';
   return null;
+}
+
+export function inferContentIdentity(filePath: string): ContentIdentity | null {
+  const type = inferTypeFromPath(filePath);
+  if (!type) return null;
+
+  const normalized = toPosixPath(filePath);
+  const fileName = normalized.split('/').at(-1) ?? '';
+  if (!FILE_NAME_REGEX.test(fileName)) {
+    return {
+      type,
+      id: '',
+      fileName,
+      validFileName: false,
+      warning:
+        'invalid filename. Expected lowercase kebab-case with a single .md extension (e.g. my-item.md).'
+    };
+  }
+
+  const slug = fileName.slice(0, -3);
+  return {
+    type,
+    id: `${type}--${slug}`,
+    fileName,
+    validFileName: true
+  };
 }

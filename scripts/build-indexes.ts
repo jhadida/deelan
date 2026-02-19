@@ -4,7 +4,7 @@ import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { ancestors } from '../src/lib/tags/hierarchy';
 import {
-  inferTypeFromPath,
+  inferContentIdentity,
   validateFrontmatter,
   type ContentType,
   type ContentFrontmatter
@@ -21,8 +21,8 @@ interface IndexItem {
   title: string;
   summary: string | null;
   notes: string | null;
-  version: string;
-  status: 'draft' | 'published' | 'archived';
+  version: string | null;
+  status: 'draft' | 'published' | 'archived' | null;
   tags: string[];
   tag_ancestors: string[];
   related_ids: string[];
@@ -44,7 +44,7 @@ interface ManifestItem {
   title: string;
   tags: string[];
   file_path: string;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'archived' | null;
 }
 
 function toPosixPath(input: string): string {
@@ -56,7 +56,8 @@ function uniqueSorted(values: string[]): string[] {
 }
 
 function buildIndexItem(filePath: string, body: string, frontmatter: ContentFrontmatter): IndexItem {
-  const status = frontmatter.status ?? 'published';
+  const status = frontmatter.type === 'post' ? frontmatter.status ?? 'published' : null;
+  const version = frontmatter.type === 'post' ? frontmatter.version : null;
   const tagAncestors = uniqueSorted(frontmatter.tags.flatMap((tag) => ancestors(tag)));
   const normalizedBody = body.replace(/\s+/g, ' ').trim();
 
@@ -66,7 +67,7 @@ function buildIndexItem(filePath: string, body: string, frontmatter: ContentFron
     title: frontmatter.title,
     summary: frontmatter.summary ?? null,
     notes: frontmatter.notes ?? null,
-    version: frontmatter.version,
+    version,
     status,
     tags: uniqueSorted(frontmatter.tags),
     tag_ancestors: tagAncestors,
@@ -86,6 +87,7 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
 async function main(): Promise<void> {
   const files = (await fg(CONTENT_GLOB, { cwd: ROOT, onlyFiles: true })).sort();
   const issues: string[] = [];
+  const warnings: string[] = [];
 
   const items: IndexItem[] = [];
 
@@ -102,13 +104,18 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const expectedType = inferTypeFromPath(absPath);
-    if (!expectedType) {
+    const identity = inferContentIdentity(absPath);
+    if (!identity) {
       issues.push(`${filePath}: unable to infer content type from path`);
       continue;
     }
 
-    const validation = validateFrontmatter(parsed.data, filePath, expectedType);
+    if (!identity.validFileName) {
+      warnings.push(`${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
+      continue;
+    }
+
+    const validation = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
     if (!validation.value) {
       for (const err of validation.errors) {
         issues.push(`${filePath}: ${err}`);
@@ -117,6 +124,10 @@ async function main(): Promise<void> {
     }
 
     items.push(buildIndexItem(filePath, parsed.content, validation.value));
+  }
+
+  for (const warning of warnings) {
+    console.warn(`build-indexes warning: ${warning}`);
   }
 
   const idMap = new Map<string, IndexItem>();

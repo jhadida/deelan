@@ -75,10 +75,10 @@ function displayDate(value: string | null): string {
               data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
             >
               <td>
-                <a href={`/posts/${post.id}`}>{post.title}</a>
+                <a href={`/view/${post.id}`}>{post.title}</a>
                 <div class="muted">{post.id}</div>
               </td>
-              <td>{post.status}</td>
+              <td>{post.status ?? 'published'}</td>
               <td>{displayDate(effectiveDate(post.id, post.updated_at ?? post.created_at))}</td>
               <td>
                 <TagCloud tags={post.tags} />
@@ -101,7 +101,7 @@ function displayDate(value: string | null): string {
             data-title={post.title}
             data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
           >
-            <h2><a href={`/posts/${post.id}`}>{post.title}</a></h2>
+            <h2><a href={`/view/${post.id}`}>{post.title}</a></h2>
             <p class="muted">{post.id}</p>
             {post.summary ? <p>{post.summary}</p> : null}
             <TagCloud tags={post.tags} className="posts-card-tags" />
