@@ -1,8 +1,11 @@
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import { codeToHtml } from 'shiki';
+import { getSiteConfig } from '../site-config';
 
 let initialized = false;
+let shikiLightTheme = 'github-light';
+let shikiDarkTheme = 'github-dark';
 
 function normalizeLang(lang: string | undefined): string {
   const candidate = (lang ?? 'text').trim();
@@ -19,6 +22,10 @@ function unwrapNestedShiki(input: string): string {
 
 export async function renderMarkdown(markdown: string): Promise<string> {
   if (!initialized) {
+    const config = await getSiteConfig();
+    shikiLightTheme = config.code_theme_light;
+    shikiDarkTheme = config.code_theme_dark;
+
     marked.setOptions({ gfm: true, breaks: false });
     marked.use(
       markedHighlight({
@@ -29,8 +36,8 @@ export async function renderMarkdown(markdown: string): Promise<string> {
             return await codeToHtml(code, {
               lang: language,
               themes: {
-                light: 'github-light',
-                dark: 'github-dark'
+                light: shikiLightTheme,
+                dark: shikiDarkTheme
               },
               defaultColor: 'light'
             });

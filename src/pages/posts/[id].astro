@@ -10,6 +10,8 @@ import {
   type GeneratedIndexItem
 } from '../../lib/content/generated';
 import { renderMarkdown } from '../../lib/content/render-markdown';
+import { getSiteConfig } from '../../lib/site-config';
+import { formatTimestamp } from '../../lib/time';
 
 export async function getStaticPaths() {
   const posts = await loadPostsIndex();
@@ -20,6 +22,7 @@ export async function getStaticPaths() {
 }
 
 const { item } = Astro.props as { item: GeneratedIndexItem };
+const siteConfig = await getSiteConfig();
 
 const timeline = await loadTimeline();
 const snippets = await loadSnippetsIndex();
@@ -29,9 +32,8 @@ const related = [...snippets.items]
   .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
 
 const itemTimeline = timeline.items[item.id];
-const createdAt = itemTimeline?.effective_created_at ?? item.created_at ?? 'N/A';
-const updatedAt = itemTimeline?.effective_updated_at ?? item.updated_at ?? 'N/A';
-const commitCount = itemTimeline?.commit_count ?? 0;
+const updatedAtRaw = itemTimeline?.effective_updated_at ?? item.updated_at ?? null;
+const updatedAt = formatTimestamp(updatedAtRaw, siteConfig.timezone);
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
@@ -59,23 +61,18 @@ const renderedHtml = await renderMarkdown(parsed.content);
     <header class="page-header reader-width">
       <span class="eyebrow">Post</span>
       <h1 class="page-title">{item.title}</h1>
-      <p class="page-subtitle">{item.id}</p>
+      <p class="page-subtitle">
+        {item.id} ({item.status}) — Version: {item.version} — Last updated: {updatedAt}
+      </p>
     </header>
-
-    <section class="meta-grid">
-      <div class="meta-item"><strong>Version</strong><div>{item.version}</div></div>
-      <div class="meta-item"><strong>Status</strong><div>{item.status}</div></div>
-      <div class="meta-item"><strong>Tags</strong><div>{item.tags.join(', ')}</div></div>
-      <div class="meta-item"><strong>Created</strong><div>{createdAt}</div></div>
-      <div class="meta-item"><strong>Updated</strong><div>{updatedAt}</div></div>
-      <div class="meta-item"><strong>Commits</strong><div>{commitCount}</div></div>
-    </section>
 
     {item.summary ? <p class="reader-width">{item.summary}</p> : null}
 
     <article class="reader markdown-body" set:html={renderedHtml}></article>
 
-    <section class="panel section-block reader-width">
+    <hr class="section-separator reader-width" />
+
+    <section class="section-block reader-width">
       <h2>Related</h2>
       {
         related.length === 0 ? (
@@ -90,7 +87,7 @@ const renderedHtml = await renderMarkdown(parsed.content);
       }
     </section>
 
-    <section class="section-block">
+    <section class="section-block reader-width">
       <h2>Timeline</h2>
       {
         !itemTimeline || itemTimeline.timeline.length === 0 ? (
@@ -102,7 +99,8 @@ const renderedHtml = await renderMarkdown(parsed.content);
               {itemTimeline.timeline.map((entry) => (
                 <li class="timeline-item">
                   <div>
-                    <code>{entry.commit.slice(0, 8)}</code> <strong>{entry.date}</strong>
+                    <code>{entry.commit.slice(0, 8)}</code>{' '}
+                    <strong>{formatTimestamp(entry.date, siteConfig.timezone)}</strong>
                   </div>
                   <div>{entry.message}</div>
                   <div class="muted">{entry.author}</div>

@@ -10,7 +10,8 @@ test('parseQuery extracts structured filters and expression', () => {
   assert.deepEqual(parsed.filters, {
     tags: ['data.pipeline.*'],
     from: '2026-01-01',
-    to: '2026-12-31'
+    to: '2026-12-31',
+    titles: []
   });
 
   assert.ok(parsed.expression);

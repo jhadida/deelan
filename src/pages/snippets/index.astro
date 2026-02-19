@@ -1,82 +1,250 @@
 ---
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import matter from 'gray-matter';
 import SiteShell from '../../components/layout/SiteShell.astro';
-import { loadSnippetsIndex, loadTimeline } from '../../lib/content/generated';
+import { loadPostsIndex, loadSnippetsIndex } from '../../lib/content/generated';
+import { renderMarkdown } from '../../lib/content/render-markdown';
+import { getSiteConfig } from '../../lib/site-config';
+import { formatTimestamp } from '../../lib/time';
 
 const snippets = await loadSnippetsIndex();
-const timeline = await loadTimeline();
+const posts = await loadPostsIndex();
+const siteConfig = await getSiteConfig();
+const postsById = new Map(posts.items.map((item) => [item.id, item]));
+const snippetsById = new Map(snippets.items.map((item) => [item.id, item]));
 
-function effectiveDate(id: string, fallback: string | null): string | null {
-  const item = timeline.items[id];
-  return item?.effective_updated_at ?? item?.effective_created_at ?? fallback;
+function buildRelatedHtml(relatedIds: string[]): string {
+  const relatedSnippets = relatedIds
+    .map((id) => snippetsById.get(id))
+    .filter((item) => item && item.type === 'snippet');
+  const relatedPosts = relatedIds.map((id) => postsById.get(id)).filter(Boolean);
+  const rows: string[] = [];
+
+  if (relatedSnippets.length > 0) {
+    rows.push('<h3>Snippets</h3><ul>');
+    for (const item of relatedSnippets) {
+      rows.push(`<li><a href="/snippets/${item.id}">${item.title}</a></li>`);
+    }
+    rows.push('</ul>');
+  }
+
+  if (relatedPosts.length > 0) {
+    rows.push('<h3>Posts</h3><ul>');
+    for (const item of relatedPosts) {
+      rows.push(`<li><a href="/posts/${item.id}">${item.title}</a></li>`);
+    }
+    rows.push('</ul>');
+  }
+
+  if (rows.length === 0) return '<p class="muted">No related items.</p>';
+  return rows.join('');
 }
+
+const snippetDetails = await Promise.all(
+  snippets.items.map(async (snippet) => {
+    const sourcePath = path.join(process.cwd(), snippet.file_path);
+    const raw = await fs.readFile(sourcePath, 'utf8');
+    const parsed = matter(raw);
+    const html = await renderMarkdown(parsed.content);
+    const updated = formatTimestamp(snippet.updated_at ?? snippet.created_at ?? null, siteConfig.timezone);
+    const meta = `${snippet.id} (${snippet.status}) — Version: ${snippet.version} — Last updated: ${updated}`;
+
+    return {
+      id: snippet.id,
+      title: snippet.title,
+      notes: snippet.notes ?? '',
+      meta,
+      html,
+      relatedHtml: buildRelatedHtml(snippet.related_ids)
+    };
+  })
+);
 ---
 
 <SiteShell pageTitle="Snippets">
+  <Fragment slot="head">
+    <script is:inline>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="/mathjax/tex-mml-chtml.js"></script>
+  </Fragment>
+
   <div class="container stack">
     <header class="page-header">
       <span class="eyebrow">Library</span>
       <h1 class="page-title">Snippets</h1>
       <p class="page-subtitle">
         <span id="snippets-visible-count">{snippets.total}</span> / {snippets.total} item(s). Indexed at{' '}
-        {new Date(snippets.generated_at).toLocaleString()}.
+        {formatTimestamp(snippets.generated_at, siteConfig.timezone)}.
       </p>
     </header>
 
-    <section class="split-view">
-      <aside class="panel section-block">
-        <label for="snippet-filter">Filter snippets</label>
+    <section class="search-shell">
+      <div class="search-tabs" role="tablist" aria-label="Snippets search mode">
         <input
-          id="snippet-filter"
-          type="search"
-          placeholder="Use &, |, (), plus tag:, from:, to:"
-          autocomplete="off"
+          id="snippets-mode-simple"
+          class="search-mode-input"
+          type="radio"
+          name="snippets-search-mode"
+          checked
         />
+        <label
+          for="snippets-mode-simple"
+          id="snippets-tab-simple"
+          class="search-tab"
+          role="tab"
+          aria-selected="true"
+        >
+          Simple
+        </label>
+        <input
+          id="snippets-mode-advanced"
+          class="search-mode-input"
+          type="radio"
+          name="snippets-search-mode"
+        />
+        <label
+          for="snippets-mode-advanced"
+          id="snippets-tab-advanced"
+          class="search-tab"
+          role="tab"
+          aria-selected="false"
+        >
+          Advanced
+        </label>
+      </div>
 
-        <label for="snippet-tag">Tag</label>
-        <input id="snippet-tag" type="search" placeholder="e.g. python.pandas.*" autocomplete="off" />
+      <div class="panel section-block search-panel">
+        <div id="snippets-search-simple" class="filter-grid">
+          <label>
+            Tag
+            <input id="snippet-tag" type="search" placeholder="e.g. python.pandas.*" autocomplete="off" />
+          </label>
+          <label>
+            Title
+            <input id="snippet-title" type="search" placeholder="title contains..." autocomplete="off" />
+          </label>
+          <label>
+            From
+            <input id="snippet-from" type="date" />
+          </label>
+          <label>
+            To
+            <input id="snippet-to" type="date" />
+          </label>
+        </div>
 
-        <label for="snippet-from">From</label>
-        <input id="snippet-from" type="date" />
+        <div id="snippets-search-advanced" hidden style="display: none;">
+          <label>
+            Query
+            <input
+              id="snippet-filter"
+              type="search"
+              placeholder="Use &, |, (), plus tag:, title:, from:, to:"
+              autocomplete="off"
+            />
+          </label>
+        </div>
+      </div>
+    </section>
 
-        <label for="snippet-to">To</label>
-        <input id="snippet-to" type="date" />
-
+    <section class="snippet-explorer">
+      <aside class="panel snippet-list-panel">
         <ul id="snippet-list" class="snippet-list">
           {snippets.items.map((snippet) => (
             <li
               data-snippet-item
               data-key={snippet.id}
+              data-title={snippet.title}
               data-text={`${snippet.title} ${snippet.notes ?? ''} ${snippet.content_text}`}
               data-tags={snippet.tags.join(',')}
-              data-date={effectiveDate(snippet.id, snippet.updated_at ?? snippet.created_at) ?? ''}
+              data-date={snippet.updated_at ?? snippet.created_at ?? ''}
             >
-              <a href={`/snippets/${snippet.id}`}>{snippet.title}</a>
-              <div class="muted">{snippet.tags.join(', ')}</div>
+              <button type="button" class="snippet-select" data-snippet-key={snippet.id}>
+                <span class="snippet-select-title">{snippet.title}</span>
+                <span class="tag-cloud">
+                  {snippet.tags.map((tag) => (
+                    <span class="tag-pill">
+                      {tag.split('.').map((part) => (
+                        <span>{part}</span>
+                      ))}
+                    </span>
+                  ))}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
       </aside>
 
-      <section class="panel section-block">
-        <h2>Quick Explorer</h2>
-        <p>
-          This view is optimized for instant list filtering. Use boolean expressions and structured
-          filters to narrow results quickly, then open any snippet for full details.
-        </p>
+      <section class="panel snippet-detail-panel">
+        <div class="section-block">
+          <h2 id="snippet-detail-title">Snippet</h2>
+          <p id="snippet-detail-meta" class="page-subtitle"></p>
+          <p id="snippet-detail-notes" class="muted"></p>
+        </div>
+        <div id="snippet-detail-content" class="markdown-body"></div>
+        <hr class="section-separator" />
+        <div class="section-block">
+          <h2>Related</h2>
+          <div id="snippet-detail-related"></div>
+        </div>
       </section>
     </section>
   </div>
+  <div id="snippet-detail-payloads" hidden>
+    {snippetDetails.map((detail) => (
+      <article
+        data-snippet-payload={detail.id}
+        data-title={detail.title}
+        data-meta={detail.meta}
+        data-notes={detail.notes}
+      >
+        <div data-snippet-html set:html={detail.html}></div>
+        <div data-snippet-related set:html={detail.relatedHtml}></div>
+      </article>
+    ))}
+  </div>
 
   <script type="module">
-    import { initFilter } from '/js/filter.js';
+    import { initFilter, initSnippetExplorer } from '/js/filter.js?v=20260219-1';
+
+    const explorer = initSnippetExplorer({
+      listSelector: '#snippet-list',
+      detailTitleSelector: '#snippet-detail-title',
+      detailMetaSelector: '#snippet-detail-meta',
+      detailNotesSelector: '#snippet-detail-notes',
+      detailContentSelector: '#snippet-detail-content',
+      detailRelatedSelector: '#snippet-detail-related',
+      payloadSelector: '#snippet-detail-payloads'
+    });
 
     initFilter({
       querySelector: '#snippet-filter',
       tagSelector: '#snippet-tag',
+      titleSelector: '#snippet-title',
       fromSelector: '#snippet-from',
       toSelector: '#snippet-to',
+      simpleTabSelector: '#snippets-tab-simple',
+      advancedTabSelector: '#snippets-tab-advanced',
+      simpleModeSelector: '#snippets-mode-simple',
+      advancedModeSelector: '#snippets-mode-advanced',
+      simplePanelSelector: '#snippets-search-simple',
+      advancedPanelSelector: '#snippets-search-advanced',
       itemSelector: '[data-snippet-item]',
-      countSelector: '#snippets-visible-count'
+      countSelector: '#snippets-visible-count',
+      onAfterApply: ({ visibleKeys }) => {
+        if (explorer) explorer.ensureVisibleSelection(visibleKeys);
+      }
     });
   </script>
 </SiteShell>

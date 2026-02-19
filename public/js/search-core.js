@@ -37,7 +37,7 @@ function tokenize(input) {
 }
 
 function extractStructuredFilters(raw) {
-  const filters = { tags: [], from: null, to: null };
+  const filters = { tags: [], from: null, to: null, titles: [] };
 
   const parts = raw.split(/\s+/).filter(Boolean);
   const remaining = [];
@@ -56,6 +56,11 @@ function extractStructuredFilters(raw) {
     if (part.startsWith('to:')) {
       const value = part.slice(3).trim();
       if (value) filters.to = value;
+      continue;
+    }
+    if (part.startsWith('title:')) {
+      const value = part.slice(6).trim();
+      if (value) filters.titles.push(value.toLowerCase());
       continue;
     }
     remaining.push(part);
@@ -183,15 +188,21 @@ function matchDate(filters, date) {
   return true;
 }
 
-function matchesFilters(filters, tags, date) {
+function matchesFilters(filters, tags, date, title = '') {
   const normalizedTags = tags.map(normalize);
   const tagsOk = filters.tags.every((queryTag) => matchTag(queryTag, normalizedTags));
   if (!tagsOk) return false;
+  const titleNorm = normalize(title);
+  const titleOk = filters.titles.every((queryTitle) => titleNorm.includes(normalize(queryTitle)));
+  if (!titleOk) return false;
   return matchDate(filters, date);
 }
 
 function evaluateQuery(expression, filters, target) {
-  return evaluateExpression(expression, target.text) && matchesFilters(filters, target.tags, target.date);
+  return (
+    evaluateExpression(expression, target.text) &&
+    matchesFilters(filters, target.tags, target.date, target.title || '')
+  );
 }
 
 function parseQuery(raw) {

@@ -6,10 +6,11 @@ import SiteShell from '../../components/layout/SiteShell.astro';
 import {
   loadPostsIndex,
   loadSnippetsIndex,
-  loadTimeline,
   type GeneratedIndexItem
 } from '../../lib/content/generated';
 import { renderMarkdown } from '../../lib/content/render-markdown';
+import { getSiteConfig } from '../../lib/site-config';
+import { formatTimestamp } from '../../lib/time';
 
 export async function getStaticPaths() {
   const snippets = await loadSnippetsIndex();
@@ -20,8 +21,8 @@ export async function getStaticPaths() {
 }
 
 const { item } = Astro.props as { item: GeneratedIndexItem };
+const siteConfig = await getSiteConfig();
 
-const timeline = await loadTimeline();
 const posts = await loadPostsIndex();
 const snippets = await loadSnippetsIndex();
 
@@ -33,10 +34,7 @@ const relatedSnippetItems = snippets.items
   .filter((candidate) => candidate.id !== item.id && item.related_ids.includes(candidate.id))
   .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
 
-const itemTimeline = timeline.items[item.id];
-const createdAt = itemTimeline?.effective_created_at ?? item.created_at ?? 'N/A';
-const updatedAt = itemTimeline?.effective_updated_at ?? item.updated_at ?? 'N/A';
-const commitCount = itemTimeline?.commit_count ?? 0;
+const updatedAt = formatTimestamp(item.updated_at ?? item.created_at ?? null, siteConfig.timezone);
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
@@ -60,26 +58,16 @@ const renderedHtml = await renderMarkdown(parsed.content);
     <script defer src="/mathjax/tex-mml-chtml.js"></script>
   </Fragment>
 
-  <div class="container snippet-page">
-    <aside class="panel section-block">
-      <h2>Metadata</h2>
-      <p><strong>ID:</strong> {item.id}</p>
-      <p><strong>Version:</strong> {item.version}</p>
-      <p><strong>Status:</strong> {item.status}</p>
-      <p><strong>Tags:</strong> {item.tags.join(', ')}</p>
-      <p><strong>Created:</strong> {createdAt}</p>
-      <p><strong>Updated:</strong> {updatedAt}</p>
-      <p><strong>Commits:</strong> {commitCount}</p>
-    </aside>
-
-    <section class="panel markdown-body section-block">
+  <div class="container">
+    <section class="panel markdown-body section-block snippet-single">
       <span class="eyebrow">Snippet</span>
       <h1 class="page-title">{item.title}</h1>
+      <p class="page-subtitle">
+        {item.id} ({item.status}) — Version: {item.version} — Last updated: {updatedAt}
+      </p>
       {item.notes ? <p>{item.notes}</p> : null}
       <article set:html={renderedHtml}></article>
-    </section>
-
-    <aside class="panel section-block">
+      <hr class="section-separator" />
       <h2>Related</h2>
       <h3>Posts</h3>
       {
@@ -104,32 +92,6 @@ const renderedHtml = await renderMarkdown(parsed.content);
               <li><a href={entry.href}>{entry.title}</a></li>
             ))}
           </ul>
-        )
-      }
-    </aside>
-  </div>
-
-  <div class="container stack">
-    <section class="panel section-block">
-      <h2>Timeline</h2>
-      {
-        !itemTimeline || itemTimeline.timeline.length === 0 ? (
-          <p class="muted">No git timeline data yet.</p>
-        ) : (
-          <>
-            <p class="muted">Showing {itemTimeline.timeline.length} commit(s), newest first.</p>
-            <ul class="timeline-list">
-              {itemTimeline.timeline.map((entry) => (
-                <li class="timeline-item">
-                  <div>
-                    <code>{entry.commit.slice(0, 8)}</code> <strong>{entry.date}</strong>
-                  </div>
-                  <div>{entry.message}</div>
-                  <div class="muted">{entry.author}</div>
-                </li>
-              ))}
-            </ul>
-          </>
         )
       }
     </section>

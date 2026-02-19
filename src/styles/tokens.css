@@ -3,7 +3,10 @@
   --bg: #f5f4ef;
   --fg: #181818;
   --muted: #6b6b6b;
-  --accent: #0b6e4f;
+  --accent-hue: 150;
+  --accent-sat: 74%;
+  --accent-light: 24%;
+  --accent: hsl(var(--accent-hue) var(--accent-sat) var(--accent-light));
   --surface: #ffffff;
   --surface-elevated: #ffffff;
   --line: #d8d4c6;
@@ -53,4 +56,5 @@
   --container-max: 1100px;
   --reader-max: 72ch;
   --control-height: 2.5rem;
+  --tag-scale: 1.05;
 }

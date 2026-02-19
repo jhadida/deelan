@@ -20,6 +20,7 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Configuration: configuration.md
   - Tag CLI: tag-cli.md
   - Editor Integration: editor-integration.md
   - Developer Notes: developer.md

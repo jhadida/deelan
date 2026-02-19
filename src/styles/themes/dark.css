@@ -1,12 +1,14 @@
 :root[data-theme='dark'] {
-  --bg: #101312;
-  --fg: #edf2ea;
-  --muted: #a2b0a3;
-  --accent: #72d9b4;
-  --surface: #1a201d;
-  --surface-elevated: #1f2622;
-  --line: #324039;
-  --line-strong: #4b6157;
-  --focus-ring: #85e2c0;
-  --overlay: rgba(0, 0, 0, 0.42);
+  --bg: hsl(var(--accent-hue) 20% 8%);
+  --fg: hsl(var(--accent-hue) 24% 92%);
+  --muted: hsl(var(--accent-hue) 14% 70%);
+  --accent-sat: 58%;
+  --accent-light: 65%;
+  --accent: hsl(var(--accent-hue) var(--accent-sat) var(--accent-light));
+  --surface: hsl(var(--accent-hue) 18% 12%);
+  --surface-elevated: hsl(var(--accent-hue) 18% 15%);
+  --line: hsl(var(--accent-hue) 16% 26%);
+  --line-strong: hsl(var(--accent-hue) 16% 39%);
+  --focus-ring: hsl(var(--accent-hue) 66% 72%);
+  --overlay: hsl(var(--accent-hue) 24% 2% / 0.42);
 }

@@ -47,6 +47,12 @@ Add markdown files under:
 
 Use frontmatter fields documented in `docs/content-schema.md`.
 
+## DEELAN Configuration
+
+Project-level app settings are configured in `deelan.config.yml` (root).
+
+See `docs/configuration.md` for all options, including `timezone` and code highlighting themes.
+
 ## Documentation Site (MkDocs Material)
 
 Install docs dependencies:

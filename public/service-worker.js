@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'deelan-v2';
+const CACHE_VERSION = 'deelan-v4';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -103,13 +103,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  const isStaticAsset =
-    url.pathname.startsWith('/_astro/') ||
-    url.pathname.startsWith('/js/') ||
-    url.pathname.startsWith('/mathjax/');
-
-  if (isStaticAsset) {
+  if (url.pathname.startsWith('/mathjax/')) {
     event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  if (url.pathname.startsWith('/js/') || url.pathname.startsWith('/_astro/')) {
+    event.respondWith(networkFirst(request));
     return;
   }
 
