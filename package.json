@@ -15,7 +15,7 @@
     "tags": "tsx scripts/tags.ts",
     "validate": "tsx scripts/validate-content.ts",
     "docs:install": "python3 -m pip install -r requirements-docs.txt",
-    "docs:serve": "mkdocs serve -w mkdocs.yml -w docs/",
+    "docs:serve": "mkdocs serve -w docs/ -w mkdocs.yml --livereload",
     "docs:build": "mkdocs build",
     "docs:deploy": "mkdocs gh-deploy --force",
     "prebuild": "npm run prepare:mathjax && npm run sync:search-core && npm run validate && tsx scripts/build-indexes.ts && tsx scripts/build-git-timeline.ts",

@@ -11,7 +11,7 @@ import {
 } from '../src/lib/content/schema';
 
 const ROOT = process.cwd();
-const CONTENT_GLOB = ['content/posts/**/*.md'];
+const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 const OUTPUT = path.join(ROOT, '.generated', 'timeline', 'versions.json');
 
 interface TimelineEntry {

@@ -1,8 +1,8 @@
 site_name: DEELAN
 site_description: Data Engineering Electronic LAboratory Notebook
-site_url: https://example.github.io/deelan/
-repo_url: https://github.com/example/deelan
-repo_name: example/deelan
+site_url: https://jhadida.github.io/deelan
+repo_url: https://github.com/jhadida/deelan
+repo_name: jhadida/deelan
 
 site_dir: .site-docs
 

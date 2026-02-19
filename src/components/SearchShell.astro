@@ -1,0 +1,92 @@
+---
+interface Props {
+  idPrefix: string;
+  ariaLabel: string;
+  initialMode?: 'simple' | 'advanced';
+  tagPlaceholder?: string;
+  titlePlaceholder?: string;
+  queryPlaceholder?: string;
+}
+
+const {
+  idPrefix,
+  ariaLabel,
+  initialMode = 'simple',
+  tagPlaceholder = 'e.g. data.lake.*',
+  titlePlaceholder = 'title contains...',
+  queryPlaceholder = 'Use &, |, (), plus tag:, title:, from:, to:'
+} = Astro.props;
+
+const isSimple = initialMode === 'simple';
+const modeName = `${idPrefix}-search-mode`;
+---
+
+<section class="search-shell">
+  <div class="search-tabs" role="tablist" aria-label={ariaLabel}>
+    <input
+      id={`${idPrefix}-mode-simple`}
+      class="search-mode-input"
+      type="radio"
+      name={modeName}
+      checked={isSimple}
+    />
+    <label
+      for={`${idPrefix}-mode-simple`}
+      id={`${idPrefix}-tab-simple`}
+      class="search-tab"
+      role="tab"
+      aria-selected={String(isSimple)}
+    >
+      Simple
+    </label>
+
+    <input
+      id={`${idPrefix}-mode-advanced`}
+      class="search-mode-input"
+      type="radio"
+      name={modeName}
+      checked={!isSimple}
+    />
+    <label
+      for={`${idPrefix}-mode-advanced`}
+      id={`${idPrefix}-tab-advanced`}
+      class="search-tab"
+      role="tab"
+      aria-selected={String(!isSimple)}
+    >
+      Advanced
+    </label>
+  </div>
+
+  <div class="panel section-block search-panel">
+    <div id={`${idPrefix}-search-simple`} class="filter-grid" hidden={!isSimple} style={isSimple ? '' : 'display: none;'}>
+      <label>
+        Tag
+        <input id={`${idPrefix}-tag`} type="search" placeholder={tagPlaceholder} autocomplete="off" />
+      </label>
+      <label>
+        Title
+        <input id={`${idPrefix}-title`} type="search" placeholder={titlePlaceholder} autocomplete="off" />
+      </label>
+      <label>
+        From
+        <input id={`${idPrefix}-from`} type="date" />
+      </label>
+      <label>
+        To
+        <input id={`${idPrefix}-to`} type="date" />
+      </label>
+    </div>
+
+    <div
+      id={`${idPrefix}-search-advanced`}
+      hidden={isSimple}
+      style={isSimple ? 'display: none;' : ''}
+    >
+      <label>
+        Query
+        <input id={`${idPrefix}-query`} type="search" placeholder={queryPlaceholder} autocomplete="off" />
+      </label>
+    </div>
+  </div>
+</section>

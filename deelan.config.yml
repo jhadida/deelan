@@ -4,3 +4,4 @@ default_theme: dark
 timezone: America/Los_Angeles
 code_theme_light: material-theme-lighter
 code_theme_dark: material-theme-darker
+timeline_commit_url_template: https://github.com/jhadida/deelan/commit/${COMMIT_SHA}

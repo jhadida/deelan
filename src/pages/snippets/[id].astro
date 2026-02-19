@@ -2,10 +2,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
-import SiteShell from '../../components/layout/SiteShell.astro';
+import SiteShell from '../../components/SiteShell.astro';
+import RelatedList from '../../components/RelatedList.astro';
 import {
   loadPostsIndex,
   loadSnippetsIndex,
+  loadTimeline,
   type GeneratedIndexItem
 } from '../../lib/content/generated';
 import { renderMarkdown } from '../../lib/content/render-markdown';
@@ -25,16 +27,29 @@ const siteConfig = await getSiteConfig();
 
 const posts = await loadPostsIndex();
 const snippets = await loadSnippetsIndex();
+const timeline = await loadTimeline();
 
-const relatedPostItems = posts.items
-  .filter((candidate) => item.related_ids.includes(candidate.id))
-  .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/posts/${candidate.id}` }));
+const postById = new Map(posts.items.map((candidate) => [candidate.id, candidate]));
+const snippetById = new Map(snippets.items.map((candidate) => [candidate.id, candidate]));
 
-const relatedSnippetItems = snippets.items
-  .filter((candidate) => candidate.id !== item.id && item.related_ids.includes(candidate.id))
-  .map((candidate) => ({ id: candidate.id, title: candidate.title, href: `/snippets/${candidate.id}` }));
+const relatedItems = item.related_ids
+  .map((id) => {
+    const snippet = snippetById.get(id);
+    if (snippet && snippet.id !== item.id) {
+      return { id: snippet.id, title: snippet.title, href: `/snippets/${snippet.id}` };
+    }
+    const post = postById.get(id);
+    if (post) {
+      return { id: post.id, title: post.title, href: `/posts/${post.id}` };
+    }
+    return null;
+  })
+  .filter((entry): entry is { id: string; title: string; href: string } => !!entry);
 
-const updatedAt = formatTimestamp(item.updated_at ?? item.created_at ?? null, siteConfig.timezone);
+const updatedAt = formatTimestamp(
+  timeline.items[item.id]?.effective_updated_at ?? item.updated_at ?? item.created_at ?? null,
+  siteConfig.timezone
+);
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
@@ -63,37 +78,13 @@ const renderedHtml = await renderMarkdown(parsed.content);
       <span class="eyebrow">Snippet</span>
       <h1 class="page-title">{item.title}</h1>
       <p class="page-subtitle">
-        {item.id} ({item.status}) — Version: {item.version} — Last updated: {updatedAt}
+        {item.id} — Last updated: {updatedAt}
       </p>
       {item.notes ? <p>{item.notes}</p> : null}
       <article set:html={renderedHtml}></article>
       <hr class="section-separator" />
       <h2>Related</h2>
-      <h3>Posts</h3>
-      {
-        relatedPostItems.length === 0 ? (
-          <p class="muted">None</p>
-        ) : (
-          <ul>
-            {relatedPostItems.map((entry) => (
-              <li><a href={entry.href}>{entry.title}</a></li>
-            ))}
-          </ul>
-        )
-      }
-
-      <h3>Snippets</h3>
-      {
-        relatedSnippetItems.length === 0 ? (
-          <p class="muted">None</p>
-        ) : (
-          <ul>
-            {relatedSnippetItems.map((entry) => (
-              <li><a href={entry.href}>{entry.title}</a></li>
-            ))}
-          </ul>
-        )
-      }
+      <RelatedList items={relatedItems} />
     </section>
   </div>
 </SiteShell>

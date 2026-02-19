@@ -1,0 +1,11 @@
+---
+import TagCloud from './TagCloud.astro';
+
+interface Props {
+  tags: string[];
+}
+
+const { tags } = Astro.props;
+---
+
+<TagCloud tags={tags} />

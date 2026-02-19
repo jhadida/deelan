@@ -1,0 +1,30 @@
+---
+interface RelatedItem {
+  id: string;
+  title: string;
+  href: string;
+}
+
+interface Props {
+  items: RelatedItem[];
+  emptyText?: string;
+  showIds?: boolean;
+}
+
+const { items, emptyText = 'No related items.', showIds = false } = Astro.props;
+---
+
+{
+  items.length === 0 ? (
+    <p class="muted">{emptyText}</p>
+  ) : (
+    <ul>
+      {items.map((entry) => (
+        <li>
+          <a href={entry.href}>{entry.title}</a>
+          {showIds ? ` (${entry.id})` : ''}
+        </li>
+      ))}
+    </ul>
+  )
+}

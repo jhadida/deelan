@@ -10,6 +10,7 @@ DEELAN runtime configuration is stored in `deelan.config.yml` at the repository 
 - `timezone` (`string`, default: `UTC`): IANA timezone used for rendered timestamps.
 - `code_theme_light` (`string`, default: `github-light`): Shiki theme name for light mode code blocks.
 - `code_theme_dark` (`string`, default: `github-dark`): Shiki theme name for dark mode code blocks.
+- `timeline_commit_url_template` (`string`, default: empty): URL template used to link timeline commits. Use `${COMMIT_SHA}` as placeholder.
 
 ## Timezone Format
 
@@ -29,6 +30,7 @@ default_theme: dark
 timezone: America/Los_Angeles
 code_theme_light: github-light
 code_theme_dark: github-dark
+timeline_commit_url_template: https://github.com/jhadida/deelan/commit/${COMMIT_SHA}
 ```
 
 Notes:
@@ -36,10 +38,11 @@ Notes:
 - Rendered timestamps are displayed without timezone suffix.
 - If `timezone` is invalid, DEELAN falls back to `UTC` formatting.
 - If a code theme name is invalid, DEELAN falls back to `github-light`/`github-dark`.
+- If `timeline_commit_url_template` is empty or missing `${COMMIT_SHA}`, timeline commits render as plain text.
 
 ## Code Highlighting Themes
 
-`code_theme_light` and `code_theme_dark` map directly to [Shiki](https://shiki.style/) theme names.
+`code_theme_light` and `code_theme_dark` map directly to [Shiki theme names](https://shiki.style/themes).
 
 Example:
 

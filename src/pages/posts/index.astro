@@ -1,5 +1,7 @@
 ---
-import SiteShell from '../../components/layout/SiteShell.astro';
+import SiteShell from '../../components/SiteShell.astro';
+import SearchShell from '../../components/SearchShell.astro';
+import TagCloud from '../../components/TagCloud.astro';
 import { loadPostsIndex, loadTimeline } from '../../lib/content/generated';
 import { getSiteConfig } from '../../lib/site-config';
 import { formatTimestamp } from '../../lib/time';
@@ -29,57 +31,7 @@ function displayDate(value: string | null): string {
       </p>
     </header>
 
-    <section class="search-shell">
-      <div class="search-tabs" role="tablist" aria-label="Posts search mode">
-        <input id="posts-mode-simple" class="search-mode-input" type="radio" name="posts-search-mode" checked />
-        <label for="posts-mode-simple" id="posts-tab-simple" class="search-tab" role="tab" aria-selected="true">
-          Simple
-        </label>
-        <input id="posts-mode-advanced" class="search-mode-input" type="radio" name="posts-search-mode" />
-        <label
-          for="posts-mode-advanced"
-          id="posts-tab-advanced"
-          class="search-tab"
-          role="tab"
-          aria-selected="false"
-        >
-          Advanced
-        </label>
-      </div>
-
-      <div class="panel section-block search-panel">
-        <div id="posts-search-simple" class="filter-grid">
-          <label>
-            Tag
-            <input id="posts-tag" type="search" placeholder="e.g. data.lake.*" autocomplete="off" />
-          </label>
-          <label>
-            Title
-            <input id="posts-title" type="search" placeholder="title contains..." autocomplete="off" />
-          </label>
-          <label>
-            From
-            <input id="posts-from" type="date" />
-          </label>
-          <label>
-            To
-            <input id="posts-to" type="date" />
-          </label>
-        </div>
-
-        <div id="posts-search-advanced" hidden style="display: none;">
-          <label>
-            Query
-            <input
-              id="posts-query"
-              type="search"
-              placeholder="Use &, |, (), plus tag:, title:, from:, to:"
-              autocomplete="off"
-            />
-          </label>
-        </div>
-      </div>
-    </section>
+    <SearchShell idPrefix="posts" ariaLabel="Posts search mode" />
 
     <section class="view-toggle">
       <button id="posts-view-table" type="button" aria-pressed="true" title="Table view" aria-label="Table view">
@@ -129,15 +81,7 @@ function displayDate(value: string | null): string {
               <td>{post.status}</td>
               <td>{displayDate(effectiveDate(post.id, post.updated_at ?? post.created_at))}</td>
               <td>
-                <div class="tag-cloud">
-                  {post.tags.map((tag) => (
-                    <span class="tag-pill">
-                      {tag.split('.').map((part) => (
-                        <span>{part}</span>
-                      ))}
-                    </span>
-                  ))}
-                </div>
+                <TagCloud tags={post.tags} />
               </td>
             </tr>
           ))}
@@ -160,15 +104,7 @@ function displayDate(value: string | null): string {
             <h2><a href={`/posts/${post.id}`}>{post.title}</a></h2>
             <p class="muted">{post.id}</p>
             {post.summary ? <p>{post.summary}</p> : null}
-            <div class="tag-cloud posts-card-tags">
-              {post.tags.map((tag) => (
-                <span class="tag-pill">
-                  {tag.split('.').map((part) => (
-                    <span>{part}</span>
-                  ))}
-                </span>
-              ))}
-            </div>
+            <TagCloud tags={post.tags} className="posts-card-tags" />
           </li>
         ))}
       </ul>

@@ -1,0 +1,13 @@
+---
+import SearchShell from './SearchShell.astro';
+
+interface Props {
+  mode?: 'simple' | 'advanced';
+}
+
+const { mode = 'simple' } = Astro.props;
+---
+
+<div style="max-width: 860px;">
+  <SearchShell idPrefix="story-search" ariaLabel="Search mode" initialMode={mode} />
+</div>

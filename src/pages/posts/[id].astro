@@ -2,7 +2,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
-import SiteShell from '../../components/layout/SiteShell.astro';
+import SiteShell from '../../components/SiteShell.astro';
+import RelatedList from '../../components/RelatedList.astro';
+import TimelineItem from '../../components/TimelineItem.astro';
 import {
   loadPostsIndex,
   loadSnippetsIndex,
@@ -34,11 +36,23 @@ const related = [...snippets.items]
 const itemTimeline = timeline.items[item.id];
 const updatedAtRaw = itemTimeline?.effective_updated_at ?? item.updated_at ?? null;
 const updatedAt = formatTimestamp(updatedAtRaw, siteConfig.timezone);
+const timelineEntries = (itemTimeline?.timeline ?? []).map((entry) => ({
+  commit: entry.commit.slice(0, 8),
+  date: formatTimestamp(entry.date, siteConfig.timezone),
+  message: entry.message,
+  author: entry.author,
+  commitUrl: buildCommitUrl(siteConfig.timeline_commit_url_template, entry.commit)
+}));
 
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
 const parsed = matter(raw);
 const renderedHtml = await renderMarkdown(parsed.content);
+
+function buildCommitUrl(template: string, commitSha: string): string | null {
+  if (!template || !template.includes('${COMMIT_SHA}')) return null;
+  return template.replaceAll('${COMMIT_SHA}', commitSha);
+}
 ---
 
 <SiteShell pageTitle={item.title}>
@@ -74,37 +88,26 @@ const renderedHtml = await renderMarkdown(parsed.content);
 
     <section class="section-block reader-width">
       <h2>Related</h2>
-      {
-        related.length === 0 ? (
-          <p class="muted">No related items.</p>
-        ) : (
-          <ul>
-            {related.map((entry) => (
-              <li><a href={entry.href}>{entry.title}</a> ({entry.id})</li>
-            ))}
-          </ul>
-        )
-      }
+      <RelatedList items={related} showIds />
     </section>
 
     <section class="section-block reader-width">
       <h2>Timeline</h2>
       {
-        !itemTimeline || itemTimeline.timeline.length === 0 ? (
+        !itemTimeline || timelineEntries.length === 0 ? (
           <p class="muted">No git timeline data yet.</p>
         ) : (
           <>
-            <p class="muted">Showing {itemTimeline.timeline.length} commit(s), newest first.</p>
+            <p class="muted">Showing {timelineEntries.length} commit(s), newest first.</p>
             <ul class="timeline-list">
-              {itemTimeline.timeline.map((entry) => (
-                <li class="timeline-item">
-                  <div>
-                    <code>{entry.commit.slice(0, 8)}</code>{' '}
-                    <strong>{formatTimestamp(entry.date, siteConfig.timezone)}</strong>
-                  </div>
-                  <div>{entry.message}</div>
-                  <div class="muted">{entry.author}</div>
-                </li>
+              {timelineEntries.map((entry) => (
+                <TimelineItem
+                  commit={entry.commit}
+                  commitUrl={entry.commitUrl ?? undefined}
+                  date={entry.date}
+                  message={entry.message}
+                  author={entry.author}
+                />
               ))}
             </ul>
           </>

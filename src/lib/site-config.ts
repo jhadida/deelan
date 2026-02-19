@@ -11,6 +11,7 @@ export interface SiteConfig {
   timezone: string;
   code_theme_light: string;
   code_theme_dark: string;
+  timeline_commit_url_template: string;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
@@ -19,7 +20,8 @@ const DEFAULT_CONFIG: SiteConfig = {
   default_theme: 'light',
   timezone: 'UTC',
   code_theme_light: 'github-light',
-  code_theme_dark: 'github-dark'
+  code_theme_dark: 'github-dark',
+  timeline_commit_url_template: ''
 };
 
 let cached: SiteConfig | null = null;
@@ -56,7 +58,11 @@ export async function getSiteConfig(): Promise<SiteConfig> {
       code_theme_dark:
         typeof parsed.code_theme_dark === 'string' && parsed.code_theme_dark.trim().length > 0
           ? parsed.code_theme_dark.trim()
-          : DEFAULT_CONFIG.code_theme_dark
+          : DEFAULT_CONFIG.code_theme_dark,
+      timeline_commit_url_template:
+        typeof parsed.timeline_commit_url_template === 'string'
+          ? parsed.timeline_commit_url_template.trim()
+          : DEFAULT_CONFIG.timeline_commit_url_template
     };
 
     return cached;

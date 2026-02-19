@@ -2,43 +2,41 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
-import SiteShell from '../../components/layout/SiteShell.astro';
-import { loadPostsIndex, loadSnippetsIndex } from '../../lib/content/generated';
+import SiteShell from '../../components/SiteShell.astro';
+import RelatedList from '../../components/RelatedList.astro';
+import SearchShell from '../../components/SearchShell.astro';
+import TagCloud from '../../components/TagCloud.astro';
+import { loadPostsIndex, loadSnippetsIndex, loadTimeline } from '../../lib/content/generated';
 import { renderMarkdown } from '../../lib/content/render-markdown';
 import { getSiteConfig } from '../../lib/site-config';
 import { formatTimestamp } from '../../lib/time';
 
 const snippets = await loadSnippetsIndex();
 const posts = await loadPostsIndex();
+const timeline = await loadTimeline();
 const siteConfig = await getSiteConfig();
 const postsById = new Map(posts.items.map((item) => [item.id, item]));
 const snippetsById = new Map(snippets.items.map((item) => [item.id, item]));
 
-function buildRelatedHtml(relatedIds: string[]): string {
-  const relatedSnippets = relatedIds
-    .map((id) => snippetsById.get(id))
-    .filter((item) => item && item.type === 'snippet');
-  const relatedPosts = relatedIds.map((id) => postsById.get(id)).filter(Boolean);
-  const rows: string[] = [];
+function resolveRelatedItems(relatedIds: string[]) {
+  return relatedIds
+    .map((id) => {
+      const snippet = snippetsById.get(id);
+      if (snippet && snippet.type === 'snippet') {
+        return { id: snippet.id, title: snippet.title, href: `/snippets/${snippet.id}` };
+      }
+      const post = postsById.get(id);
+      if (post) {
+        return { id: post.id, title: post.title, href: `/posts/${post.id}` };
+      }
+      return null;
+    })
+    .filter((entry): entry is { id: string; title: string; href: string } => !!entry);
+}
 
-  if (relatedSnippets.length > 0) {
-    rows.push('<h3>Snippets</h3><ul>');
-    for (const item of relatedSnippets) {
-      rows.push(`<li><a href="/snippets/${item.id}">${item.title}</a></li>`);
-    }
-    rows.push('</ul>');
-  }
-
-  if (relatedPosts.length > 0) {
-    rows.push('<h3>Posts</h3><ul>');
-    for (const item of relatedPosts) {
-      rows.push(`<li><a href="/posts/${item.id}">${item.title}</a></li>`);
-    }
-    rows.push('</ul>');
-  }
-
-  if (rows.length === 0) return '<p class="muted">No related items.</p>';
-  return rows.join('');
+function resolveSnippetUpdatedAt(snippetId: string, fallback: string | null): string {
+  const timelineItem = timeline.items[snippetId];
+  return timelineItem?.effective_updated_at ?? fallback ?? '';
 }
 
 const snippetDetails = await Promise.all(
@@ -47,8 +45,9 @@ const snippetDetails = await Promise.all(
     const raw = await fs.readFile(sourcePath, 'utf8');
     const parsed = matter(raw);
     const html = await renderMarkdown(parsed.content);
-    const updated = formatTimestamp(snippet.updated_at ?? snippet.created_at ?? null, siteConfig.timezone);
-    const meta = `${snippet.id} (${snippet.status}) — Version: ${snippet.version} — Last updated: ${updated}`;
+    const updatedRaw = resolveSnippetUpdatedAt(snippet.id, snippet.updated_at ?? snippet.created_at ?? null);
+    const updated = formatTimestamp(updatedRaw, siteConfig.timezone);
+    const meta = `${snippet.id} — Last updated: ${updated}`;
 
     return {
       id: snippet.id,
@@ -56,7 +55,7 @@ const snippetDetails = await Promise.all(
       notes: snippet.notes ?? '',
       meta,
       html,
-      relatedHtml: buildRelatedHtml(snippet.related_ids)
+      relatedItems: resolveRelatedItems(snippet.related_ids)
     };
   })
 );
@@ -88,74 +87,7 @@ const snippetDetails = await Promise.all(
       </p>
     </header>
 
-    <section class="search-shell">
-      <div class="search-tabs" role="tablist" aria-label="Snippets search mode">
-        <input
-          id="snippets-mode-simple"
-          class="search-mode-input"
-          type="radio"
-          name="snippets-search-mode"
-          checked
-        />
-        <label
-          for="snippets-mode-simple"
-          id="snippets-tab-simple"
-          class="search-tab"
-          role="tab"
-          aria-selected="true"
-        >
-          Simple
-        </label>
-        <input
-          id="snippets-mode-advanced"
-          class="search-mode-input"
-          type="radio"
-          name="snippets-search-mode"
-        />
-        <label
-          for="snippets-mode-advanced"
-          id="snippets-tab-advanced"
-          class="search-tab"
-          role="tab"
-          aria-selected="false"
-        >
-          Advanced
-        </label>
-      </div>
-
-      <div class="panel section-block search-panel">
-        <div id="snippets-search-simple" class="filter-grid">
-          <label>
-            Tag
-            <input id="snippet-tag" type="search" placeholder="e.g. python.pandas.*" autocomplete="off" />
-          </label>
-          <label>
-            Title
-            <input id="snippet-title" type="search" placeholder="title contains..." autocomplete="off" />
-          </label>
-          <label>
-            From
-            <input id="snippet-from" type="date" />
-          </label>
-          <label>
-            To
-            <input id="snippet-to" type="date" />
-          </label>
-        </div>
-
-        <div id="snippets-search-advanced" hidden style="display: none;">
-          <label>
-            Query
-            <input
-              id="snippet-filter"
-              type="search"
-              placeholder="Use &, |, (), plus tag:, title:, from:, to:"
-              autocomplete="off"
-            />
-          </label>
-        </div>
-      </div>
-    </section>
+    <SearchShell idPrefix="snippets" ariaLabel="Snippets search mode" tagPlaceholder="e.g. python.pandas.*" />
 
     <section class="snippet-explorer">
       <aside class="panel snippet-list-panel">
@@ -167,19 +99,11 @@ const snippetDetails = await Promise.all(
               data-title={snippet.title}
               data-text={`${snippet.title} ${snippet.notes ?? ''} ${snippet.content_text}`}
               data-tags={snippet.tags.join(',')}
-              data-date={snippet.updated_at ?? snippet.created_at ?? ''}
+              data-date={resolveSnippetUpdatedAt(snippet.id, snippet.updated_at ?? snippet.created_at ?? null)}
             >
               <button type="button" class="snippet-select" data-snippet-key={snippet.id}>
                 <span class="snippet-select-title">{snippet.title}</span>
-                <span class="tag-cloud">
-                  {snippet.tags.map((tag) => (
-                    <span class="tag-pill">
-                      {tag.split('.').map((part) => (
-                        <span>{part}</span>
-                      ))}
-                    </span>
-                  ))}
-                </span>
+                <TagCloud tags={snippet.tags} />
               </button>
             </li>
           ))}
@@ -210,7 +134,9 @@ const snippetDetails = await Promise.all(
         data-notes={detail.notes}
       >
         <div data-snippet-html set:html={detail.html}></div>
-        <div data-snippet-related set:html={detail.relatedHtml}></div>
+        <div data-snippet-related>
+          <RelatedList items={detail.relatedItems} />
+        </div>
       </article>
     ))}
   </div>
@@ -229,11 +155,11 @@ const snippetDetails = await Promise.all(
     });
 
     initFilter({
-      querySelector: '#snippet-filter',
-      tagSelector: '#snippet-tag',
-      titleSelector: '#snippet-title',
-      fromSelector: '#snippet-from',
-      toSelector: '#snippet-to',
+      querySelector: '#snippets-query',
+      tagSelector: '#snippets-tag',
+      titleSelector: '#snippets-title',
+      fromSelector: '#snippets-from',
+      toSelector: '#snippets-to',
       simpleTabSelector: '#snippets-tab-simple',
       advancedTabSelector: '#snippets-tab-advanced',
       simpleModeSelector: '#snippets-mode-simple',

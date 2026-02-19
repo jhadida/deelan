@@ -1,0 +1,19 @@
+---
+interface Props {
+  tags: string[];
+  className?: string;
+}
+
+const { tags, className = '' } = Astro.props;
+const classes = className ? `tag-cloud ${className}` : 'tag-cloud';
+---
+
+<div class={classes}>
+  {tags.map((tag) => (
+    <span class="tag-pill">
+      {tag.split('.').map((part) => (
+        <span>{part}</span>
+      ))}
+    </span>
+  ))}
+</div>
