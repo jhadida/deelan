@@ -33,6 +33,7 @@ test('deelan init scaffolds minimal project and supports helper opt-out flags', 
     await fs.access(path.join(target, 'content', 'snippets'));
     await fs.access(path.join(target, 'public', 'js'));
     await assert.rejects(() => fs.access(path.join(target, 'src', 'pages')));
+    await fs.access(path.join(target, '.gitattributes'));
 
     const gitignore = await fs.readFile(path.join(target, '.gitignore'), 'utf8');
     assert.match(gitignore, /\.astro\//);

@@ -26,7 +26,7 @@ npm run validate
 
 ## Supported Wrapper Commands
 
-- `deelan init [dir] [--with-src] [--no-vscode] [--no-frontmatter] [--yes]`
+- `deelan init [dir] [--with-src] [--no-vscode] [--no-frontmatter] [--no-git] [--no-lfs-attrs] [--yes]`
 - `deelan build`
 - `deelan serve [--port <n>]`
 - `deelan tags ...`
@@ -51,18 +51,28 @@ Optional helpers are included by default:
 
 - `.vscode/`
 - `.frontmatter/`
+- git repository initialization (when target is not already in a git repo)
+- `.gitattributes` with default LFS rules (when git repo is initialized)
 
 Disable helpers with:
 
 - `--no-vscode`
 - `--no-frontmatter`
+- `--no-git`
+- `--no-lfs-attrs`
 
 Build-internal commands are still npm-scoped:
 
 - `npm run build:prepare-mathjax`
 - `npm run build:sync-search-core`
+- `npm run build:sync-content-assets`
 - `npm run build:indexes`
 - `npm run build:timeline`
+
+Optional feature installers:
+
+- `npm run optional:pdf`
+- `npm run optional:install`
 
 ## Related Command References
 

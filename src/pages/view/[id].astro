@@ -56,7 +56,7 @@ const timelineEntries =
 const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
 const parsed = matter(raw);
-const renderedHtml = await renderMarkdown(parsed.content);
+const renderedHtml = await renderMarkdown(parsed.content, { sourceFilePath: item.file_path });
 
 function buildCommitUrl(template: string, commitSha: string): string | null {
   if (!template || !template.includes('${COMMIT_SHA}')) return null;

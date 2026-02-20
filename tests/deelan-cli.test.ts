@@ -43,6 +43,8 @@ test('deelan wrapper forwards init --help', async () => {
 
   assert.match(stdout, /DEELAN init/);
   assert.match(stdout, /--with-src/);
+  assert.match(stdout, /--no-git/);
+  assert.match(stdout, /--no-lfs-attrs/);
 });
 
 test('deelan wrapper reports unknown command', async () => {

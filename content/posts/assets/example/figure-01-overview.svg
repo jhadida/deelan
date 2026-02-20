@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-label="Example figure">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b6e4f" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#0b6e4f" stop-opacity="0.05" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="960" height="420" fill="url(#bg)" />
+  <rect x="80" y="110" width="240" height="200" rx="14" fill="#0b6e4f" fill-opacity="0.18" stroke="#0b6e4f" />
+  <rect x="360" y="110" width="240" height="200" rx="14" fill="#0b6e4f" fill-opacity="0.12" stroke="#0b6e4f" />
+  <rect x="640" y="110" width="240" height="200" rx="14" fill="#0b6e4f" fill-opacity="0.08" stroke="#0b6e4f" />
+  <path d="M320 210 L360 210" stroke="#0b6e4f" stroke-width="4" />
+  <polygon points="360,210 348,204 348,216" fill="#0b6e4f" />
+  <path d="M600 210 L640 210" stroke="#0b6e4f" stroke-width="4" />
+  <polygon points="640,210 628,204 628,216" fill="#0b6e4f" />
+  <text x="200" y="215" font-family="ui-sans-serif, system-ui" font-size="28" text-anchor="middle" fill="#0b6e4f">Input</text>
+  <text x="480" y="215" font-family="ui-sans-serif, system-ui" font-size="28" text-anchor="middle" fill="#0b6e4f">Process</text>
+  <text x="760" y="215" font-family="ui-sans-serif, system-ui" font-size="28" text-anchor="middle" fill="#0b6e4f">Output</text>
+</svg>

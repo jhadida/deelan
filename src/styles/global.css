@@ -678,6 +678,121 @@ button:disabled {
   border-radius: var(--radius-sm);
 }
 
+.markdown-body .md-toc {
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface-elevated) 85%, var(--bg));
+  padding: var(--space-3) var(--space-4);
+}
+
+.markdown-body .md-toc-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.markdown-body .md-toc ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.markdown-body .md-toc li {
+  margin: var(--space-1) 0;
+}
+
+.markdown-body .md-toc .md-toc-level-3 {
+  margin-left: var(--space-3);
+}
+
+.markdown-body .md-figure {
+  width: min(100%, var(--md-figure-width, 100%));
+  margin: var(--space-5) auto;
+  display: block;
+  text-align: center;
+}
+
+.markdown-body .md-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.markdown-body .md-figure figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: color-mix(in oklab, var(--muted) 85%, var(--fg));
+}
+
+.markdown-body .md-admonition {
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  background: color-mix(in oklab, var(--surface-elevated) 78%, var(--bg));
+}
+
+.markdown-body .md-admonition-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.markdown-body .md-admonition-note {
+  border-left-color: var(--accent);
+}
+
+.markdown-body .md-admonition-tip {
+  border-left-color: color-mix(in oklab, var(--accent) 70%, #2ea043);
+}
+
+.markdown-body .md-admonition-warning {
+  border-left-color: #d97706;
+}
+
+.markdown-body .md-admonition-danger,
+.markdown-body .md-admonition-caution {
+  border-left-color: #b91c1c;
+}
+
+.markdown-body .md-admonition > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .md-footnote-ref {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+.markdown-body .md-footnotes {
+  margin-top: var(--space-7);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.markdown-body .md-footnotes ol {
+  margin: var(--space-3) 0 0;
+}
+
+.markdown-body .md-footnotes li + li {
+  margin-top: var(--space-2);
+}
+
+.markdown-body .md-footnote-backref {
+  margin-left: var(--space-1);
+}
+
+.markdown-body pre.mermaid {
+  overflow: auto;
+  padding: var(--space-4);
+  border: 1px dashed var(--line-strong);
+  background: color-mix(in oklab, var(--surface-elevated) 90%, var(--bg));
+}
+
 .snippet-page {
   display: grid;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(220px, 260px);

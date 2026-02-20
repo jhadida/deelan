@@ -9,6 +9,7 @@ node_modules/
 .site-storybook/
 .generated/
 .cache/
+public/content-assets/
 
 # local exports and temp files
 exports/

@@ -48,7 +48,7 @@ Playwright browser binaries are **not guaranteed to be present** after npm insta
 If Chromium is not installed yet, run:
 
 ```bash
-npx playwright install chromium
+npm run optional:pdf
 ```
 
 ## Notes

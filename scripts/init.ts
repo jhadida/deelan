@@ -1,11 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 interface InitOptions {
   targetDir: string;
   includeVscode: boolean;
   includeFrontmatter: boolean;
   includeSrc: boolean;
+  includeGit: boolean;
+  includeLfsAttrs: boolean;
   force: boolean;
   help: boolean;
 }
@@ -22,6 +25,25 @@ const GITIGNORE_TEMPLATE = `.astro/
 .generated/
 .site-deelan/
 exports/
+`;
+
+const GITATTRIBUTES_LFS_TEMPLATE = `# DEELAN optional Git LFS defaults
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.7z filter=lfs diff=lfs merge=lfs -text
+*.tar filter=lfs diff=lfs merge=lfs -text
+*.gz filter=lfs diff=lfs merge=lfs -text
+*.tgz filter=lfs diff=lfs merge=lfs -text
+*.bz2 filter=lfs diff=lfs merge=lfs -text
+*.xz filter=lfs diff=lfs merge=lfs -text
 `;
 
 const FALLBACK_FILE_TEMPLATES: Record<(typeof REQUIRED_FILES)[number], string> = {
@@ -80,6 +102,8 @@ Options:
   --with-src         Copy local src/ templates (advanced customization)
   --no-vscode        Skip .vscode helper files
   --no-frontmatter   Skip .frontmatter helper files
+  --no-git           Skip automatic git repository initialization
+  --no-lfs-attrs     Skip writing default .gitattributes LFS rules
   --yes, --force     Allow writing into a non-empty target directory
   -h, --help         Show this help
 
@@ -87,6 +111,8 @@ Defaults:
   - Creates a minimal content project in the target directory
   - Uses package-provided src templates at build time
   - Includes .vscode and .frontmatter helpers by default
+  - Initializes git repo if target is not already in one
+  - Writes default .gitattributes LFS patterns when creating new git repo
 `);
 }
 
@@ -95,6 +121,8 @@ function parseArgs(argv: string[]): InitOptions {
   let includeVscode = true;
   let includeFrontmatter = true;
   let includeSrc = false;
+  let includeGit = true;
+  let includeLfsAttrs = true;
   let force = false;
   let help = false;
 
@@ -103,11 +131,13 @@ function parseArgs(argv: string[]): InitOptions {
     else if (token === '--with-src') includeSrc = true;
     if (token === '--no-vscode') includeVscode = false;
     else if (token === '--no-frontmatter') includeFrontmatter = false;
+    else if (token === '--no-git') includeGit = false;
+    else if (token === '--no-lfs-attrs') includeLfsAttrs = false;
     else if (token === '--yes' || token === '--force') force = true;
     else if (!token.startsWith('--')) targetDir = token;
   }
 
-  return { targetDir, includeVscode, includeFrontmatter, includeSrc, force, help };
+  return { targetDir, includeVscode, includeFrontmatter, includeSrc, includeGit, includeLfsAttrs, force, help };
 }
 
 async function exists(filePath: string): Promise<boolean> {
@@ -161,6 +191,43 @@ async function writeGitignore(targetRoot: string): Promise<void> {
   await fs.writeFile(gitignorePath, GITIGNORE_TEMPLATE, 'utf8');
 }
 
+function runGit(args: string[], cwd: string): { ok: boolean; output: string } {
+  const result = spawnSync('git', args, {
+    cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: 'utf8'
+  });
+  const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trim();
+  return { ok: (result.status ?? 1) === 0, output };
+}
+
+async function writeDefaultGitattributes(targetRoot: string): Promise<void> {
+  const attrsPath = path.join(targetRoot, '.gitattributes');
+  if (await exists(attrsPath)) return;
+  await fs.writeFile(attrsPath, GITATTRIBUTES_LFS_TEMPLATE, 'utf8');
+}
+
+function looksLikeGitRepo(targetRoot: string): boolean {
+  const probe = runGit(['rev-parse', '--is-inside-work-tree'], targetRoot);
+  return probe.ok && probe.output.includes('true');
+}
+
+async function maybeInitializeGit(targetRoot: string, options: InitOptions): Promise<void> {
+  if (!options.includeGit) return;
+  if (looksLikeGitRepo(targetRoot)) return;
+
+  const init = runGit(['init'], targetRoot);
+  if (!init.ok) {
+    console.warn('init warning: unable to initialize git repository automatically.');
+    if (init.output) console.warn(init.output);
+    return;
+  }
+
+  if (options.includeLfsAttrs) {
+    await writeDefaultGitattributes(targetRoot);
+  }
+}
+
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -201,6 +268,7 @@ async function main(): Promise<void> {
   }
 
   await writeGitignore(targetRoot);
+  await maybeInitializeGit(targetRoot, options);
 
   console.log(`Initialized DEELAN project at ${targetRoot}`);
   console.log('Next steps:');
@@ -208,6 +276,9 @@ async function main(): Promise<void> {
   console.log('- edit content under content/posts and content/snippets');
   if (!options.includeSrc) {
     console.log('- optional: run `deelan init . --with-src --yes` later if you want local src customization');
+  }
+  if (options.includeGit) {
+    console.log('- optional: run `git lfs install` if you plan to track large binary assets with LFS');
   }
   console.log('- run `deelan build` then `deelan serve`');
 }

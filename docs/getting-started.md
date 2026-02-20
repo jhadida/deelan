@@ -5,6 +5,8 @@
 - Node.js 22+
 - npm
 - Python 3 (for docs tooling)
+- Git (recommended)
+- Git LFS (optional, recommended for large binary assets)
 
 ## Quick Start
 
@@ -39,6 +41,8 @@ npm run validate
 - `npm run tags -- <command>` - tag management (`list`, `tree`, `duplicates`, `rename`, `merge`)
 - `npm run storybook:serve` - Storybook dev server
 - `npm run storybook:build` - static Storybook build
+- `npm run optional:pdf` - install Chromium for PDF export
+- `npm run optional:install` - install optional dependencies
 
 Wrapper CLI (repository-local):
 
@@ -70,11 +74,41 @@ Add markdown files under:
 - `content/snippets/`
 
 Use frontmatter fields documented in `docs/content-schema.md`.
+Authoring syntax and asset conventions are documented in `docs/authoring.md`.
 
 Detail pages are generated under `/view/<id>` where `<id>` is auto-derived from filename:
 
 - `post--<slug>` for posts
 - `snippet--<slug>` for snippets
+
+## Optional Runtime Features
+
+Optional dependency:
+
+1. PDF export: Playwright Chromium browser binary.
+
+Install:
+
+```bash
+npm run optional:pdf
+```
+
+Or use:
+
+```bash
+npm run optional:install
+```
+
+## Git + LFS (Optional, Recommended)
+
+`deelan init` initializes a git repository by default when the target is not already in one.
+It also writes default `.gitattributes` LFS patterns for common binary files.
+
+To activate Git LFS hooks locally:
+
+```bash
+git lfs install
+```
 
 ## DEELAN Configuration
 

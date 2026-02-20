@@ -21,6 +21,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - CLI: cli.md
+  - Authoring: authoring.md
   - Configuration: configuration.md
   - Tag CLI: tag-cli.md
   - Editor Integration: editor-integration.md

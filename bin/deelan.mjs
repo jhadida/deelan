@@ -61,6 +61,7 @@ function runBuild(args) {
   const chain = [
     ['scripts/prepare-mathjax.ts'],
     ['scripts/sync-search-core.ts'],
+    ['scripts/sync-content-assets.ts'],
     ['scripts/validate-content.ts'],
     ['scripts/build-indexes.ts'],
     ['scripts/build-git-timeline.ts']

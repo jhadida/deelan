@@ -194,6 +194,9 @@ export function initSnippetExplorer(config) {
     }
     detailContent.innerHTML = item.html;
     detailRelated.innerHTML = item.relatedHtml;
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([detailContent]).catch(() => {});
+    }
 
     itemButtons.forEach((button) => {
       const selected = button.getAttribute('data-snippet-key') === key;

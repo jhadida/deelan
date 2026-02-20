@@ -6,10 +6,11 @@
 
 1. `build:prepare-mathjax`
 2. `build:sync-search-core`
-3. `validate`
-4. `build-indexes`
-5. `build-git-timeline`
-6. `astro build`
+3. `build:sync-content-assets`
+4. `validate`
+5. `build-indexes`
+6. `build-git-timeline`
+7. `astro build`
 
 ### Command Intent
 
@@ -19,12 +20,15 @@
 - `build:sync-search-core`:
   - Syncs shared search core from `src/lib/search/search-core.js` to `public/js/search-core.js`.
   - Used by `dev` and `build` preflight to keep browser/runtime logic aligned.
+- `build:sync-content-assets`:
+  - Copies content assets from `content/**/assets` into `public/content-assets/...`.
+  - Ensures relative image/file paths resolve correctly from both `/view/*` and explorer routes.
 - `validate`:
   - Validates frontmatter, cross-references, and content constraints before indexing/build.
   - Safe to run independently while authoring content.
 - `build:preflight`:
   - Internal orchestration command used by npm `prebuild`.
-  - Runs asset prep + sync + validation + index/timeline generation.
+  - Runs asset prep + sync + content asset mirroring + validation + index/timeline generation.
   - Uses npm-only build-scoped commands (`build:indexes`, `build:timeline`) rather than end-user CLI wrapper commands.
 
 ## Test Workflow
@@ -75,6 +79,8 @@ Example:
   - `scripts/prepare-mathjax.ts` (via `build:prepare-mathjax`)
 - Offline MathJax runtime assets:
   - `public/mathjax/`
+- Mirrored content assets:
+  - `public/content-assets/...`
 
 ## PWA/Offline
 

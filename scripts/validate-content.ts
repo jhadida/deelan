@@ -8,6 +8,7 @@ import {
   type ContentFrontmatter,
   type ValidatedContent
 } from '../src/lib/content/schema';
+import { extractInternalLinks } from '../src/lib/content/internal-links';
 
 const ROOT = process.cwd();
 const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
@@ -111,6 +112,15 @@ function validateCrossReferences(items: ValidatedContent[]): ItemError[] {
       issues.push({
         filePath: item.filePath,
         errors: [`unknown related_ids: ${missing.join(', ')}`]
+      });
+    }
+
+    const linkedIds = extractInternalLinks(item.body);
+    const missingLinks = linkedIds.filter((id) => !ids.has(id));
+    if (missingLinks.length > 0) {
+      issues.push({
+        filePath: item.filePath,
+        errors: [`unknown internal links: ${missingLinks.join(', ')}`]
       });
     }
   }
