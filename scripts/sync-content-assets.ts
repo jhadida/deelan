@@ -1,17 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { pathExists } from '../src/lib/util';
 
 async function copyIfExists(src: string, dst: string): Promise<boolean> {
-  if (!(await exists(src))) return false;
+  if (!(await pathExists(src))) return false;
   await fs.mkdir(path.dirname(dst), { recursive: true });
   await fs.cp(src, dst, { recursive: true, force: true });
   return true;
@@ -25,18 +17,18 @@ async function main(): Promise<void> {
   await fs.mkdir(outRoot, { recursive: true });
 
   const copied: string[] = [];
-  if (await copyIfExists(path.join(root, 'content', 'posts', 'assets'), path.join(outRoot, 'posts', 'assets'))) {
+  if (await copyIfExists(path.join(root, 'content', 'posts', 'assets'), path.join(outRoot, 'posts'))) {
     copied.push('content/posts/assets');
   }
   if (
     await copyIfExists(
       path.join(root, 'content', 'snippets', 'assets'),
-      path.join(outRoot, 'snippets', 'assets')
+      path.join(outRoot, 'snippets')
     )
   ) {
     copied.push('content/snippets/assets');
   }
-  if (await copyIfExists(path.join(root, 'content', 'assets'), path.join(outRoot, 'assets'))) {
+  if (await copyIfExists(path.join(root, 'content', 'assets'), path.join(outRoot, 'shared'))) {
     copied.push('content/assets');
   }
 

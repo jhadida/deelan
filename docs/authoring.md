@@ -57,7 +57,8 @@ Supported units:
 - `in`
 
 Figures render as centered block elements with caption below.
-When using relative paths, DEELAN mirrors content assets to `public/content-assets/...` during build/dev.
+When using relative paths, DEELAN mirrors content assets to `public/content-assets/...` during build/dev,
+using `/content-assets/<entity-type>/<slug-or-subpath>/...`.
 
 ## Asset Management Best Practices
 
@@ -91,8 +92,8 @@ Recommended conventions as content grows:
 
 6. For shared assets, use an explicit shared directory.
 
-    - `content/assets/shared/...`
-    - only for assets intentionally reused across multiple posts/snippets
+    - `content/posts/assets/shared/...` or `content/snippets/assets/shared/...`
+    - only for assets intentionally reused across many items of the same entity type
 
 7. Validate before publishing.
 

@@ -1,4 +1,5 @@
 import { validateTags } from '@/lib/tags/validate';
+import { toPosixPath } from '@/lib/util';
 
 export type ContentType = 'post' | 'snippet';
 
@@ -52,10 +53,6 @@ export interface ContentIdentity {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function toPosixPath(filePath: string): string {
-  return filePath.replace(/\\/g, '/');
 }
 
 function isIsoDate(value: string): boolean {

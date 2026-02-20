@@ -1,22 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { pathExists, resolvePackageRoot } from '../src/lib/util';
 
 async function main(): Promise<void> {
   const root = process.cwd();
-  const packageRoot = process.env.DEELAN_PACKAGE_ROOT ? path.resolve(process.env.DEELAN_PACKAGE_ROOT) : null;
+  const packageRoot = resolvePackageRoot(root);
   const localSrc = path.join(root, 'src', 'lib', 'search', 'search-core.js');
   const packageSrc = packageRoot ? path.join(packageRoot, 'src', 'lib', 'search', 'search-core.js') : null;
   let src = localSrc;
-  if (!(await exists(localSrc)) && packageSrc) src = packageSrc;
+  if (!(await pathExists(localSrc)) && packageSrc) src = packageSrc;
 
   const dst = path.join(root, 'public', 'js', 'search-core.js');
 

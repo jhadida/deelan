@@ -5,6 +5,7 @@ import { codeToHtml } from 'shiki';
 import path from 'node:path';
 import { getSiteConfig } from '../site-config';
 import { replaceInternalLinks } from './internal-links';
+import { isLocalAssetReference, toPosixPath } from '../util';
 
 let initialized = false;
 let shikiLightTheme = 'github-light';
@@ -207,21 +208,8 @@ function transformAdmonitions(html: string): string {
   });
 }
 
-function toPosixPath(input: string): string {
-  return input.replaceAll('\\', '/');
-}
-
-function isLocalAssetRef(value: string): boolean {
-  if (!value) return false;
-  if (value.startsWith('#')) return false;
-  if (value.startsWith('/')) return false;
-  if (value.startsWith('//')) return false;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
-  return true;
-}
-
 function resolveContentAssetUrl(ref: string, sourceFilePath: string): string | null {
-  if (!isLocalAssetRef(ref)) return null;
+  if (!isLocalAssetReference(ref)) return null;
   const normalizedRef = ref.split('?')[0]?.split('#')[0] ?? ref;
   const sourceAbs = path.isAbsolute(sourceFilePath)
     ? sourceFilePath
@@ -230,7 +218,19 @@ function resolveContentAssetUrl(ref: string, sourceFilePath: string): string | n
   const contentRoot = path.resolve(process.cwd(), 'content');
   const rel = path.relative(contentRoot, candidate);
   if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return null;
-  return `/content-assets/${toPosixPath(rel)}`;
+  const relPosix = toPosixPath(rel);
+
+  const scoped = relPosix.match(/^(posts|snippets)\/assets\/(.+)$/);
+  if (scoped) {
+    return `/content-assets/${scoped[1]}/${scoped[2]}`;
+  }
+
+  const shared = relPosix.match(/^assets\/(.+)$/);
+  if (shared) {
+    return `/content-assets/shared/${shared[1]}`;
+  }
+
+  return null;
 }
 
 function rewriteLocalAssetUrls(html: string, sourceFilePath?: string): string {

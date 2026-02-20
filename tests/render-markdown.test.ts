@@ -36,5 +36,5 @@ flowchart TD
 test('renderMarkdown rewrites local asset links when source file path is provided', async () => {
   const markdown = '![Img](./assets/example/figure-01-overview.svg){width=50%}';
   const html = await renderMarkdown(markdown, { sourceFilePath: 'content/posts/example.md' });
-  assert.match(html, /src="\/content-assets\/posts\/assets\/example\/figure-01-overview\.svg"/);
+  assert.match(html, /src="\/content-assets\/posts\/example\/figure-01-overview\.svg"/);
 });

@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { getSiteConfig, type SiteTheme } from '../site-config';
 import { formatTimestamp } from '../time';
 import { loadTimeline } from '../content/generated';
+import { isLocalAssetReference, pathExists } from '../util';
 import type { ExportContext } from './types';
 
 async function copyDir(src: string, dst: string): Promise<void> {
@@ -92,13 +93,6 @@ function getLatestGitTimestamp(filePath: string): string | null {
   }
 }
 
-function isLocalAssetReference(value: string): boolean {
-  if (!value || value.startsWith('#')) return false;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
-  if (value.startsWith('//')) return false;
-  return true;
-}
-
 function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
@@ -118,9 +112,7 @@ async function rewriteHtmlAssets(html: string, sourceFilePath: string, exportDir
     const normalized = original.split('?')[0].split('#')[0];
     const absPath = path.resolve(sourceDir, normalized);
 
-    try {
-      await fs.access(absPath);
-    } catch {
+    if (!(await pathExists(absPath))) {
       return null;
     }
 

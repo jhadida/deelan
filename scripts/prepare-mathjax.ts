@@ -1,22 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathExists, resolvePackageRoot } from '../src/lib/util';
 
 const ROOT = process.cwd();
-const PACKAGE_ROOT = process.env.DEELAN_PACKAGE_ROOT ? path.resolve(process.env.DEELAN_PACKAGE_ROOT) : null;
+const PACKAGE_ROOT = resolvePackageRoot(ROOT);
 const LEGACY_SOURCE_DIR = path.join(ROOT, 'node_modules', 'mathjax', 'es5');
 const MODERN_SOURCE_DIR = path.join(ROOT, 'node_modules', 'mathjax');
 const PACKAGE_LEGACY_SOURCE_DIR = PACKAGE_ROOT ? path.join(PACKAGE_ROOT, 'node_modules', 'mathjax', 'es5') : null;
 const PACKAGE_MODERN_SOURCE_DIR = PACKAGE_ROOT ? path.join(PACKAGE_ROOT, 'node_modules', 'mathjax') : null;
 const TARGET_DIR = path.join(ROOT, 'public', 'mathjax');
-
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 async function copyDir(src: string, dst: string): Promise<void> {
   await fs.mkdir(dst, { recursive: true });
@@ -39,16 +31,16 @@ async function copyDir(src: string, dst: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  let sourceDir = (await exists(LEGACY_SOURCE_DIR)) ? LEGACY_SOURCE_DIR : MODERN_SOURCE_DIR;
-  const sourceExists = await exists(sourceDir);
+  let sourceDir = (await pathExists(LEGACY_SOURCE_DIR)) ? LEGACY_SOURCE_DIR : MODERN_SOURCE_DIR;
+  const sourceExists = await pathExists(sourceDir);
 
   if (!sourceExists && PACKAGE_LEGACY_SOURCE_DIR && PACKAGE_MODERN_SOURCE_DIR) {
-    sourceDir = (await exists(PACKAGE_LEGACY_SOURCE_DIR))
+    sourceDir = (await pathExists(PACKAGE_LEGACY_SOURCE_DIR))
       ? PACKAGE_LEGACY_SOURCE_DIR
       : PACKAGE_MODERN_SOURCE_DIR;
   }
 
-  if (!(await exists(sourceDir))) {
+  if (!(await pathExists(sourceDir))) {
     throw new Error(
       `MathJax source not found at ${LEGACY_SOURCE_DIR}, ${MODERN_SOURCE_DIR}${
         PACKAGE_ROOT ? `, ${PACKAGE_LEGACY_SOURCE_DIR}, ${PACKAGE_MODERN_SOURCE_DIR}` : ''
