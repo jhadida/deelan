@@ -7,8 +7,7 @@ import {
   validateFrontmatter,
   type ContentFrontmatter
 } from '../src/lib/content/schema';
-
-const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
+import { buildContentGlobs } from '../src/lib/content/files';
 
 interface ContentFile {
   filePath: string;
@@ -53,7 +52,7 @@ function getBoolFlag(flags: Map<string, string | boolean>, key: string): boolean
 
 async function loadContent(): Promise<ContentFile[]> {
   const root = process.cwd();
-  const files = (await fg(CONTENT_GLOB, { cwd: root, onlyFiles: true })).sort();
+  const files = (await fg(buildContentGlobs(), { cwd: root, onlyFiles: true })).sort();
   const out: ContentFile[] = [];
 
   for (const filePath of files) {
@@ -339,8 +338,12 @@ Commands:
   merge --from <tag|prefix> --to <tag|prefix> [--subtree] [--apply] [--confirm-subtree]
   wordcloud [--out <path>]
 
+Global options:
+  --include-subfolder <name>   Repeatable. Include content/posts/<name>/*.md and content/snippets/<name>/*.md.
+
 Examples:
   npm run tags -- list
+  npm run tags -- list --include-subfolder synthetic
   npm run tags -- stats
   npm run tags -- tree
   npm run tags -- duplicates --distance 2

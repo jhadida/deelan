@@ -14,7 +14,7 @@ const SCRIPT_MAP = {
   init: path.join(ROOT, 'scripts', 'init.ts'),
   tags: path.join(ROOT, 'scripts', 'tags.ts'),
   export: path.join(ROOT, 'scripts', 'export.ts'),
-  validate: path.join(ROOT, 'scripts', 'validate-content.ts')
+  validate: path.join(ROOT, 'scripts', 'validate.ts')
 };
 
 function printHelp() {
@@ -36,6 +36,7 @@ Examples:
   deelan init my-notebook --no-vscode
   deelan init my-notebook --with-src
   deelan build
+  deelan build --include-subfolder synthetic
   deelan serve --port 4321
   deelan tags stats
   deelan export --id post--de-partitioning-primer --format pdf --pdf-scale 0.95
@@ -57,18 +58,49 @@ function runNode(args) {
   process.exit(result.status ?? 1);
 }
 
+function splitBuildArgs(args) {
+  const scriptArgs = [];
+  const astroArgs = [];
+
+  for (let i = 0; i < args.length; i += 1) {
+    const token = args[i];
+
+    if (token === '--include-subfolder') {
+      const next = args[i + 1];
+      if (next && !next.startsWith('--')) {
+        scriptArgs.push(token, next);
+        i += 1;
+      } else {
+        scriptArgs.push(token);
+      }
+      continue;
+    }
+
+    if (token.startsWith('--include-subfolder=')) {
+      scriptArgs.push(token);
+      continue;
+    }
+
+    astroArgs.push(token);
+  }
+
+  return { scriptArgs, astroArgs };
+}
+
 function runBuild(args) {
+  const { scriptArgs, astroArgs } = splitBuildArgs(args);
   const chain = [
     ['scripts/prepare-mathjax.ts'],
-    ['scripts/sync-search-core.ts'],
-    ['scripts/sync-content-assets.ts'],
-    ['scripts/validate-content.ts'],
+    ['scripts/prepare-search.ts'],
+    ['scripts/prepare-content-assets.ts'],
+    ['scripts/validate.ts'],
     ['scripts/build-indexes.ts'],
+    ['scripts/build-analytics.ts'],
     ['scripts/build-git-timeline.ts']
   ];
 
   for (const [script] of chain) {
-    const result = spawnSync(process.execPath, [TSX_CLI, path.join(ROOT, script)], {
+    const result = spawnSync(process.execPath, [TSX_CLI, path.join(ROOT, script), ...scriptArgs], {
       cwd: process.cwd(),
       stdio: 'inherit',
       env: { ...process.env, DEELAN_PACKAGE_ROOT: ROOT }
@@ -76,7 +108,7 @@ function runBuild(args) {
     if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
   }
 
-  runNode([ASTRO_CLI, 'build', ...args]);
+  runNode([ASTRO_CLI, 'build', ...astroArgs]);
 }
 
 function runServe(args) {

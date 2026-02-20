@@ -1,0 +1,282 @@
+---
+import SiteShell from '../../components/SiteShell.astro';
+import { loadRelationsAnalytics, loadTagsAnalytics } from '../../lib/content/generated';
+import { getSiteConfig } from '../../lib/site-config';
+import { formatTimestamp } from '../../lib/time';
+
+const tagsAnalytics = await loadTagsAnalytics();
+const relationsAnalytics = await loadRelationsAnalytics();
+const siteConfig = await getSiteConfig();
+const generatedAt = formatTimestamp(tagsAnalytics.generated_at, siteConfig.timezone);
+const avgTagsPerItem =
+  tagsAnalytics.totals.items > 0
+    ? (tagsAnalytics.tags.reduce((sum, tag) => sum + tag.count_total, 0) / tagsAnalytics.totals.items).toFixed(2)
+    : '0.00';
+---
+
+<SiteShell pageTitle="Analytics">
+  <div class="container stack analytics-page">
+    <header class="page-header">
+      <span class="eyebrow">Insights</span>
+      <h1 class="page-title">Analytics</h1>
+      <p class="page-subtitle">Generated at {generatedAt}.</p>
+    </header>
+
+    <section class="analytics-summary-grid">
+      <article class="panel">
+        <h2>Total items</h2>
+        <p class="analytics-kpi">{tagsAnalytics.totals.items}</p>
+      </article>
+      <article class="panel">
+        <h2>Unique tags</h2>
+        <p class="analytics-kpi">{tagsAnalytics.totals.unique_tags}</p>
+      </article>
+      <article class="panel">
+        <h2>Avg tags / item</h2>
+        <p class="analytics-kpi">{avgTagsPerItem}</p>
+      </article>
+      <article class="panel">
+        <h2>Relation edges</h2>
+        <p class="analytics-kpi">{relationsAnalytics.totals.edges}</p>
+      </article>
+    </section>
+
+    <section class="panel section-block">
+      <h2>Tag Frequency</h2>
+      <p class="muted">Sortable table. Click column headers to sort.</p>
+      <div class="table-wrap">
+        <table class="table analytics-table">
+          <thead>
+            <tr>
+              <th><button type="button" class="sort-btn" data-sort-key="name">Tag</button></th>
+              <th><button type="button" class="sort-btn" data-sort-key="count_total">Count</button></th>
+              <th><button type="button" class="sort-btn" data-sort-key="count_posts">Posts</button></th>
+              <th><button type="button" class="sort-btn" data-sort-key="count_snippets">Snippets</button></th>
+            </tr>
+          </thead>
+          <tbody id="analytics-tags-table-body">
+            {tagsAnalytics.tags.map((tag) => (
+              <tr>
+                <td>{tag.name}</td>
+                <td>{tag.count_total}</td>
+                <td>{tag.count_posts}</td>
+                <td>{tag.count_snippets}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel section-block">
+      <h2>Top Tags Histogram</h2>
+      <canvas id="analytics-tag-chart" height="140"></canvas>
+    </section>
+
+    <section class="panel section-block">
+      <h2>Tag Hierarchy (Static Treemap)</h2>
+      <p class="muted">Minimal static preview. Interactive treemap improvements are planned in future versions.</p>
+      <div id="analytics-treemap" class="analytics-treemap" aria-label="Tag hierarchy treemap"></div>
+    </section>
+
+    <section class="panel section-block">
+      <h2>Relationships Graph</h2>
+      <div class="analytics-graph-layout">
+        <div id="analytics-graph" class="analytics-graph"></div>
+        <aside class="panel analytics-graph-side">
+          <h3>Selection</h3>
+          <div id="analytics-selection" class="muted">Select a node to inspect metadata.</div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <script id="analytics-tags-json" type="application/json" set:html={JSON.stringify(tagsAnalytics)}></script>
+  <script
+    id="analytics-relations-json"
+    type="application/json"
+    set:html={JSON.stringify(relationsAnalytics)}
+  ></script>
+
+  <script type="module">
+    import Chart from 'chart.js/auto';
+    import cytoscape from 'cytoscape';
+
+    const tagsData = JSON.parse(document.getElementById('analytics-tags-json')?.textContent || '{}');
+    const relationsData = JSON.parse(document.getElementById('analytics-relations-json')?.textContent || '{}');
+    const tags = Array.isArray(tagsData.tags) ? [...tagsData.tags] : [];
+    const hierarchy = Array.isArray(tagsData.hierarchy) ? tagsData.hierarchy : [];
+
+    const tableBody = document.getElementById('analytics-tags-table-body');
+    const sortButtons = Array.from(document.querySelectorAll('.sort-btn'));
+    let sortKey = 'count_total';
+    let sortDirection = -1;
+
+    function renderTable(rows) {
+      if (!tableBody) return;
+      tableBody.innerHTML = rows
+        .map(
+          (row) =>
+            `<tr><td>${row.name}</td><td>${row.count_total}</td><td>${row.count_posts}</td><td>${row.count_snippets}</td></tr>`
+        )
+        .join('');
+    }
+
+    function sortedTags() {
+      const rows = [...tags];
+      rows.sort((a, b) => {
+        if (sortKey === 'name') {
+          return sortDirection * a.name.localeCompare(b.name);
+        }
+        return sortDirection * ((a[sortKey] ?? 0) - (b[sortKey] ?? 0));
+      });
+      return rows;
+    }
+
+    sortButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.getAttribute('data-sort-key');
+        if (!key) return;
+        if (sortKey === key) sortDirection *= -1;
+        else {
+          sortKey = key;
+          sortDirection = key === 'name' ? 1 : -1;
+        }
+        renderTable(sortedTags());
+      });
+    });
+
+    renderTable(sortedTags());
+
+    const chartCanvas = document.getElementById('analytics-tag-chart');
+    if (chartCanvas instanceof HTMLCanvasElement) {
+      const top = [...tags].sort((a, b) => b.count_total - a.count_total).slice(0, 20);
+      new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+          labels: top.map((entry) => entry.name),
+          datasets: [
+            {
+              label: 'Tag count',
+              data: top.map((entry) => entry.count_total)
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    const treemapEl = document.getElementById('analytics-treemap');
+    if (treemapEl) {
+      const top = hierarchy
+        .filter((node) => node.depth === 1)
+        .sort((a, b) => b.count_total - a.count_total || a.path.localeCompare(b.path));
+      const total = top.reduce((sum, node) => sum + node.count_total, 0) || 1;
+      const width = treemapEl.clientWidth || 900;
+      const height = 320;
+      let xOffset = 0;
+
+      const pieces = [];
+      for (const root of top) {
+        const rootWidth = Math.max(1, (root.count_total / total) * width);
+        const children = hierarchy
+          .filter((node) => node.depth === 2 && node.parent === root.path)
+          .sort((a, b) => b.count_total - a.count_total || a.path.localeCompare(b.path));
+
+        if (children.length === 0) {
+          pieces.push({
+            x: xOffset,
+            y: 0,
+            w: rootWidth,
+            h: height,
+            label: root.path,
+            count: root.count_total
+          });
+        } else {
+          let yOffset = 0;
+          for (const child of children) {
+            const childHeight = Math.max(1, (child.count_total / root.count_total) * height);
+            pieces.push({
+              x: xOffset,
+              y: yOffset,
+              w: rootWidth,
+              h: childHeight,
+              label: child.path,
+              count: child.count_total
+            });
+            yOffset += childHeight;
+          }
+        }
+        xOffset += rootWidth;
+      }
+
+      treemapEl.innerHTML = pieces
+        .map((piece) => {
+          const style = `left:${piece.x}px;top:${piece.y}px;width:${piece.w}px;height:${piece.h}px;`;
+          return `<div class="analytics-treemap-node" style="${style}" title="${piece.label} (${piece.count})"><span>${piece.label}</span></div>`;
+        })
+        .join('');
+    }
+
+    const graphEl = document.getElementById('analytics-graph');
+    const selectionEl = document.getElementById('analytics-selection');
+    if (graphEl) {
+      const elements = [
+        ...(relationsData.nodes || []).map((node) => ({ data: { ...node } })),
+        ...(relationsData.edges || []).map((edge) => ({
+          data: { id: `${edge.source}--${edge.target}`, source: edge.source, target: edge.target, kind: edge.kind }
+        }))
+      ];
+
+      const cy = cytoscape({
+        container: graphEl,
+        elements,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'background-color': (ele) => (ele.data('type') === 'post' ? '#1f7a5a' : '#2878c8'),
+              label: 'data(id)',
+              color: '#f2f2f2',
+              'font-size': 10,
+              'text-wrap': 'none',
+              width: 18,
+              height: 18
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              width: 1.5,
+              'line-color': '#6b7280',
+              opacity: 0.7
+            }
+          }
+        ],
+        layout: {
+          name: 'cose',
+          animate: false,
+          fit: true
+        }
+      });
+
+      cy.on('tap', 'node', (event) => {
+        const data = event.target.data();
+        if (!selectionEl) return;
+        selectionEl.innerHTML = `
+          <p><strong>${data.title}</strong></p>
+          <p>ID: <code>${data.id}</code></p>
+          <p>Type: ${data.type}</p>
+          <p>Neighbors: ${data.degree}</p>
+          <p><a href="${data.href}">Open item</a></p>
+        `;
+      });
+    }
+  </script>
+</SiteShell>

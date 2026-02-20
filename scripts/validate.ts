@@ -9,9 +9,9 @@ import {
   type ValidatedContent
 } from '../src/lib/content/schema';
 import { extractInternalLinks } from '../src/lib/content/internal-links';
+import { buildContentGlobs } from '../src/lib/content/files';
 
 const ROOT = process.cwd();
-const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 
 interface ItemError {
   filePath: string;
@@ -161,16 +161,16 @@ function summarize(items: ValidatedContent[]): void {
 }
 
 async function main(): Promise<void> {
-  const files = await fg(CONTENT_GLOB, { cwd: ROOT, onlyFiles: true });
+  const files = await fg(buildContentGlobs(), { cwd: ROOT, onlyFiles: true });
+
+  const issues: ItemError[] = [];
+  const warnings: ItemWarning[] = [];
+  const items: ValidatedContent[] = [];
 
   if (files.length === 0) {
     console.log('no content files found under content/posts or content/snippets.');
     return;
   }
-
-  const issues: ItemError[] = [];
-  const warnings: ItemWarning[] = [];
-  const items: ValidatedContent[] = [];
 
   for (const filePath of files.sort()) {
     const result = await loadAndValidateFile(filePath);

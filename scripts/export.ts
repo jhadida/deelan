@@ -4,6 +4,7 @@ import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { renderMarkdown } from '../src/lib/content/render-markdown';
 import { inferContentIdentity, validateFrontmatter, type ValidatedContent } from '../src/lib/content/schema';
+import { buildContentGlobs } from '../src/lib/content/files';
 import { exportHtml } from '../src/lib/export/html';
 import { exportPdf } from '../src/lib/export/pdf';
 import type { ExportItem } from '../src/lib/export/types';
@@ -19,8 +20,6 @@ interface CliOptions {
   pdfScale: number;
   help: boolean;
 }
-
-const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 
 function parseArgs(argv: string[]): CliOptions {
   if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) {
@@ -86,7 +85,7 @@ function printHelp(): void {
   console.log(`DEELAN export CLI
 
 Usage:
-  npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>]
+  npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]
 
 Arguments:
   --id       Required. Generated ID (e.g. post--de-partitioning-primer)
@@ -94,17 +93,19 @@ Arguments:
   --out      Optional. Output directory (default: ./exports)
   --theme    Optional. light or dark. Overrides default_theme in deelan.config.yml
   --pdf-scale Optional. PDF scaling factor (>0 and <=2). Default: 1. Example: 0.95
+  --include-subfolder Optional, repeatable. Include content/posts/<name>/*.md and content/snippets/<name>/*.md in discovery.
 
 Examples:
   npm run export -- --id post--de-partitioning-primer
   npm run export -- --id snippet--pandas-groupby-snippet --format html --theme light
   npm run export -- --id post--de-partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
+  npm run export -- --id post--synthetic-post-0001 --include-subfolder synthetic
 `);
 }
 
 async function loadValidatedItems(): Promise<ValidatedContent[]> {
   const root = process.cwd();
-  const files = (await fg(CONTENT_GLOB, { cwd: root, onlyFiles: true })).sort();
+  const files = (await fg(buildContentGlobs(), { cwd: root, onlyFiles: true })).sort();
   const items: ValidatedContent[] = [];
 
   for (const filePath of files) {

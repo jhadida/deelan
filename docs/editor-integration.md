@@ -8,8 +8,8 @@ Recommended extensions are listed in `.vscode/extensions.json` (all optional).
 
 - `.frontmatter/config.yml` defines DEELAN post/snippet fields for the Front Matter extension.
 - `.vscode/deelan-frontmatter.code-snippets` provides raw Markdown snippets:
-  - `deelan-post-fm`
-  - `deelan-snippet-fm`
+    - `deelan-post-fm`
+    - `deelan-snippet-fm`
 - `.vscode/settings.json` enables snippet suggestions in Markdown contexts.
 
 Use snippets when editing Markdown files directly.

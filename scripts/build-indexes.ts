@@ -9,9 +9,9 @@ import {
   type ContentType,
   type ContentFrontmatter
 } from '../src/lib/content/schema';
+import { buildContentGlobs } from '../src/lib/content/files';
 
 const ROOT = process.cwd();
-const CONTENT_GLOB = ['content/posts/**/*.md', 'content/snippets/**/*.md'];
 const SEARCH_DIR = path.join(ROOT, '.generated', 'search');
 const MANIFEST_DIR = path.join(ROOT, '.generated', 'manifests');
 
@@ -85,7 +85,7 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const files = (await fg(CONTENT_GLOB, { cwd: ROOT, onlyFiles: true })).sort();
+  const files = await fg(buildContentGlobs(), { cwd: ROOT, onlyFiles: true });
   const issues: string[] = [];
   const warnings: string[] = [];
 

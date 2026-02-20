@@ -11,14 +11,14 @@ DEELAN uses a service worker for offline-first browsing after first load.
 ## Caching Strategy
 
 - Pre-cache on install:
-  - `/`
-  - `/posts/`
-  - `/snippets/`
-  - `/offline.html`
-  - `/js/filter.js`
-  - `/js/search-core.js`
-  - `/js/pwa-register.js`
-  - `/mathjax/tex-mml-chtml.js`
+    - `/`
+    - `/posts/`
+    - `/snippets/`
+    - `/offline.html`
+    - `/js/filter.js`
+    - `/js/search-core.js`
+    - `/js/pwa-register.js`
+    - `/mathjax/tex-mml-chtml.js`
 - Navigation requests: network-first with offline fallback page
 - Static assets (`/_astro/`, `/js/`, `/mathjax/`): cache-first
 - JSON requests: stale-while-revalidate

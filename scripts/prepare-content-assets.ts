@@ -33,15 +33,15 @@ async function main(): Promise<void> {
   }
 
   if (copied.length === 0) {
-    console.log('sync-content-assets: no content asset directories found.');
+    console.log('prepare-content-assets: no content asset directories found.');
     return;
   }
 
-  console.log(`sync-content-assets: copied ${copied.join(', ')} -> public/content-assets`);
+  console.log(`prepare-content-assets: copied ${copied.join(', ')} -> public/content-assets`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`sync-content-assets failed: ${message}`);
+  console.error(`prepare-content-assets failed: ${message}`);
   process.exitCode = 1;
 });

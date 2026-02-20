@@ -14,6 +14,8 @@ deelan init my-notebook --with-src
 deelan tags --help
 deelan export --help
 deelan validate
+deelan validate --include-subfolder synthetic
+deelan build --include-subfolder synthetic
 ```
 
 Repository-local equivalents:
@@ -27,11 +29,11 @@ npm run validate
 ## Supported Wrapper Commands
 
 - `deelan init [dir] [--with-src] [--no-vscode] [--no-frontmatter] [--no-git] [--no-lfs-attrs] [--yes]`
-- `deelan build`
+- `deelan build [--include-subfolder <name>]...`
 - `deelan serve [--port <n>]`
 - `deelan tags ...`
-- `deelan export ...`
-- `deelan validate`
+- `deelan export ... [--include-subfolder <name>]...`
+- `deelan validate [--include-subfolder <name>]...`
 
 ## `init` Defaults
 
@@ -64,10 +66,19 @@ Disable helpers with:
 Build-internal commands are still npm-scoped:
 
 - `npm run build:prepare-mathjax`
-- `npm run build:sync-search-core`
-- `npm run build:sync-content-assets`
+- `npm run build:prepare-search`
+- `npm run build:prepare-content-assets`
 - `npm run build:indexes`
+- `npm run build:analytics`
 - `npm run build:timeline`
+
+Synthetic stress-test helpers:
+
+- `npm run synthetic:generate -- --posts 140 --snippets 220 --seed 20260222`
+- `npm run synthetic:clean`
+- `npm run validate:with-synthetic`
+- `npm run build:with-synthetic`
+- `npm run test:with-synthetic`
 
 Optional feature installers:
 

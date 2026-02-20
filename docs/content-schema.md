@@ -11,7 +11,23 @@ Combined reference schema:
 
 ## File Naming Rules
 
-Content files under `content/posts/` and `content/snippets/` must be:
+Content discovery scans only:
+
+- `content/posts/*.md`
+- `content/snippets/*.md`
+
+Subfolders are allowed but ignored for content discovery.
+
+To include selected subfolders, pass repeated flags:
+
+- `--include-subfolder <name>`
+
+Examples:
+
+- `--include-subfolder synthetic`
+- `--include-subfolder experiments/v2`
+
+Discovered files must be:
 
 - lowercase kebab-case filename
 - single `.md` extension
@@ -30,11 +46,11 @@ Invalid examples (excluded at build time with warnings):
 ## Generated ID and Type
 
 - `type` is inferred from directory:
-  - `content/posts/*` -> `post`
-  - `content/snippets/*` -> `snippet`
+    - `content/posts/*` -> `post`
+    - `content/snippets/*` -> `snippet`
 - `id` is generated at build time from type + filename stem:
-  - `post--<slug>`
-  - `snippet--<slug>`
+    - `post--<slug>`
+    - `snippet--<slug>`
 
 Examples:
 

@@ -55,6 +55,56 @@ export interface GeneratedTimelineFile {
   items: Record<string, GeneratedTimelineItem>;
 }
 
+export interface GeneratedTagStatsItem {
+  name: string;
+  count_total: number;
+  count_posts: number;
+  count_snippets: number;
+}
+
+export interface GeneratedTagHierarchyNode {
+  path: string;
+  name: string;
+  parent: string | null;
+  depth: number;
+  count_total: number;
+  count_posts: number;
+  count_snippets: number;
+}
+
+export interface GeneratedTagsAnalyticsFile {
+  generated_at: string;
+  totals: {
+    items: number;
+    posts: number;
+    snippets: number;
+    unique_tags: number;
+  };
+  tags: GeneratedTagStatsItem[];
+  cooccurrence: Array<{ tag_a: string; tag_b: string; count: number }>;
+  hierarchy: GeneratedTagHierarchyNode[];
+}
+
+export interface GeneratedRelationsAnalyticsFile {
+  generated_at: string;
+  totals: {
+    nodes: number;
+    edges: number;
+  };
+  nodes: Array<{
+    id: string;
+    type: GeneratedType;
+    title: string;
+    href: string;
+    degree: number;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+    kind: 'related';
+  }>;
+}
+
 const ROOT = process.cwd();
 
 async function readJsonOrDefault<T>(filePath: string, fallback: T): Promise<T> {
@@ -87,5 +137,24 @@ export async function loadTimeline(): Promise<GeneratedTimelineFile> {
     generated_at: new Date(0).toISOString(),
     total: 0,
     items: {}
+  });
+}
+
+export async function loadTagsAnalytics(): Promise<GeneratedTagsAnalyticsFile> {
+  return readJsonOrDefault(path.join(ROOT, '.generated', 'analytics', 'tags.json'), {
+    generated_at: new Date(0).toISOString(),
+    totals: { items: 0, posts: 0, snippets: 0, unique_tags: 0 },
+    tags: [],
+    cooccurrence: [],
+    hierarchy: []
+  });
+}
+
+export async function loadRelationsAnalytics(): Promise<GeneratedRelationsAnalyticsFile> {
+  return readJsonOrDefault(path.join(ROOT, '.generated', 'analytics', 'relations.json'), {
+    generated_at: new Date(0).toISOString(),
+    totals: { nodes: 0, edges: 0 },
+    nodes: [],
+    edges: []
   });
 }

@@ -15,12 +15,12 @@ async function main(): Promise<void> {
   await fs.mkdir(path.dirname(dst), { recursive: true });
   await fs.copyFile(src, dst);
   console.log(
-    `sync-search-core: copied ${path.relative(root, src) || src} -> public/js/search-core.js`
+    `prepare-search: copied ${path.relative(root, src) || src} -> public/js/search-core.js`
   );
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`sync-search-core failed: ${message}`);
+  console.error(`prepare-search failed: ${message}`);
   process.exitCode = 1;
 });

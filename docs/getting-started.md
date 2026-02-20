@@ -43,6 +43,11 @@ npm run validate
 - `npm run storybook:build` - static Storybook build
 - `npm run optional:pdf` - install Chromium for PDF export
 - `npm run optional:install` - install optional dependencies
+- `npm run synthetic:generate -- --posts <n> --snippets <n> [--seed <n>]` - generate synthetic stress-test content
+- `npm run synthetic:clean` - remove synthetic stress-test content
+- `npm run validate:with-synthetic` - validate with `content/*/synthetic/*.md` included
+- `npm run build:with-synthetic` - build with `content/*/synthetic/*.md` included
+- `npm run test:with-synthetic` - run tests with synthetic subfolders enabled
 
 Wrapper CLI (repository-local):
 
@@ -65,6 +70,17 @@ Before build/export, run:
 ```bash
 npm run validate
 ```
+
+Only top-level markdown files are scanned:
+- `content/posts/*.md`
+- `content/snippets/*.md`
+Subfolders are allowed but ignored for content discovery.
+
+You can explicitly include subfolders by repeating:
+- `--include-subfolder <name>`
+Examples:
+- `node ./bin/deelan.mjs validate --include-subfolder synthetic`
+- `node ./bin/deelan.mjs build --include-subfolder synthetic --include-subfolder experiments/v2`
 
 ## Content Authoring
 
