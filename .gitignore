@@ -29,7 +29,6 @@ debug-storybook.log
 !.env.example
 
 # editor
-.vscode/
 .idea/
 *.swp
 *~

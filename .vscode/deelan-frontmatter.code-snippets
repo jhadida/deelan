@@ -1,0 +1,40 @@
+{
+  "DEELAN Post Frontmatter": {
+    "scope": "markdown,yaml,yaml-frontmatter",
+    "prefix": "deelan-post-fm",
+    "description": "Insert DEELAN post frontmatter block",
+    "body": [
+      "---",
+      "title: ${1:Post title}",
+      "tags:",
+      "  - ${2:topic.example}",
+      "version: ${3:v0.1.0}",
+      "summary: ${4:One-line summary}",
+      "notes: ${5:Optional notes}",
+      "related_ids:",
+      "  - ${6:snippet--related-item}",
+      "status: ${7|draft,published,archived|}",
+      "---",
+      "",
+      "${0}"
+    ]
+  },
+  "DEELAN Snippet Frontmatter": {
+    "scope": "markdown,yaml,yaml-frontmatter",
+    "prefix": "deelan-snippet-fm",
+    "description": "Insert DEELAN snippet frontmatter block",
+    "body": [
+      "---",
+      "title: ${1:Snippet title}",
+      "tags:",
+      "  - ${2:topic.example}",
+      "summary: ${3:Optional summary}",
+      "notes: ${4:Optional notes}",
+      "related_ids:",
+      "  - ${5:post--related-item}",
+      "---",
+      "",
+      "${0}"
+    ]
+  }
+}

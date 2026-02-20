@@ -32,7 +32,9 @@ Commands:
   validate            Validate content/frontmatter
 
 Examples:
+  deelan init --help
   deelan init my-notebook --no-vscode
+  deelan init my-notebook --with-src
   deelan build
   deelan serve --port 4321
   deelan tags stats

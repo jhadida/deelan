@@ -44,6 +44,24 @@ Wrapper CLI (repository-local):
 
 - `node ./bin/deelan.mjs --help`
 
+## Editor Setup (Optional, Recommended)
+
+For frontmatter authoring ergonomics:
+
+1. VSCode: install recommended extensions from `.vscode/extensions.json`.
+   All extension recommendations are optional.
+2. VSCode: use snippets `deelan-post-fm` and `deelan-snippet-fm`.
+3. Obsidian: enable Templates plugin.
+4. Obsidian: set templates folder to `.frontmatter/templates`.
+
+Detailed guidance: `docs/editor-integration.md`.
+
+Before build/export, run:
+
+```bash
+npm run validate
+```
+
 ## Content Authoring
 
 Add markdown files under:
@@ -94,7 +112,10 @@ The built docs output is excluded from git.
 
 ## Astro `site` Configuration
 
-`astro.config.mjs` contains a `site` field. This should be set to the public base URL where your DEELAN site is hosted.
+`astro.config.mjs` contains a `site` field.
+
+- Local/offline usage: this can be left as the placeholder value.
+- Published deployment: set this to the public base URL where your DEELAN site is hosted.
 
 Example:
 

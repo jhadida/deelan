@@ -8,7 +8,9 @@ In this repository you can use it via npm scripts, and when published with a `bi
 
 ```bash
 deelan --help
+deelan init --help
 deelan init my-notebook
+deelan init my-notebook --with-src
 deelan tags --help
 deelan export --help
 deelan validate
@@ -24,7 +26,7 @@ npm run validate
 
 ## Supported Wrapper Commands
 
-- `deelan init [dir] [--no-vscode] [--no-frontmatter] [--yes]`
+- `deelan init [dir] [--with-src] [--no-vscode] [--no-frontmatter] [--yes]`
 - `deelan build`
 - `deelan serve [--port <n>]`
 - `deelan tags ...`
@@ -33,12 +35,17 @@ npm run validate
 
 ## `init` Defaults
 
-`init` scaffolds a working project with:
+`init` scaffolds a minimal working project with:
 
 - `content/` starter post + snippet
-- `src/`, `public/js/`, `src/schemas/`
+- `public/js/`
 - `astro.config.mjs`, `tsconfig.json`, `deelan.config.yml`
 - `.gitignore` (ignores `.astro`, `.generated`, `.site-deelan`, `exports`)
+
+By default, site templates are used from the installed package at build time.
+For advanced customization, copy local source templates with:
+
+- `--with-src`
 
 Optional helpers are included by default:
 

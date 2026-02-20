@@ -36,6 +36,15 @@ test('deelan wrapper forwards export --help', async () => {
   assert.match(result.stdout, /--pdf-scale/);
 });
 
+test('deelan wrapper forwards init --help', async () => {
+  const { stdout } = await execFileAsync(process.execPath, [CLI, 'init', '--help'], {
+    cwd: REPO_ROOT
+  });
+
+  assert.match(stdout, /DEELAN init/);
+  assert.match(stdout, /--with-src/);
+});
+
 test('deelan wrapper reports unknown command', async () => {
   const result = await runCli(['definitely-unknown-command']);
   assert.equal(result.code, 1);

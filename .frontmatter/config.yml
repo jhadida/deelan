@@ -4,13 +4,10 @@ content:
     path: content/posts
     type: file
     fields:
-      - name: id
-        type: string
       - name: type
         type: select
         options:
           - post
-          - snippet
       - name: title
         type: string
       - name: tags
@@ -19,8 +16,14 @@ content:
         type: string
       - name: summary
         type: string
+      - name: notes
+        type: string
       - name: related_ids
         type: list
+      - name: created_at
+        type: datetime
+      - name: updated_at
+        type: datetime
       - name: status
         type: select
         options:
@@ -33,26 +36,21 @@ content:
     path: content/snippets
     type: file
     fields:
-      - name: id
-        type: string
       - name: type
         type: select
         options:
-          - post
           - snippet
       - name: title
         type: string
       - name: tags
         type: list
-      - name: version
+      - name: summary
         type: string
       - name: notes
         type: string
       - name: related_ids
         type: list
-      - name: status
-        type: select
-        options:
-          - draft
-          - published
-          - archived
+      - name: created_at
+        type: datetime
+      - name: updated_at
+        type: datetime
