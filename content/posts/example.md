@@ -1,10 +1,10 @@
 ---
-title: Authoring Features Showcase
+title: Hi, Bob!
 tags:
   - demo.authoring
   - demo.markdown
 version: v0.1.0
-description: Synthetic post demonstrating Deelan authoring features end-to-end.
+description: Synthetic post showcasing Deelan authoring features.
 related_ids:
   - post--de-partitioning-primer
   - snippet--pandas-groupby-snippet
