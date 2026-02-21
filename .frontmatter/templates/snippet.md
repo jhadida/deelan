@@ -4,7 +4,7 @@ tags:
   - topic.example
 description: Optional description
 related_ids:
-  - post--example-post
+  - post--showcase-post
 ---
 
 Write your snippet content here.

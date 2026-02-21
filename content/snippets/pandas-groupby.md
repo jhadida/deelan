@@ -5,7 +5,7 @@ tags:
   - data.transform
 description: Useful aggregation patterns for exploratory work.
 related_ids:
-  - post--de-partitioning-primer
+  - post--partitioning-primer
 ---
 
 ```python

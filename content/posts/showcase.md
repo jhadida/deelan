@@ -6,8 +6,8 @@ tags:
 version: v0.1.0
 description: Synthetic post showcasing Deelan authoring features.
 related_ids:
-  - post--de-partitioning-primer
-  - snippet--pandas-groupby-snippet
+  - post--partitioning-primer
+  - snippet--pandas-groupby
 status: draft
 ---
 
@@ -15,9 +15,9 @@ status: draft
 
 ## Internal Links
 
-This sentence links to another post: [[post--de-partitioning-primer|De-partitioning primer]].
+This sentence links to another post: [[post--partitioning-primer|Partitioning primer]].
 
-This sentence links to a snippet: [[snippet--pandas-groupby-snippet|Pandas groupby snippet]].
+This sentence links to a snippet: [[snippet--pandas-groupby|Pandas groupby snippet]].
 
 ## Admonitions
 

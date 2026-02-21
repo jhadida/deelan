@@ -33,5 +33,5 @@ Scope: no-framework visual polish and consistency.
 
 - Original phase-1 objective is complete.
 - Further UI work should be tracked under:
-    - `.blueprint/ui.md` (Phase 2/3/4)
-    - `.blueprint/backlog.md` (cross-cutting hardening priorities)
+    - `blueprints/ui.md` (Phase 2/3/4)
+    - `blueprints/backlog.md` (cross-cutting hardening priorities)

@@ -6,7 +6,7 @@ tags:
 version: 1.0.0
 description: Why and how to partition for practical query performance.
 related_ids:
-  - snippet--pandas-groupby-snippet
+  - snippet--pandas-groupby
 status: published
 ---
 

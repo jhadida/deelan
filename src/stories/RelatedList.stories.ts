@@ -4,9 +4,9 @@ import RelatedList from '../components/RelatedList.astro';
 const baseItems = [
   { id: 'post--partitioning-primer', title: 'Partitioning Primer', href: '/view/post--partitioning-primer' },
   {
-    id: 'snippet--pandas-groupby-snippet',
+    id: 'snippet--pandas-groupby',
     title: 'Pandas GroupBy Snippet',
-    href: '/view/snippet--pandas-groupby-snippet'
+    href: '/view/snippet--pandas-groupby'
   }
 ];
 

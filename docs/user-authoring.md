@@ -6,8 +6,8 @@ Deelan supports extended markdown authoring for posts/snippets.
 
 Use wiki-style links:
 
-- `[[post--de-partitioning-primer]]`
-- `[[snippet--pandas-groupby-snippet|Pandas groupby snippet]]`
+- `[[post--partitioning-primer]]`
+- `[[snippet--pandas-groupby|Pandas groupby snippet]]`
 
 These render to `/view/<id>` links.
 `npm run validate` fails on unknown internal IDs.

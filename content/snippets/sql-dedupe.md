@@ -5,8 +5,8 @@ tags:
   - data.quality
 description: Keep latest event per business key using `row_number`.
 related_ids:
-  - post--ingestion-observability-checklist
-  - post--de-partitioning-primer
+  - post--ingestion-observability
+  - post--partitioning-primer
 created_at: "2026-02-09T12:00:00Z"
 updated_at: "2026-02-11T09:15:00Z"
 ---

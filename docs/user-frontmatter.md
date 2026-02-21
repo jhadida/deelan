@@ -25,8 +25,8 @@ Discovered files must be:
 
 Valid:
 
-- `de-partitioning-primer.md`
-- `sql-window-dedupe-snippet.md`
+- `partitioning-primer.md`
+- `sql-dedupe.md`
 
 Invalid (excluded with warnings):
 
@@ -45,8 +45,8 @@ Invalid (excluded with warnings):
 
 Examples:
 
-- `content/posts/de-partitioning-primer.md` -> `post--de-partitioning-primer`
-- `content/snippets/pandas-groupby-snippet.md` -> `snippet--pandas-groupby-snippet`
+- `content/posts/partitioning-primer.md` -> `post--partitioning-primer`
+- `content/snippets/pandas-groupby.md` -> `snippet--pandas-groupby`
 
 `type` is optional in frontmatter. If provided, it must match inferred type.
 `id` should not be provided in frontmatter.

@@ -40,7 +40,7 @@ Output path:
 Scale can be tuned to fit page content density:
 
 ```bash
-npm run export -- --id post--de-partitioning-primer --format pdf --pdf-scale 0.95
+npm run export -- --id post--partitioning-primer --format pdf --pdf-scale 0.95
 ```
 
 Playwright browser binaries are **not guaranteed to be present** after npm install in every environment.

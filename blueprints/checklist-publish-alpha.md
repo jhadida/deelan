@@ -43,7 +43,7 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
     - `.generated/`
     - local `exports/`
     - `.codex/`
-    - `.blueprint/` (if intended non-runtime internal planning docs)
+    - `blueprints/` (if intended non-runtime internal planning docs)
 
 ### 4) Documentation for npm consumers
 
@@ -54,6 +54,11 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
     - config basics (`deelan.config.yml`)
     - filename-derived ID conventions
 - [ ] Add explicit alpha support/expectation notice.
+- [ ] Add top-level `CODEX.md` contributor context for Codex-assisted development:
+    - repository map and folder intent
+    - command/script conventions and quality gates
+    - content/model conventions and generated artifacts
+    - style/contribution guardrails
 
 ### 5) Quality gates for release candidate
 
@@ -73,4 +78,3 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 - [ ] Create git tag:
     - `v0.1.0-alpha.0`
 - [ ] Post-publish verification in clean temp install.
-

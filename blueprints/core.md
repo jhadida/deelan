@@ -36,7 +36,7 @@ Data Engineering Electronic LAboratory Notebook (Deelan)
 
 ### In Progress
 
-- Hardening and packaging polish tracked in `.blueprint/backlog.md`
+- Hardening and packaging polish tracked in `blueprints/backlog.md`
 
 ### Remaining / Planned
 

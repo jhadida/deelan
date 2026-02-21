@@ -6,8 +6,8 @@ tags:
 version: 1.0.0
 description: A compact checklist for instrumenting ingestion jobs before production rollout.
 related_ids:
-  - snippet--sql-window-dedupe-snippet
-  - snippet--pandas-groupby-snippet
+  - snippet--sql-dedupe
+  - snippet--pandas-groupby
 created_at: "2026-02-10T08:30:00Z"
 updated_at: "2026-02-12T16:20:00Z"
 status: published

@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { inferContentIdentity, validateFrontmatter } from '../src/lib/content/schema';
 
 test('inferContentIdentity derives type and id from valid post path', () => {
-  const identity = inferContentIdentity('content/posts/de-partitioning-primer.md');
+  const identity = inferContentIdentity('content/posts/partitioning-primer.md');
   assert.ok(identity);
   assert.equal(identity?.validFileName, true);
   assert.equal(identity?.type, 'post');
-  assert.equal(identity?.id, 'post--de-partitioning-primer');
+  assert.equal(identity?.id, 'post--partitioning-primer');
 });
 
 test('inferContentIdentity flags invalid filename patterns', () => {
@@ -23,7 +23,7 @@ test('validateFrontmatter accepts minimal post and injects generated id', () => 
       title: 'Demo Post',
       tags: ['data.pipeline.dbt'],
       version: '1.0.0',
-      related_ids: ['snippet--pandas-groupby-snippet']
+      related_ids: ['snippet--pandas-groupby']
     },
     'content/posts/demo-post.md',
     'post',
@@ -79,7 +79,7 @@ test('validateFrontmatter rejects invalid related id formats', () => {
       title: 'Bad Post',
       tags: ['data.pipeline.dbt'],
       version: '1.0.0',
-      related_ids: ['de-partitioning-primer']
+      related_ids: ['partitioning-primer']
     },
     'content/posts/bad-post.md',
     'post',

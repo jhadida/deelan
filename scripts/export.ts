@@ -86,7 +86,7 @@ Usage:
   npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]
 
 Arguments:
-  --id       Required. Generated ID (e.g. post--de-partitioning-primer)
+  --id       Required. Generated ID (e.g. post--partitioning-primer)
   --format   Optional. html (default) or pdf
   --out      Optional. Output directory (default: ./exports)
   --theme    Optional. light or dark. Overrides default_theme in deelan.config.yml
@@ -94,9 +94,9 @@ Arguments:
   --include-subfolder Optional, repeatable. Include content/posts/<name>/*.md and content/snippets/<name>/*.md in discovery.
 
 Examples:
-  npm run export -- --id post--de-partitioning-primer
-  npm run export -- --id snippet--pandas-groupby-snippet --format html --theme light
-  npm run export -- --id post--de-partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
+  npm run export -- --id post--partitioning-primer
+  npm run export -- --id snippet--pandas-groupby --format html --theme light
+  npm run export -- --id post--partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
   npm run export -- --id post--synthetic-post-0001 --include-subfolder synthetic
 `);
 }
