@@ -1,6 +1,6 @@
 # Frontmatter
 
-DEELAN uses separate frontmatter schemas for posts and snippets.
+Deelan uses separate frontmatter schemas for posts and snippets.
 
 ## File Naming and Discovery
 

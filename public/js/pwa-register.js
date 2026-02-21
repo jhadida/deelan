@@ -3,7 +3,7 @@
   if (!window.isSecureContext && window.location.hostname !== 'localhost') return;
 
   function promptForUpdate(registration) {
-    const confirmUpdate = window.confirm('A new DEELAN version is available. Reload now?');
+    const confirmUpdate = window.confirm('A new Deelan version is available. Reload now?');
     if (confirmUpdate && registration.waiting) {
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
     }

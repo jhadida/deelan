@@ -24,7 +24,7 @@ test('deelan init scaffolds minimal project and supports helper opt-out flags', 
       { cwd: REPO_ROOT }
     );
 
-    assert.match(stdout, /Initialized DEELAN project/);
+    assert.match(stdout, /Initialized Deelan project/);
 
     await fs.access(path.join(target, 'astro.config.mjs'));
     await fs.access(path.join(target, 'tsconfig.json'));

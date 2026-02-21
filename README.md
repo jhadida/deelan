@@ -1,4 +1,4 @@
-# DEELAN
+# Deelan
 
 Data Engineering Electronic LAboratory Notebook.
 

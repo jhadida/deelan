@@ -1,6 +1,6 @@
 # Keyboard Shortcuts
 
-This page lists keyboard shortcuts currently available in DEELAN.
+This page lists keyboard shortcuts currently available in Deelan.
 
 ## Snippets Explorer
 

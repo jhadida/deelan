@@ -1,4 +1,4 @@
-# DEELAN Blueprint (UI)
+# Deelan Blueprint (UI)
 
 ## Status Snapshot (2026-02-20)
 

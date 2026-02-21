@@ -1,6 +1,6 @@
-# DEELAN Blueprint (Core)
+# Deelan Blueprint (Core)
 
-Data Engineering Electronic LAboratory Notebook (DEELAN)
+Data Engineering Electronic LAboratory Notebook (Deelan)
 
 ## Status Snapshot (2026-02-20)
 

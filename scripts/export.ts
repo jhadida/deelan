@@ -80,7 +80,7 @@ function parseArgs(argv: string[]): CliOptions {
 }
 
 function printHelp(): void {
-  writeStdout(`DEELAN export CLI
+  writeStdout(`Deelan export CLI
 
 Usage:
   npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]

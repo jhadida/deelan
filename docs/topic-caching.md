@@ -1,6 +1,6 @@
 # PWA Offline Caching
 
-DEELAN uses a service worker for offline-first browsing after first load.
+Deelan uses a service worker for offline-first browsing after first load.
 
 ## Files
 

@@ -1,6 +1,6 @@
 # Analytics
 
-DEELAN includes a static `analytics/` route generated from build artifacts.
+Deelan includes a static `analytics/` route generated from build artifacts.
 
 ## What it shows
 

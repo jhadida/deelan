@@ -1,4 +1,4 @@
-# DEELAN Alpha Publish Checklist
+# Deelan Alpha Publish Checklist
 
 Target: publish an initial `0.x` alpha to npm with a controlled and reproducible release process.
 

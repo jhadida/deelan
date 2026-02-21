@@ -1,10 +1,10 @@
-# DEELAN Documentation
+# Deelan Documentation
 
-## What is DEELAN?
+## What is Deelan?
 
-DEELAN (Data Engineering Electronic LAboratory Notebook) is a static-first knowledge management tool for technical individuals and teams. It is designed for people who want a durable, searchable, versioned knowledge base that stays close to plain text authoring and yet provides a useful, scaleable, and beautiful web-based view to navigate contents.
+Deelan (Data Engineering Electronic LAboratory Notebook) is a static-first knowledge management tool for technical individuals and teams. It is designed for people who want a durable, searchable, versioned knowledge base that stays close to plain text authoring and yet provides a useful, scaleable, and beautiful web-based view to navigate contents.
 
-At a practical level, DEELAN helps you:
+At a practical level, Deelan helps you:
 
 - Write and maintain technical notes in markdown.
 - Separate long-form writeups (`post`) from quick references (`snippet`).
@@ -15,7 +15,7 @@ At a practical level, DEELAN helps you:
 
 The project intentionally favors transparent files and reproducible build steps over opaque app-state storage.  That makes it suitable for individuals, small teams, and internal engineering groups that want control over content, portability across environments, and predictable long-term maintenance.
 
-If you are new to DEELAN, start with the User Guide.  
+If you are new to Deelan, start with the User Guide.  
 If you are integrating or automating workflows, use the CLI Reference.  
 If you are extending internals or build behavior, use the Developer Guide.
 
@@ -32,7 +32,7 @@ If you are extending internals or build behavior, use the Developer Guide.
 
 | I want to... | Go to |
 | --- | --- |
-| Install and run DEELAN quickly | [Getting Started](user-guide.md) |
+| Install and run Deelan quickly | [Getting Started](user-guide.md) |
 | Write posts/snippets with the right syntax | [Authoring](user-authoring.md) |
 | Understand frontmatter fields and ID rules | [Frontmatter](user-frontmatter.md) |
 | Configure timezone/themes/links | [Configuration](user-configuration.md) |

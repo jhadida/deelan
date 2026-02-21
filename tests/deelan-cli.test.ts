@@ -24,7 +24,7 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
 test('deelan wrapper prints help', async () => {
   const result = await runCli(['--help']);
   assert.equal(result.code, 0);
-  assert.match(result.stdout, /DEELAN CLI/);
+  assert.match(result.stdout, /Deelan CLI/);
   assert.match(result.stdout, /deelan tags/);
   assert.match(result.stdout, /deelan export/);
 });
@@ -32,7 +32,7 @@ test('deelan wrapper prints help', async () => {
 test('deelan wrapper forwards export --help', async () => {
   const result = await runCli(['export', '--help']);
   assert.equal(result.code, 0);
-  assert.match(result.stdout, /DEELAN export CLI/);
+  assert.match(result.stdout, /Deelan export CLI/);
   assert.match(result.stdout, /--pdf-scale/);
 });
 
@@ -41,7 +41,7 @@ test('deelan wrapper forwards init --help', async () => {
     cwd: REPO_ROOT
   });
 
-  assert.match(stdout, /DEELAN init/);
+  assert.match(stdout, /Deelan init/);
   assert.match(stdout, /--with-src/);
   assert.match(stdout, /--no-git/);
   assert.match(stdout, /--no-lfs-attrs/);

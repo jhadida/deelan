@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/src/schemas/frontmatter.schema.json",
-  "title": "DEELAN Frontmatter (Any)",
+  "title": "Deelan Frontmatter (Any)",
   "oneOf": [
     {
       "$ref": "./frontmatter-post.schema.json"

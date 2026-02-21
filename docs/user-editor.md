@@ -6,7 +6,7 @@ Recommended extensions are listed in `.vscode/extensions.json` (all optional).
 
 ### Frontmatter Authoring Support
 
-- `.frontmatter/config.yml` defines DEELAN post/snippet fields for the Front Matter extension.
+- `.frontmatter/config.yml` defines Deelan post/snippet fields for the Front Matter extension.
 - `.vscode/deelan-frontmatter.code-snippets` provides raw Markdown snippets:
     - `deelan-post-fm`
     - `deelan-snippet-fm`

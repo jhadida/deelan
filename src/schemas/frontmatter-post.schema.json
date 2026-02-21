@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/src/schemas/frontmatter-post.schema.json",
-  "title": "DEELAN Post Frontmatter",
+  "title": "Deelan Post Frontmatter",
   "type": "object",
   "additionalProperties": false,
   "required": ["title", "tags", "version"],

@@ -42,7 +42,7 @@ const GITIGNORE_TEMPLATE = `.astro/
 exports/
 `;
 
-const GITATTRIBUTES_LFS_TEMPLATE = `# DEELAN optional Git LFS defaults
+const GITATTRIBUTES_LFS_TEMPLATE = `# Deelan optional Git LFS defaults
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
@@ -110,7 +110,7 @@ export default defineConfig({
 `;
 
 function printHelp(): void {
-  writeStdout(`DEELAN init
+  writeStdout(`Deelan init
 
 Usage:
   deelan init [dir] [options]
@@ -278,7 +278,7 @@ async function main(): Promise<void> {
   await writeGitignore(targetRoot);
   await maybeInitializeGit(targetRoot, options);
 
-  logger.info(`Initialized DEELAN project at ${targetRoot}`);
+  logger.info(`Initialized Deelan project at ${targetRoot}`);
   writeStdout('Next steps:');
   writeStdout(`- cd ${targetRoot}`);
   writeStdout('- edit content under content/posts and content/snippets');

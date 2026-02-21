@@ -38,7 +38,7 @@
 
 ### 0. Brand and visual identity
 
-- [P0] Create DEELAN logo and visual identity kit:
+- [P0] Create Deelan logo and visual identity kit:
     - logo exploration and final mark (SVG + icon variants)
     - color/accent guidance and typography pairing
     - usage notes for app, docs, Storybook, and exported artifacts

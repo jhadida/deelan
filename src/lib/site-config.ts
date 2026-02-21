@@ -17,8 +17,8 @@ export interface SiteConfig {
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
-  blog_title: 'DEELAN',
-  footer_text: 'Built with love using DEELAN',
+  blog_title: 'Deelan',
+  footer_text: 'Built with love using Deelan',
   default_theme: 'light',
   timezone: 'UTC',
   accent_hue: 150,

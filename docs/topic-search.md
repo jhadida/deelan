@@ -1,6 +1,6 @@
 # Search Grammar
 
-DEELAN search combines:
+Deelan search combines:
 
 1. Boolean text expression
 2. Structured filters

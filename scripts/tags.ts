@@ -279,7 +279,7 @@ async function generateWordCloud(counts: Map<string, number>, outPath: string): 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>DEELAN Tag Word Cloud</title>
+    <title>Deelan Tag Word Cloud</title>
     <style>
       body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 2rem; }
       .cloud { display: flex; flex-wrap: wrap; gap: 0.7rem; line-height: 1.2; }
@@ -307,7 +307,7 @@ async function generateWordCloud(counts: Map<string, number>, outPath: string): 
 }
 
 function printHelp(): void {
-  writeStdout(`DEELAN tags CLI
+  writeStdout(`Deelan tags CLI
 
 Commands:
   list

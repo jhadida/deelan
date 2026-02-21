@@ -7,13 +7,13 @@ This page describes how to protect `deelan serve` behind a reverse proxy with TL
 `deelan serve` is a static preview server. It is intentionally simple and does not provide built-in auth, TLS, or access policy.
 For local/private hosting, the standard pattern is:
 
-1. Run DEELAN locally (`127.0.0.1:4321` by default).
+1. Run Deelan locally (`127.0.0.1:4321` by default).
 2. Put Caddy or Nginx in front of it.
 3. Let the proxy enforce HTTPS and authentication.
 
 ## Minimal Architecture
 
-- DEELAN app:
+- Deelan app:
     - `deelan serve --host 127.0.0.1 --port 4321`
 - Reverse proxy:
     - listens on `443`
@@ -87,7 +87,7 @@ In corporate contexts this is often done once by IT/platform admins, then reused
 
 ## Operational Guidance
 
-- Keep DEELAN bound to localhost; expose only proxy ports.
+- Keep Deelan bound to localhost; expose only proxy ports.
 - Rotate proxy credentials (basic auth) periodically.
 - Restrict network access with firewall rules when possible.
 - Log access at proxy layer.
@@ -95,19 +95,19 @@ In corporate contexts this is often done once by IT/platform admins, then reused
 ## Scope Boundary
 
 Reverse-proxy auth/TLS covers most local/private collaboration needs with low complexity.
-Enterprise SSO (OIDC/SAML) can be layered at the proxy/identity stack later, without changing core DEELAN rendering logic.
+Enterprise SSO (OIDC/SAML) can be layered at the proxy/identity stack later, without changing core Deelan rendering logic.
 
 ## Why This Is Mostly Documentation + Templates
 
-No additional DEELAN runtime dependency is required for this pattern because:
+No additional Deelan runtime dependency is required for this pattern because:
 
 - TLS termination is handled by the proxy (Caddy/Nginx), not by `deelan serve`.
 - Authentication is handled by the proxy as well.
-- DEELAN remains a static-site server behind localhost upstream.
+- Deelan remains a static-site server behind localhost upstream.
 
 So the implementation surface is:
 
 - deployment templates (`templates/reverse-proxy/*`)
 - operational documentation (this page + getting-started quick setup)
 
-not changes to DEELAN rendering/build internals.
+not changes to Deelan rendering/build internals.

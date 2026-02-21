@@ -74,13 +74,13 @@ const SCRIPT_MAP = {
 };
 
 function printHelp() {
-  process.stdout.write(`DEELAN CLI
+  process.stdout.write(`Deelan CLI
 
 Usage:
   deelan <command> [...args]
 
 Commands:
-  init                Scaffold a new DEELAN project
+  init                Scaffold a new Deelan project
   build               Run preflight + static build for current project
   serve               Serve built output for current project
   tags                Run tag management CLI

@@ -29,8 +29,8 @@ Open [http://localhost:4321](http://localhost:4321).
 
 ## Optional: Secure Local/Team Access (HTTPS + Password)
 
-If you want to expose your DEELAN site to collaborators on a local network or private host, run
-DEELAN behind a reverse proxy (Caddy or Nginx) instead of exposing `deelan serve` directly.
+If you want to expose your Deelan site to collaborators on a local network or private host, run
+Deelan behind a reverse proxy (Caddy or Nginx) instead of exposing `deelan serve` directly.
 
 High-level flow:
 
@@ -39,7 +39,7 @@ High-level flow:
 3. Configure HTTPS (TLS certificates) and authentication at the proxy layer.
 4. Share the proxy URL, not the raw localhost port.
 
-This keeps DEELAN itself simple while using standard production security patterns.
+This keeps Deelan itself simple while using standard production security patterns.
 For step-by-step examples, see [Reverse Proxy and HTTPS](topic-reverse-proxy.md).
 
 ## Core Commands
@@ -52,7 +52,7 @@ For step-by-step examples, see [Reverse Proxy and HTTPS](topic-reverse-proxy.md)
 
 ## Content Types
 
-DEELAN has two content types with distinct intent:
+Deelan has two content types with distinct intent:
 
 - `post`
     - Longer-form content.
@@ -70,7 +70,7 @@ In both cases, IDs are generated from filenames and type:
 
 ## Content Discovery Rules
 
-By default, DEELAN discovers only top-level markdown files:
+By default, Deelan discovers only top-level markdown files:
 
 - `content/posts/*.md`
 - `content/snippets/*.md`

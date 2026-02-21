@@ -1,6 +1,6 @@
 # Authoring Features
 
-DEELAN supports extended markdown authoring for posts/snippets.
+Deelan supports extended markdown authoring for posts/snippets.
 
 ## Internal Links
 
@@ -19,7 +19,7 @@ Use either marker in markdown:
 - `[[toc]]`
 - `[toc]`
 
-If omitted, DEELAN auto-injects a TOC when headings are present.
+If omitted, Deelan auto-injects a TOC when headings are present.
 
 ## Admonitions (Callouts)
 
@@ -67,7 +67,7 @@ Supported units:
 - `in`
 
 Figures render as centered block elements with caption below.
-When using relative paths, DEELAN mirrors content assets to `public/content-assets/...` during build/dev,
+When using relative paths, Deelan mirrors content assets to `public/content-assets/...` during build/dev,
 using `/content-assets/<entity-type>/<slug-or-subpath>/...`.
 
 ## Asset Management Best Practices
