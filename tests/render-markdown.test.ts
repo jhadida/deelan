@@ -19,6 +19,9 @@ flowchart TD
 > [!NOTE] Heads up
 > Works with callouts.
 
+> [?TIP] Hidden tip
+> Expand me.
+
 [^n1]: Footnote content.
 `;
 
@@ -30,6 +33,7 @@ flowchart TD
   assert.match(html, /--md-figure-width: 60%/);
   assert.match(html, /<pre class="mermaid">/);
   assert.match(html, /class="md-admonition md-admonition-note"/);
+  assert.match(html, /<details class="md-admonition md-admonition-tip">/);
   assert.match(html, /class="md-footnotes"/);
 });
 

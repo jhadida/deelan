@@ -856,35 +856,85 @@ button:disabled {
 
 .markdown-body .md-admonition {
   margin: var(--space-4) 0;
-  padding: var(--space-3) var(--space-4);
+  padding: 0 var(--space-4) var(--space-3);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--accent);
-  background: color-mix(in oklab, var(--surface-elevated) 78%, var(--bg));
+  border-left: 3px solid var(--admonition-accent, var(--accent));
+  background: color-mix(in oklab, var(--admonition-accent, var(--accent)) 6%, var(--surface));
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
-.markdown-body .md-admonition-title {
-  margin: 0 0 var(--space-2);
+.markdown-body p.md-admonition-title {
+  margin: 0 calc(-1 * var(--space-4)) var(--space-3);
+  padding: 0.28rem var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--admonition-title-fg, var(--fg));
+  background: color-mix(in oklab, var(--admonition-accent, var(--accent)) 18%, var(--surface-elevated));
+  border-bottom: 1px solid color-mix(in oklab, var(--admonition-accent, var(--accent)) 28%, var(--line));
+}
+
+.markdown-body details.md-admonition > summary.md-admonition-title {
+  margin: 0 calc(-1 * var(--space-4)) var(--space-3);
+  padding: 0.28rem var(--space-4);
+  list-style-position: inside;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--admonition-title-fg, var(--fg));
+  background: color-mix(in oklab, var(--admonition-accent, var(--accent)) 18%, var(--surface-elevated));
+  border-bottom: 1px solid color-mix(in oklab, var(--admonition-accent, var(--accent)) 28%, var(--line));
+  cursor: pointer;
+}
+
+.markdown-body details.md-admonition > summary.md-admonition-title > * {
+  display: inline-flex;
+  align-items: center;
+}
+
+.markdown-body details.md-admonition > summary.md-admonition-title > .md-admonition-icon {
+  margin-inline: 0.28rem var(--space-2);
+}
+
+.markdown-body .md-admonition-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1;
+  background: color-mix(in oklab, var(--admonition-accent, var(--accent)) 22%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--admonition-accent, var(--accent)) 36%, var(--line));
+  color: color-mix(in oklab, var(--admonition-accent, var(--accent)) 78%, var(--fg));
 }
 
 .markdown-body .md-admonition-note {
-  border-left-color: var(--accent);
+  --admonition-accent: var(--accent);
+  --admonition-title-fg: color-mix(in oklab, var(--accent) 65%, var(--fg));
 }
 
 .markdown-body .md-admonition-tip {
-  border-left-color: color-mix(in oklab, var(--accent) 70%, #2ea043);
+  --admonition-accent: color-mix(in oklab, var(--accent) 55%, #2ea043);
+  --admonition-title-fg: color-mix(in oklab, #2ea043 68%, var(--fg));
 }
 
 .markdown-body .md-admonition-warning {
-  border-left-color: #d97706;
+  --admonition-accent: #d97706;
+  --admonition-title-fg: color-mix(in oklab, #d97706 72%, var(--fg));
 }
 
 .markdown-body .md-admonition-danger,
 .markdown-body .md-admonition-caution {
-  border-left-color: #b91c1c;
+  --admonition-accent: #b91c1c;
+  --admonition-title-fg: color-mix(in oklab, #b91c1c 74%, var(--fg));
 }
 
 .markdown-body .md-admonition > *:last-child {
@@ -936,6 +986,59 @@ button:disabled {
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
   gap: var(--space-4);
   align-items: start;
+}
+
+.shortcuts-help h2 {
+  margin: 0;
+  font-size: var(--text-base);
+}
+
+.shortcuts-help summary {
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+.shortcuts-help summary::marker {
+  color: var(--muted);
+  font-size: 0.78em;
+}
+
+.shortcuts-inline {
+  margin: var(--space-3) 0 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.shortcuts-inline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.shortcuts-inline span + span::before {
+  content: '•';
+  color: var(--muted);
+  margin-right: 0.45rem;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0.06rem 0.34rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.35rem;
+  background: var(--surface-elevated);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--line-strong) 58%, transparent);
+  font-family: var(--font-ui);
+  font-size: 0.84em;
+  font-weight: 600;
+  text-align: center;
 }
 
 .snippet-list-panel,

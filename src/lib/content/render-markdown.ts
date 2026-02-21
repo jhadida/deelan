@@ -188,23 +188,41 @@ function renderFootnotesHtml(state: FootnoteState): string {
 }
 
 function transformAdmonitions(html: string): string {
+  const supported = new Set(['note', 'tip', 'warning', 'danger', 'caution']);
+  const iconByType: Record<string, string> = {
+    note: 'ℹ',
+    tip: '✓',
+    warning: '⚠',
+    danger: '⛔',
+    caution: '⚠'
+  };
+
   return html.replaceAll(/<blockquote>([\s\S]*?)<\/blockquote>/g, (full, inner: string) => {
     const firstParagraph = inner.match(/^\s*<p>([\s\S]*?)<\/p>/);
     if (!firstParagraph) return full;
     const paragraphContent = firstParagraph[1];
     const lines = paragraphContent.split('\n');
-    const head = lines[0]?.match(/^\[!([A-Z]+)\]\s*(.*)$/i);
+    const head = lines[0]?.match(/^\[([!?])([A-Z]+)\]\s*(.*)$/i);
     if (!head) return full;
 
-    const type = head[1].toLowerCase();
-    const explicitTitle = head[2].trim();
+    const mode = head[1] === '?' ? 'collapsible' : 'static';
+    const requestedType = head[2].toLowerCase();
+    const type = supported.has(requestedType) ? requestedType : 'note';
+    const explicitTitle = head[3].trim();
     const bodyFirstParagraph = lines.slice(1).join('\n').trim();
     const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);
     const title = explicitTitle || defaultTitle;
+    const icon = iconByType[type] ?? iconByType.note;
     const bodyParagraph =
       bodyFirstParagraph.length > 0 ? `<p>${bodyFirstParagraph}</p>` : '';
     const restInner = inner.replace(firstParagraph[0], bodyParagraph);
-    return `<aside class="md-admonition md-admonition-${type}"><p class="md-admonition-title">${escapeHtml(title)}</p>${restInner}</aside>`;
+    const titleHtml = `<span class="md-admonition-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(title)}</span>`;
+
+    if (mode === 'collapsible') {
+      return `<details class="md-admonition md-admonition-${type}"><summary class="md-admonition-title">${titleHtml}</summary>${restInner}</details>`;
+    }
+
+    return `<aside class="md-admonition md-admonition-${type}"><p class="md-admonition-title">${titleHtml}</p>${restInner}</aside>`;
   });
 }
 

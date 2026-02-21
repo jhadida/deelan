@@ -163,6 +163,7 @@ export function initSnippetExplorer(config) {
 
   const itemButtons = Array.from(list.querySelectorAll('[data-snippet-key]'));
   const detailMap = new Map();
+  let selectedKey = null;
   if (payloadRoot) {
     const payloads = payloadRoot.querySelectorAll('[data-snippet-payload]');
     for (const payload of payloads) {
@@ -188,6 +189,7 @@ export function initSnippetExplorer(config) {
     if (!detailMap.has(key)) return;
     const item = detailMap.get(key);
     if (!item) return;
+    selectedKey = key;
     detailTitle.innerHTML = '';
     const titleLink = document.createElement('a');
     titleLink.href = item.href;
@@ -220,7 +222,41 @@ export function initSnippetExplorer(config) {
     itemButtons.forEach((button) => {
       const selected = button.getAttribute('data-snippet-key') === key;
       button.setAttribute('aria-selected', String(selected));
+      if (selected) {
+        button.scrollIntoView({ block: 'nearest' });
+      }
     });
+  }
+
+  function getVisibleButtons() {
+    return itemButtons.filter((button) => {
+      const listItem = button.closest('[data-snippet-item]');
+      return !!listItem && listItem.style.display !== 'none';
+    });
+  }
+
+  function stepSelection(delta) {
+    const visible = getVisibleButtons();
+    if (visible.length === 0) return;
+
+    let index = visible.findIndex((button) => button.getAttribute('data-snippet-key') === selectedKey);
+    if (index < 0) index = 0;
+    const nextIndex = (index + delta + visible.length) % visible.length;
+    const nextKey = visible[nextIndex]?.getAttribute('data-snippet-key');
+    if (nextKey) renderByKey(nextKey);
+  }
+
+  function openSelectionInNewTab() {
+    if (!selectedKey) return;
+    const item = detailMap.get(selectedKey);
+    if (!item) return;
+    window.open(item.href, '_blank', 'noopener,noreferrer');
+  }
+
+  function copySelectionPermalink() {
+    const copyLink = detailMeta.querySelector('[data-copy-link]');
+    if (!(copyLink instanceof HTMLElement)) return;
+    copyLink.click();
   }
 
   list.addEventListener('click', (event) => {
@@ -254,8 +290,47 @@ export function initSnippetExplorer(config) {
       }
       detailContent.innerHTML = '<p class="muted">No matching snippets.</p>';
       detailRelated.innerHTML = '<p class="muted">No related items.</p>';
+      selectedKey = null;
     }
   }
+
+  function isTypingContext(target) {
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
+    const tag = target.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.defaultPrevented) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (isTypingContext(event.target)) return;
+
+    const key = event.key.toLowerCase();
+
+    if (event.key === 'ArrowDown' || key === 'j') {
+      event.preventDefault();
+      stepSelection(1);
+      return;
+    }
+
+    if (event.key === 'ArrowUp' || key === 'k') {
+      event.preventDefault();
+      stepSelection(-1);
+      return;
+    }
+
+    if (event.key === 'Enter' || key === 'o') {
+      event.preventDefault();
+      openSelectionInNewTab();
+      return;
+    }
+
+    if (key === 'y') {
+      event.preventDefault();
+      copySelectionPermalink();
+    }
+  });
 
   const first = itemButtons[0];
   if (first) {

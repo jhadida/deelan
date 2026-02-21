@@ -24,7 +24,7 @@ This sentence links to a snippet: [[snippet--pandas-groupby-snippet|Pandas group
 > [!NOTE] Note Callout
 > This is a note admonition rendered from blockquote syntax.
 
-> [!TIP] Tip Callout
+> [?TIP] Tip Callout
 > Keep headings consistent to get a clean auto-generated table of contents.
 
 > [!WARNING] Warning Callout

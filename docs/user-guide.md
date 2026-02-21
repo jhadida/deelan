@@ -27,6 +27,21 @@ deelan serve
 
 Open [http://localhost:4321](http://localhost:4321).
 
+## Optional: Secure Local/Team Access (HTTPS + Password)
+
+If you want to expose your DEELAN site to collaborators on a local network or private host, run
+DEELAN behind a reverse proxy (Caddy or Nginx) instead of exposing `deelan serve` directly.
+
+High-level flow:
+
+1. Run `deelan serve` on localhost only.
+2. Put Caddy or Nginx in front of it.
+3. Configure HTTPS (TLS certificates) and authentication at the proxy layer.
+4. Share the proxy URL, not the raw localhost port.
+
+This keeps DEELAN itself simple while using standard production security patterns.
+For step-by-step examples, see [Reverse Proxy and HTTPS](topic-reverse-proxy.md).
+
 ## Core Commands
 
 - `deelan validate` - validate frontmatter and cross-references.

@@ -26,7 +26,6 @@ nav:
       - Frontmatter: user-frontmatter.md
       - Configuration: user-configuration.md
       - Analytics: user-analytics.md
-      - Editor Integration: user-editor.md
   - CLI Reference:
       - Overview: cli-overview.md
       - Initialization: cli-init.md
@@ -34,8 +33,11 @@ nav:
       - Tag Management: cli-tags.md
       - HTML/PDF Export: cli-export.md
   - Advanced Topics:
+      - Editor Integration: user-editor.md
+      - Keyboard Shortcuts: topic-keyboard-shortcuts.md
       - Search Grammar: topic-search.md
       - Offline Caching: topic-caching.md
+      - Secure Deployment: topic-reverse-proxy.md
   - Developer Guide:
       - Overview: dev-overview.md
       - Developer Notes: dev-notes.md

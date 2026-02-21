@@ -90,6 +90,16 @@ const snippetDetails = await Promise.all(
 
     <SearchShell idPrefix="snippets" ariaLabel="Snippets search mode" tagPlaceholder="e.g. python.pandas.*" />
 
+    <details class="panel shortcuts-help" aria-label="Snippet explorer keyboard shortcuts">
+      <summary>Keyboard shortcuts</summary>
+      <p class="shortcuts-inline muted">
+        <span><kbd>J</kbd>/<kbd>&darr;</kbd>: next</span>
+        <span><kbd>K</kbd>/<kbd>&uarr;</kbd>: previous</span>
+        <span><kbd>Enter</kbd> or <kbd>O</kbd>: open</span>
+        <span><kbd>Y</kbd>: copy link</span>
+      </p>
+    </details>
+
     <section class="snippet-explorer">
       <aside class="panel snippet-list-panel">
         <ul id="snippet-list" class="snippet-list">

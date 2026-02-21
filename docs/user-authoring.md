@@ -30,6 +30,16 @@ Use blockquote callout syntax:
 > Body text.
 ```
 
+Use `[!TYPE]` for fixed admonitions and `[?TYPE]` for collapsible admonitions:
+
+```md
+> [!WARNING] Fixed warning
+> Always visible.
+
+> [?TIP] Collapsible tip
+> Hidden by default; click title to expand.
+```
+
 Supported common types include `NOTE`, `TIP`, `WARNING`, `DANGER`, `CAUTION`.
 
 ## Footnotes

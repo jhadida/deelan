@@ -1,0 +1,17 @@
+# DEELAN reverse proxy template (Caddy)
+# Update host and credentials before use.
+#
+# Usage pattern:
+# 1) Run DEELAN locally:
+#    deelan serve --host 127.0.0.1 --port 4321
+# 2) Place this file in your Caddy config path and reload Caddy.
+
+notes.example.com {
+  reverse_proxy 127.0.0.1:4321
+
+  # Replace with your bcrypt hash:
+  # caddy hash-password --plaintext "your-password"
+  basicauth {
+    admin $2a$14$replace-with-bcrypt-hash
+  }
+}
