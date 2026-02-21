@@ -10,9 +10,12 @@ import {
   type ContentFrontmatter
 } from '../src/lib/content/schema';
 import { buildContentGlobs } from '../src/lib/content/files';
+import { createLogger } from '../src/lib/logger';
+import { toPosixPath, writeJsonFile } from '../src/lib/util';
 
 const ROOT = process.cwd();
 const OUTPUT = path.join(ROOT, '.generated', 'timeline', 'versions.json');
+const logger = createLogger('build-git-timeline');
 
 interface TimelineEntry {
   commit: string;
@@ -34,10 +37,6 @@ interface TimelineItem {
   effective_updated_at: string | null;
   commit_count: number;
   timeline: TimelineEntry[];
-}
-
-function toPosixPath(input: string): string {
-  return input.split(path.sep).join('/');
 }
 
 function getGitHistory(filePath: string): TimelineEntry[] {
@@ -69,11 +68,6 @@ function getGitHistory(filePath: string): TimelineEntry[] {
   } catch {
     return [];
   }
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(value, null, 2) + '\n', 'utf8');
 }
 
 function buildTimelineItem(
@@ -152,13 +146,13 @@ async function main(): Promise<void> {
   }
 
   for (const warning of warnings) {
-    console.warn(`build-git-timeline warning: ${warning}`);
+    logger.warn(warning);
   }
 
   if (issues.length > 0) {
-    console.error('build-git-timeline failed with validation issues:');
+    logger.error('failed with validation issues:');
     for (const issue of issues) {
-      console.error(`- ${issue}`);
+      logger.error(`- ${issue}`);
     }
     process.exitCode = 1;
     return;
@@ -170,12 +164,12 @@ async function main(): Promise<void> {
     items: itemsById
   };
 
-  await writeJson(OUTPUT, out);
-  console.log(`build-git-timeline complete: ${out.total} items.`);
+  await writeJsonFile(OUTPUT, out);
+  logger.info(`complete: ${out.total} items.`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`build-git-timeline crashed: ${message}`);
+  logger.error(`crashed: ${message}`);
   process.exitCode = 1;
 });

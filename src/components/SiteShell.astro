@@ -79,6 +79,43 @@ const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config
         syncLabel();
       })();
     </script>
+    <script is:inline>
+      (() => {
+        let toastTimer = null;
+
+        function showToast(message) {
+          let toast = document.getElementById('copy-toast');
+          if (!(toast instanceof HTMLElement)) {
+            toast = document.createElement('div');
+            toast.id = 'copy-toast';
+            toast.className = 'copy-toast';
+            document.body.appendChild(toast);
+          }
+          toast.textContent = message;
+          toast.classList.add('is-visible');
+          if (toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 1200);
+        }
+
+        document.addEventListener('click', async (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const link = target.closest('[data-copy-link]');
+          if (!(link instanceof HTMLAnchorElement || link instanceof HTMLElement)) return;
+          event.preventDefault();
+
+          const raw = link.getAttribute('data-copy-url');
+          if (!raw) return;
+          const absolute = new URL(raw, window.location.origin).toString();
+          try {
+            await navigator.clipboard.writeText(absolute);
+            showToast('Permalink copied.');
+          } catch {
+            showToast('Could not copy permalink.');
+          }
+        });
+      })();
+    </script>
     <script type="module" src="/js/pwa-register.js"></script>
   </body>
 </html>

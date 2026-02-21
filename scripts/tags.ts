@@ -8,6 +8,14 @@ import {
   type ContentFrontmatter
 } from '../src/lib/content/schema';
 import { buildContentGlobs } from '../src/lib/content/files';
+import { createLogger } from '../src/lib/logger';
+import {
+  getParsedBoolFlag,
+  getParsedFlagValue,
+  getParsedNumberFlag,
+  hasHelpFlag,
+  parseCliArgs
+} from '../src/lib/args';
 
 interface ContentFile {
   filePath: string;
@@ -16,38 +24,10 @@ interface ContentFile {
   rawData: Record<string, unknown>;
 }
 
-interface CliArgs {
-  command: string;
-  flags: Map<string, string | boolean>;
-}
+const logger = createLogger('tags');
 
-function parseArgs(argv: string[]): CliArgs {
-  const [command = 'help', ...rest] = argv;
-  const flags = new Map<string, string | boolean>();
-
-  for (let i = 0; i < rest.length; i += 1) {
-    const token = rest[i];
-    if (!token.startsWith('--')) continue;
-    const key = token.slice(2);
-    const next = rest[i + 1];
-    if (next && !next.startsWith('--')) {
-      flags.set(key, next);
-      i += 1;
-    } else {
-      flags.set(key, true);
-    }
-  }
-
-  return { command, flags };
-}
-
-function getStringFlag(flags: Map<string, string | boolean>, key: string): string | null {
-  const value = flags.get(key);
-  return typeof value === 'string' ? value : null;
-}
-
-function getBoolFlag(flags: Map<string, string | boolean>, key: string): boolean {
-  return flags.get(key) === true;
+function writeStdout(text: string): void {
+  process.stdout.write(`${text}\n`);
 }
 
 async function loadContent(): Promise<ContentFile[]> {
@@ -63,7 +43,7 @@ async function loadContent(): Promise<ContentFile[]> {
     const identity = inferContentIdentity(absPath);
     if (!identity) continue;
     if (!identity.validFileName) {
-      console.warn(`tags warning: ${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
+      logger.warn(`${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
       continue;
     }
 
@@ -98,9 +78,9 @@ function collectTagCounts(content: ContentFile[]): Map<string, number> {
 function printTagList(counts: Map<string, number>): void {
   const tags = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   for (const [tag, count] of tags) {
-    console.log(`${tag}\t${count}`);
+    writeStdout(`${tag}\t${count}`);
   }
-  console.log(`\nTotal unique tags: ${tags.length}`);
+  writeStdout(`\nTotal unique tags: ${tags.length}`);
 }
 
 function printTagStats(content: ContentFile[], counts: Map<string, number>): void {
@@ -115,13 +95,13 @@ function printTagStats(content: ContentFile[], counts: Map<string, number>): voi
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 10);
 
-  console.log(`Items: ${totalItems} (posts=${posts}, snippets=${snippets})`);
-  console.log(`Unique tags: ${counts.size}`);
-  console.log(`Tag assignments: ${totalTagAssignments}`);
-  console.log(`Average tags/item: ${avg.toFixed(2)}`);
-  console.log('\nTop tags:');
+  writeStdout(`Items: ${totalItems} (posts=${posts}, snippets=${snippets})`);
+  writeStdout(`Unique tags: ${counts.size}`);
+  writeStdout(`Tag assignments: ${totalTagAssignments}`);
+  writeStdout(`Average tags/item: ${avg.toFixed(2)}`);
+  writeStdout('\nTop tags:');
   for (const [tag, count] of top) {
-    console.log(`- ${tag}: ${count}`);
+    writeStdout(`- ${tag}: ${count}`);
   }
 }
 
@@ -155,7 +135,7 @@ function printTree(node: TreeNode, prefix = ''): void {
   entries.forEach(([name, child], index) => {
     const isLast = index === entries.length - 1;
     const branch = isLast ? '└─' : '├─';
-    console.log(`${prefix}${branch} ${name}${child.count > 0 ? ` (${child.count})` : ''}`);
+    writeStdout(`${prefix}${branch} ${name}${child.count > 0 ? ` (${child.count})` : ''}`);
     printTree(child, `${prefix}${isLast ? '   ' : '│  '}`);
   });
 }
@@ -190,17 +170,17 @@ function printDuplicates(counts: Map<string, number>, maxDistance: number): void
     canonicalGroups.set(key, group);
   }
 
-  console.log('Potential canonical duplicates:');
+  writeStdout('Potential canonical duplicates:');
   let canonicalFound = 0;
   for (const [key, group] of canonicalGroups.entries()) {
     if (group.length > 1) {
       canonicalFound += 1;
-      console.log(`- ${key}: ${group.join(', ')}`);
+      writeStdout(`- ${key}: ${group.join(', ')}`);
     }
   }
-  if (canonicalFound === 0) console.log('- none');
+  if (canonicalFound === 0) writeStdout('- none');
 
-  console.log(`\nPotential near duplicates (distance <= ${maxDistance}):`);
+  writeStdout(`\nPotential near duplicates (distance <= ${maxDistance}):`);
   let fuzzyFound = 0;
   for (let i = 0; i < tags.length; i += 1) {
     for (let j = i + 1; j < tags.length; j += 1) {
@@ -209,11 +189,11 @@ function printDuplicates(counts: Map<string, number>, maxDistance: number): void
       const d = levenshtein(a, b);
       if (d <= maxDistance) {
         fuzzyFound += 1;
-        console.log(`- ${a} <-> ${b} (distance=${d})`);
+        writeStdout(`- ${a} <-> ${b} (distance=${d})`);
       }
     }
   }
-  if (fuzzyFound === 0) console.log('- none');
+  if (fuzzyFound === 0) writeStdout('- none');
 }
 
 function mapTag(tag: string, from: string, to: string, subtree: boolean): string {
@@ -241,10 +221,10 @@ async function applyTagRewrite(
   const impacted = impactedTagSet(allDistinctTags, from, subtree);
 
   if (subtree) {
-    console.log(`Subtree mode enabled for prefix: ${from}`);
-    console.log(`Impacted distinct tags (${impacted.length}):`);
+    writeStdout(`Subtree mode enabled for prefix: ${from}`);
+    writeStdout(`Impacted distinct tags (${impacted.length}):`);
     for (const tag of impacted) {
-      console.log(`- ${tag}`);
+      writeStdout(`- ${tag}`);
     }
 
     if (apply && !confirmSubtree) {
@@ -268,9 +248,9 @@ async function applyTagRewrite(
     changedFiles += 1;
     changedTags += replacedCount;
 
-    console.log(`- ${item.filePath}`);
-    console.log(`  ${before.join(', ')}`);
-    console.log(`  -> ${deduped.join(', ')}`);
+    writeStdout(`- ${item.filePath}`);
+    writeStdout(`  ${before.join(', ')}`);
+    writeStdout(`  -> ${deduped.join(', ')}`);
 
     if (apply) {
       const newData = { ...item.rawData, tags: deduped };
@@ -280,13 +260,13 @@ async function applyTagRewrite(
   }
 
   if (changedFiles === 0) {
-    console.log('No matching tags found.');
+    writeStdout('No matching tags found.');
     return;
   }
 
-  console.log(`\n${apply ? 'Applied' : 'Previewed'} changes: ${changedFiles} files, ${changedTags} tag updates.`);
+  writeStdout(`\n${apply ? 'Applied' : 'Previewed'} changes: ${changedFiles} files, ${changedTags} tag updates.`);
   if (!apply) {
-    console.log('Dry-run mode. Re-run with --apply to write changes.');
+    writeStdout('Dry-run mode. Re-run with --apply to write changes.');
   }
 }
 
@@ -323,11 +303,11 @@ async function generateWordCloud(counts: Map<string, number>, outPath: string): 
 
   await fs.mkdir(path.dirname(outPath), { recursive: true });
   await fs.writeFile(outPath, html, 'utf8');
-  console.log(`Word cloud written: ${outPath}`);
+  logger.info(`Word cloud written: ${outPath}`);
 }
 
 function printHelp(): void {
-  console.log(`DEELAN tags CLI
+  writeStdout(`DEELAN tags CLI
 
 Commands:
   list
@@ -354,8 +334,10 @@ Examples:
 }
 
 async function main(): Promise<void> {
-  const { command, flags } = parseArgs(process.argv.slice(2));
-  if (command === 'help' || command === '--help' || command === '-h') {
+  const argv = process.argv.slice(2);
+  const parsed = parseCliArgs(argv);
+  const command = parsed.positionals[0] ?? 'help';
+  if (command === 'help' || hasHelpFlag(argv)) {
     printHelp();
     return;
   }
@@ -380,24 +362,23 @@ async function main(): Promise<void> {
   }
 
   if (command === 'duplicates') {
-    const distanceRaw = getStringFlag(flags, 'distance');
-    const distance = distanceRaw ? Number(distanceRaw) : 2;
-    printDuplicates(counts, Number.isFinite(distance) ? distance : 2);
+    printDuplicates(counts, getParsedNumberFlag(parsed.flags, 'distance') ?? 2);
     return;
   }
 
   if (command === 'wordcloud') {
-    const outPath = getStringFlag(flags, 'out') ?? path.join(process.cwd(), 'exports', 'tag-wordcloud.html');
+    const outPath =
+      getParsedFlagValue(parsed.flags, 'out') ?? path.join(process.cwd(), 'exports', 'tag-wordcloud.html');
     await generateWordCloud(counts, outPath);
     return;
   }
 
   if (command === 'rename' || command === 'merge') {
-    const from = getStringFlag(flags, 'from');
-    const to = getStringFlag(flags, 'to');
-    const apply = getBoolFlag(flags, 'apply');
-    const confirmSubtree = getBoolFlag(flags, 'confirm-subtree');
-    const subtree = getBoolFlag(flags, 'subtree') || (from?.endsWith('.*') ?? false);
+    const from = getParsedFlagValue(parsed.flags, 'from');
+    const to = getParsedFlagValue(parsed.flags, 'to');
+    const apply = getParsedBoolFlag(parsed.flags, 'apply');
+    const confirmSubtree = getParsedBoolFlag(parsed.flags, 'confirm-subtree');
+    const subtree = getParsedBoolFlag(parsed.flags, 'subtree') || (from?.endsWith('.*') ?? false);
 
     if (!from || !to) {
       throw new Error('rename/merge requires --from <tag> and --to <tag>');
@@ -415,6 +396,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`tags command failed: ${message}`);
+  logger.error(`command failed: ${message}`);
   process.exitCode = 1;
 });

@@ -41,7 +41,7 @@ test('validateFrontmatter accepts minimal snippet and omits post-only fields', (
     {
       title: 'Demo Snippet',
       tags: ['python.pandas.groupby'],
-      notes: 'Useful snippet'
+      description: 'Useful snippet'
     },
     'content/snippets/demo-snippet.md',
     'snippet',

@@ -58,4 +58,5 @@
   --detail-max: var(--container-max);
   --control-height: 2.5rem;
   --tag-scale: 1.05;
+  --analytics-treemap-min-height: 360px;
 }

@@ -46,6 +46,11 @@ npx deelan --help
 - `deelan tags <subcommand> [options]`
 - `deelan export [options]`
 
+Global logging flags (supported by script-backed commands such as `validate`, `tags`, `export`, and build preflight scripts):
+
+- `--log-level <error|warn|info|debug>`
+- `--log-file <path>`
+
 ## Include Subfolder Behavior
 
 `build`, `validate`, `tags`, and `export` support repeated subfolder inclusion:

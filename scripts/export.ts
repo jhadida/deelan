@@ -9,6 +9,12 @@ import { exportHtml } from '../src/lib/export/html';
 import { exportPdf } from '../src/lib/export/pdf';
 import type { ExportItem } from '../src/lib/export/types';
 import type { SiteTheme } from '../src/lib/site-config';
+import { createLogger } from '../src/lib/logger';
+import {
+  getParsedFlagValue,
+  hasHelpFlag,
+  parseCliArgs
+} from '../src/lib/args';
 
 type ExportFormat = 'html' | 'pdf';
 
@@ -21,8 +27,14 @@ interface CliOptions {
   help: boolean;
 }
 
+const logger = createLogger('export');
+
+function writeStdout(text: string): void {
+  process.stdout.write(`${text}\n`);
+}
+
 function parseArgs(argv: string[]): CliOptions {
-  if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) {
+  if (hasHelpFlag(argv) || argv.length === 0) {
     return {
       id: '',
       format: 'html',
@@ -33,26 +45,12 @@ function parseArgs(argv: string[]): CliOptions {
     };
   }
 
-  const args = new Map<string, string>();
-
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
-    if (!token.startsWith('--')) continue;
-    const key = token.slice(2);
-    const value = argv[i + 1];
-    if (value && !value.startsWith('--')) {
-      args.set(key, value);
-      i += 1;
-    } else {
-      args.set(key, 'true');
-    }
-  }
-
-  const id = args.get('id');
-  const format = (args.get('format') ?? 'html') as ExportFormat;
-  const outDir = args.get('out') ?? path.join(process.cwd(), 'exports');
-  const themeRaw = args.get('theme');
-  const pdfScaleRaw = args.get('pdf-scale');
+  const parsed = parseCliArgs(argv);
+  const id = getParsedFlagValue(parsed.flags, 'id');
+  const format = (getParsedFlagValue(parsed.flags, 'format') ?? 'html') as ExportFormat;
+  const outDir = getParsedFlagValue(parsed.flags, 'out') ?? path.join(process.cwd(), 'exports');
+  const themeRaw = getParsedFlagValue(parsed.flags, 'theme');
+  const pdfScaleRaw = getParsedFlagValue(parsed.flags, 'pdf-scale');
 
   if (!id) {
     throw new Error('Missing required argument: --id <content-id>');
@@ -66,7 +64,7 @@ function parseArgs(argv: string[]): CliOptions {
     throw new Error('Invalid theme. Use --theme light or --theme dark');
   }
 
-  const pdfScale = pdfScaleRaw ? Number(pdfScaleRaw) : 1;
+  const pdfScale = pdfScaleRaw === null ? 1 : Number(pdfScaleRaw);
   if (!Number.isFinite(pdfScale) || pdfScale <= 0 || pdfScale > 2) {
     throw new Error('Invalid pdf scale. Use --pdf-scale <number> where number is > 0 and <= 2.');
   }
@@ -82,7 +80,7 @@ function parseArgs(argv: string[]): CliOptions {
 }
 
 function printHelp(): void {
-  console.log(`DEELAN export CLI
+  writeStdout(`DEELAN export CLI
 
 Usage:
   npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]
@@ -167,17 +165,17 @@ async function main(): Promise<void> {
   });
 
   if (options.format === 'html') {
-    console.log(`Exported HTML: ${htmlResult.htmlPath}`);
-    console.log(`Exported folder: ${htmlResult.exportDir}`);
+    logger.info(`Exported HTML: ${htmlResult.htmlPath}`);
+    logger.info(`Exported folder: ${htmlResult.exportDir}`);
     return;
   }
 
   const pdfPath = await exportPdf(htmlResult.htmlPath, options.outDir, { scale: options.pdfScale });
-  console.log(`Exported PDF: ${pdfPath}`);
+  logger.info(`Exported PDF: ${pdfPath}`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`export failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

@@ -1,5 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createLogger } from '../src/lib/logger';
+import { writeTextFile } from '../src/lib/util';
 
 interface CliOptions {
   posts: number;
@@ -10,6 +12,7 @@ interface CliOptions {
 const ROOT = process.cwd();
 const POSTS_DIR = path.join(ROOT, 'content', 'posts', 'synthetic');
 const SNIPPETS_DIR = path.join(ROOT, 'content', 'snippets', 'synthetic');
+const logger = createLogger('synthetic-generate');
 
 function parseArgs(argv: string[]): CliOptions {
   const opts: CliOptions = {
@@ -197,11 +200,6 @@ function toFrontmatter(data: Record<string, string | string[] | undefined>): str
   return lines.join('\n');
 }
 
-async function writeFile(filePath: string, content: string): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, content, 'utf8');
-}
-
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const rand = mulberry32(options.seed);
@@ -241,8 +239,7 @@ async function main(): Promise<void> {
       title: `"Synthetic Post ${pad(i + 1, 4)}"`,
       tags,
       version: `v1.${Math.floor(rand() * 10)}.${Math.floor(rand() * 20)}`,
-      summary: `"Synthetic stress-test content for analytics and UI."`,
-      notes: `"Generated automatically for testing."`,
+      description: `"Synthetic stress-test content for analytics and UI."`,
       related_ids: related.length > 0 ? related : undefined,
       created_at: `"${createdAt}"`,
       updated_at: `"${updatedAt}"`,
@@ -250,7 +247,7 @@ async function main(): Promise<void> {
     });
 
     const body = buildPostBody(rand, i + 1, related);
-    await writeFile(filePath, `${frontmatter}\n\n${body}\n`);
+    await writeTextFile(filePath, `${frontmatter}\n\n${body}\n`);
   }
 
   for (let i = 0; i < snippetSlugs.length; i += 1) {
@@ -270,24 +267,21 @@ async function main(): Promise<void> {
     const frontmatter = toFrontmatter({
       title: `"Synthetic Snippet ${pad(i + 1, 4)}"`,
       tags,
-      summary: `"Synthetic snippet generated for stress testing."`,
-      notes: `"Generated automatically for testing."`,
+      description: `"Synthetic snippet generated for stress testing."`,
       related_ids: related.length > 0 ? related : undefined,
       created_at: `"${createdAt}"`,
       updated_at: `"${updatedAt}"`
     });
 
     const body = buildSnippetBody(rand, i + 1);
-    await writeFile(filePath, `${frontmatter}\n\n${body}\n`);
+    await writeTextFile(filePath, `${frontmatter}\n\n${body}\n`);
   }
 
-  console.log(
-    `synthetic-generate complete: ${options.posts} posts and ${options.snippets} snippets in content/**/synthetic (seed=${options.seed}).`
-  );
+  logger.info(`complete: ${options.posts} posts and ${options.snippets} snippets in content/**/synthetic (seed=${options.seed}).`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`synthetic-generate failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

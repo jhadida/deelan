@@ -1,11 +1,13 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { GeneratedIndexItem, GeneratedIndexFile } from '../src/lib/content/generated';
+import { createLogger } from '../src/lib/logger';
+import { readJsonFile, uniqueSorted, writeJsonFile } from '../src/lib/util';
 
 const ROOT = process.cwd();
 const ANALYTICS_DIR = path.join(ROOT, '.generated', 'analytics');
 const POSTS_INDEX_PATH = path.join(ROOT, '.generated', 'search', 'posts-index.json');
 const SNIPPETS_INDEX_PATH = path.join(ROOT, '.generated', 'search', 'snippets-index.json');
+const logger = createLogger('build-analytics');
 
 interface TagStats {
   name: string;
@@ -57,11 +59,6 @@ interface RelationsAnalyticsFile {
   }>;
 }
 
-async function readJson<T>(filePath: string): Promise<T> {
-  const raw = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(raw) as T;
-}
-
 function addTagCount(item: GeneratedIndexItem, tag: string, bucket: Map<string, TagStats>): void {
   const current = bucket.get(tag) ?? {
     name: tag,
@@ -90,7 +87,7 @@ function buildTagStats(items: GeneratedIndexItem[]): TagStats[] {
 function buildCooccurrence(items: GeneratedIndexItem[]): Array<{ tag_a: string; tag_b: string; count: number }> {
   const pairCounts = new Map<string, number>();
   for (const item of items) {
-    const tags = Array.from(new Set(item.tags)).sort((a, b) => a.localeCompare(b));
+    const tags = uniqueSorted(item.tags);
     for (let i = 0; i < tags.length; i += 1) {
       for (let j = i + 1; j < tags.length; j += 1) {
         const key = `${tags[i]}|||${tags[j]}`;
@@ -186,14 +183,9 @@ function buildRelations(items: GeneratedIndexItem[]): RelationsAnalyticsFile {
   };
 }
 
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(value, null, 2) + '\n', 'utf8');
-}
-
 async function main(): Promise<void> {
-  const postsIndex = await readJson<GeneratedIndexFile>(POSTS_INDEX_PATH);
-  const snippetsIndex = await readJson<GeneratedIndexFile>(SNIPPETS_INDEX_PATH);
+  const postsIndex = await readJsonFile<GeneratedIndexFile>(POSTS_INDEX_PATH);
+  const snippetsIndex = await readJsonFile<GeneratedIndexFile>(SNIPPETS_INDEX_PATH);
   const items = [...postsIndex.items, ...snippetsIndex.items];
   const generatedAt = new Date().toISOString();
 
@@ -214,19 +206,18 @@ async function main(): Promise<void> {
   const relationsFile = buildRelations(items);
   relationsFile.generated_at = generatedAt;
 
-  await fs.mkdir(ANALYTICS_DIR, { recursive: true });
   await Promise.all([
-    writeJson(path.join(ANALYTICS_DIR, 'tags.json'), tagsFile),
-    writeJson(path.join(ANALYTICS_DIR, 'relations.json'), relationsFile)
+    writeJsonFile(path.join(ANALYTICS_DIR, 'tags.json'), tagsFile),
+    writeJsonFile(path.join(ANALYTICS_DIR, 'relations.json'), relationsFile)
   ]);
 
-  console.log(
-    `build-analytics complete: ${tagsFile.tags.length} tags, ${relationsFile.totals.nodes} nodes, ${relationsFile.totals.edges} edges.`
+  logger.info(
+    `complete: ${tagsFile.tags.length} tags, ${relationsFile.totals.nodes} nodes, ${relationsFile.totals.edges} edges.`
   );
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`build-analytics failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

@@ -8,8 +8,7 @@ export interface GeneratedIndexItem {
   id: string;
   type: GeneratedType;
   title: string;
-  summary: string | null;
-  notes: string | null;
+  description: string | null;
   version: string | null;
   status: GeneratedStatus | null;
   tags: string[];

@@ -3,7 +3,7 @@ title: SQL Window Deduplication Pattern
 tags:
   - sql.window
   - data.quality
-notes: Keep latest event per business key using `row_number`.
+description: Keep latest event per business key using `row_number`.
 related_ids:
   - post--ingestion-observability-checklist
   - post--de-partitioning-primer

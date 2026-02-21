@@ -260,48 +260,7 @@ function unwrapNestedShiki(input: string): string {
 }
 
 export async function renderMarkdown(markdown: string, options: RenderMarkdownOptions = {}): Promise<string> {
-  if (!initialized) {
-    const config = await getSiteConfig();
-    shikiLightTheme = config.code_theme_light;
-    shikiDarkTheme = config.code_theme_dark;
-    parser = new Marked({ gfm: true, breaks: false });
-    parser.use(
-      markedHighlight({
-        async: true,
-        highlight: async (code, lang) => {
-          const language = normalizeLang(lang);
-          try {
-            return await codeToHtml(code, {
-              lang: language,
-              themes: {
-                light: shikiLightTheme,
-                dark: shikiDarkTheme
-              },
-              defaultColor: 'light'
-            });
-          } catch {
-            return await codeToHtml(code, {
-              lang: 'text',
-              themes: {
-                light: 'github-light',
-                dark: 'github-dark'
-              },
-              defaultColor: 'light'
-            });
-          }
-        }
-      }),
-      {
-        renderer: {
-          heading(token) {
-            const id = headingSlugger(token.text);
-            const text = this.parser.parseInline(token.tokens);
-            return `<h${token.depth} id="${id}">${text}</h${token.depth}>`;
-          }
-        }
-      });
-    initialized = true;
-  }
+  await ensureParser();
 
   const mdWithLinks = replaceInternalLinks(markdown);
   const mdWithFigures = transformFigureSyntax(mdWithLinks);
@@ -323,4 +282,55 @@ export async function renderMarkdown(markdown: string, options: RenderMarkdownOp
   const withAdmonitions = transformAdmonitions(withFootnotes);
   const withAssets = rewriteLocalAssetUrls(withAdmonitions, options.sourceFilePath);
   return unwrapNestedShiki(withAssets);
+}
+
+export async function renderInlineMarkdown(markdown: string): Promise<string> {
+  await ensureParser();
+  const out = await parser!.parseInline(replaceInternalLinks(markdown), { async: true });
+  return typeof out === 'string' ? out : String(out);
+}
+
+async function ensureParser(): Promise<void> {
+  if (initialized) return;
+
+  const config = await getSiteConfig();
+  shikiLightTheme = config.code_theme_light;
+  shikiDarkTheme = config.code_theme_dark;
+  parser = new Marked({ gfm: true, breaks: false });
+  parser.use(
+    markedHighlight({
+      async: true,
+      highlight: async (code, lang) => {
+        const language = normalizeLang(lang);
+        try {
+          return await codeToHtml(code, {
+            lang: language,
+            themes: {
+              light: shikiLightTheme,
+              dark: shikiDarkTheme
+            },
+            defaultColor: 'light'
+          });
+        } catch {
+          return await codeToHtml(code, {
+            lang: 'text',
+            themes: {
+              light: 'github-light',
+              dark: 'github-dark'
+            },
+            defaultColor: 'light'
+          });
+        }
+      }
+    }),
+    {
+      renderer: {
+        heading(token) {
+          const id = headingSlugger(token.text);
+          const text = this.parser.parseInline(token.tokens);
+          return `<h${token.depth} id="${id}">${text}</h${token.depth}>`;
+        }
+      }
+    });
+  initialized = true;
 }

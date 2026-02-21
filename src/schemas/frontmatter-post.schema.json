@@ -26,10 +26,7 @@
       "type": "string",
       "minLength": 1
     },
-    "summary": {
-      "type": "string"
-    },
-    "notes": {
+    "description": {
       "type": "string"
     },
     "related_ids": {

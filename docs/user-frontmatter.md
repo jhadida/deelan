@@ -64,8 +64,7 @@ Required:
 Optional:
 
 - `type` (`post`)
-- `summary`
-- `notes`
+- `description`
 - `related_ids` (`post--...` / `snippet--...`)
 - `created_at`
 - `updated_at`
@@ -81,11 +80,9 @@ Required:
 Optional:
 
 - `type` (`snippet`)
-- `summary`
-- `notes`
+- `description`
 - `related_ids`
 - `created_at`
 - `updated_at`
 
 Snippets do not support `version` or `status`.
-

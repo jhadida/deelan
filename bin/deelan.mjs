@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,61 @@ const ROOT = path.resolve(__dirname, '..');
 const TSX_CLI = path.join(ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs');
 const ASTRO_CLI = path.join(ROOT, 'node_modules', 'astro', 'astro.js');
 
+const LOG_LEVEL_WEIGHT = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  debug: 3
+};
+
+function parseFlagValue(argv, flag) {
+  const equalsPrefix = `${flag}=`;
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === flag) {
+      const next = argv[i + 1];
+      return next && !next.startsWith('--') ? next : null;
+    }
+    if (token.startsWith(equalsPrefix)) {
+      return token.slice(equalsPrefix.length);
+    }
+  }
+  return null;
+}
+
+function normalizeLevel(input) {
+  if (!input || typeof input !== 'string') return null;
+  const value = input.trim().toLowerCase();
+  return value in LOG_LEVEL_WEIGHT ? value : null;
+}
+
+function resolveLogging(argv) {
+  const argLevel = normalizeLevel(parseFlagValue(argv, '--log-level'));
+  const envLevel = normalizeLevel(process.env.DEELAN_LOG_LEVEL);
+  const level = argLevel ?? envLevel ?? 'info';
+
+  const argFile = parseFlagValue(argv, '--log-file');
+  const envFile = process.env.DEELAN_LOG_FILE;
+  const filePathRaw = (argFile ?? envFile ?? '').trim();
+  const filePath = filePathRaw ? path.resolve(process.cwd(), filePathRaw) : null;
+  return { level, filePath };
+}
+
+function writeLog(logging, level, message) {
+  if (LOG_LEVEL_WEIGHT[level] > LOG_LEVEL_WEIGHT[logging.level]) return;
+  const line = `[${new Date().toISOString()}] ${level.toUpperCase()} deelan ${message}`;
+  if (level === 'error') process.stderr.write(`${line}\n`);
+  else process.stdout.write(`${line}\n`);
+
+  if (!logging.filePath) return;
+  try {
+    fs.mkdirSync(path.dirname(logging.filePath), { recursive: true });
+    fs.appendFileSync(logging.filePath, `${line}\n`, 'utf8');
+  } catch {
+    // CLI logging should never crash command execution.
+  }
+}
+
 const SCRIPT_MAP = {
   init: path.join(ROOT, 'scripts', 'init.ts'),
   tags: path.join(ROOT, 'scripts', 'tags.ts'),
@@ -18,7 +74,7 @@ const SCRIPT_MAP = {
 };
 
 function printHelp() {
-  console.log(`DEELAN CLI
+  process.stdout.write(`DEELAN CLI
 
 Usage:
   deelan <command> [...args]
@@ -41,10 +97,10 @@ Examples:
   deelan tags stats
   deelan export --id post--de-partitioning-primer --format pdf --pdf-scale 0.95
   deelan validate
-`);
+` + '\n');
 }
 
-function runNode(args) {
+function runNode(args, logging) {
   const result = spawnSync(process.execPath, args, {
     cwd: process.cwd(),
     stdio: 'inherit',
@@ -52,7 +108,7 @@ function runNode(args) {
   });
 
   if (result.error) {
-    console.error(`deelan: command failed: ${result.error.message}`);
+    writeLog(logging, 'error', `command failed: ${result.error.message}`);
     process.exit(1);
   }
   process.exit(result.status ?? 1);
@@ -87,7 +143,7 @@ function splitBuildArgs(args) {
   return { scriptArgs, astroArgs };
 }
 
-function runBuild(args) {
+function runBuild(args, logging) {
   const { scriptArgs, astroArgs } = splitBuildArgs(args);
   const chain = [
     ['scripts/prepare-mathjax.ts'],
@@ -108,14 +164,15 @@ function runBuild(args) {
     if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
   }
 
-  runNode([ASTRO_CLI, 'build', ...astroArgs]);
+  runNode([ASTRO_CLI, 'build', ...astroArgs], logging);
 }
 
-function runServe(args) {
-  runNode([ASTRO_CLI, 'preview', ...args]);
+function runServe(args, logging) {
+  runNode([ASTRO_CLI, 'preview', ...args], logging);
 }
 
 const argv = process.argv.slice(2);
+const logging = resolveLogging(argv);
 const command = argv[0];
 
 if (!command || command === 'help' || command === '--help' || command === '-h') {
@@ -124,18 +181,18 @@ if (!command || command === 'help' || command === '--help' || command === '-h') 
 }
 
 if (command === 'build') {
-  runBuild(argv.slice(1));
+  runBuild(argv.slice(1), logging);
 }
 
 if (command === 'serve') {
-  runServe(argv.slice(1));
+  runServe(argv.slice(1), logging);
 }
 
 const scriptPath = SCRIPT_MAP[command];
 if (!scriptPath) {
-  console.error(`deelan: unknown command "${command}"`);
-  console.error('Run `deelan --help` for available commands.');
+  writeLog(logging, 'error', `unknown command "${command}"`);
+  writeLog(logging, 'error', 'Run `deelan --help` for available commands.');
   process.exit(1);
 }
 
-runNode([TSX_CLI, scriptPath, ...argv.slice(1)]);
+runNode([TSX_CLI, scriptPath, ...argv.slice(1)], logging);

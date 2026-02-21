@@ -13,6 +13,8 @@ Runtime configuration is stored in `deelan.config.yml` at project root.
 - `code_theme_light` (`string`, default: `github-light`) Shiki theme for light mode code blocks
 - `code_theme_dark` (`string`, default: `github-dark`) Shiki theme for dark mode code blocks
 - `timeline_commit_url_template` (`string`, default: empty) URL template with `${COMMIT_SHA}`
+- `log_level` (`error | warn | info | debug`, default: `info`) global CLI/script logging threshold
+- `log_file` (`string`, optional) path to append logs to (relative to project root)
 
 ## Example
 
@@ -26,6 +28,8 @@ content_max_width: 1100px
 code_theme_light: material-theme-lighter
 code_theme_dark: material-theme-darker
 timeline_commit_url_template: https://github.com/jhadida/deelan/commit/${COMMIT_SHA}
+log_level: info
+# log_file: .generated/logs/deelan.log
 ```
 
 ## Theme Tokens and UI Customization
@@ -69,3 +73,18 @@ code_theme_dark: nord
 - Invalid `content_max_width` falls back to `1100px`.
 - If `timeline_commit_url_template` is missing `${COMMIT_SHA}`, timeline SHAs render as plain text.
 
+## Logging Configuration
+
+Logging resolution order is:
+
+1. CLI flags (`--log-level`, `--log-file`)
+2. Environment (`DEELAN_LOG_LEVEL`, `DEELAN_LOG_FILE`)
+3. `deelan.config.yml` (`logging.level` / `logging.file` or `log_level` / `log_file`)
+4. Built-in defaults (`info`, no log file)
+
+Example overrides:
+
+```bash
+deelan build --log-level debug
+deelan validate --log-file .generated/logs/validate.log
+```

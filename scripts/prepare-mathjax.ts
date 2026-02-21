@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pathExists, resolvePackageRoot } from '../src/lib/util';
+import { copyDirRecursive, pathExists, resolvePackageRoot } from '../src/lib/util';
+import { createLogger } from '../src/lib/logger';
 
 const ROOT = process.cwd();
 const PACKAGE_ROOT = resolvePackageRoot(ROOT);
@@ -9,26 +10,7 @@ const MODERN_SOURCE_DIR = path.join(ROOT, 'node_modules', 'mathjax');
 const PACKAGE_LEGACY_SOURCE_DIR = PACKAGE_ROOT ? path.join(PACKAGE_ROOT, 'node_modules', 'mathjax', 'es5') : null;
 const PACKAGE_MODERN_SOURCE_DIR = PACKAGE_ROOT ? path.join(PACKAGE_ROOT, 'node_modules', 'mathjax') : null;
 const TARGET_DIR = path.join(ROOT, 'public', 'mathjax');
-
-async function copyDir(src: string, dst: string): Promise<void> {
-  await fs.mkdir(dst, { recursive: true });
-  const entries = await fs.readdir(src, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const dstPath = path.join(dst, entry.name);
-
-    if (entry.isDirectory()) {
-      await copyDir(srcPath, dstPath);
-      continue;
-    }
-
-    if (entry.isFile()) {
-      if (entry.name.endsWith('.md')) continue;
-      await fs.copyFile(srcPath, dstPath);
-    }
-  }
-}
+const logger = createLogger('prepare-mathjax');
 
 async function main(): Promise<void> {
   let sourceDir = (await pathExists(LEGACY_SOURCE_DIR)) ? LEGACY_SOURCE_DIR : MODERN_SOURCE_DIR;
@@ -48,12 +30,14 @@ async function main(): Promise<void> {
     );
   }
 
-  await copyDir(sourceDir, TARGET_DIR);
-  console.log(`prepare-mathjax complete: copied assets to ${path.relative(ROOT, TARGET_DIR)}.`);
+  await copyDirRecursive(sourceDir, TARGET_DIR, {
+    includeFile: (fileName) => !fileName.endsWith('.md')
+  });
+  logger.info(`complete: copied assets to ${path.relative(ROOT, TARGET_DIR)}.`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`prepare-mathjax failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

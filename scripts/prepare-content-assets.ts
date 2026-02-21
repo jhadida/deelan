@@ -1,13 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pathExists } from '../src/lib/util';
+import { copyDirIfExists } from '../src/lib/util';
+import { createLogger } from '../src/lib/logger';
 
-async function copyIfExists(src: string, dst: string): Promise<boolean> {
-  if (!(await pathExists(src))) return false;
-  await fs.mkdir(path.dirname(dst), { recursive: true });
-  await fs.cp(src, dst, { recursive: true, force: true });
-  return true;
-}
+const logger = createLogger('prepare-content-assets');
 
 async function main(): Promise<void> {
   const root = process.cwd();
@@ -17,31 +13,31 @@ async function main(): Promise<void> {
   await fs.mkdir(outRoot, { recursive: true });
 
   const copied: string[] = [];
-  if (await copyIfExists(path.join(root, 'content', 'posts', 'assets'), path.join(outRoot, 'posts'))) {
+  if (await copyDirIfExists(path.join(root, 'content', 'posts', 'assets'), path.join(outRoot, 'posts'))) {
     copied.push('content/posts/assets');
   }
   if (
-    await copyIfExists(
+    await copyDirIfExists(
       path.join(root, 'content', 'snippets', 'assets'),
       path.join(outRoot, 'snippets')
     )
   ) {
     copied.push('content/snippets/assets');
   }
-  if (await copyIfExists(path.join(root, 'content', 'assets'), path.join(outRoot, 'shared'))) {
+  if (await copyDirIfExists(path.join(root, 'content', 'assets'), path.join(outRoot, 'shared'))) {
     copied.push('content/assets');
   }
 
   if (copied.length === 0) {
-    console.log('prepare-content-assets: no content asset directories found.');
+    logger.info('no content asset directories found.');
     return;
   }
 
-  console.log(`prepare-content-assets: copied ${copied.join(', ')} -> public/content-assets`);
+  logger.info(`copied ${copied.join(', ')} -> public/content-assets`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`prepare-content-assets failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

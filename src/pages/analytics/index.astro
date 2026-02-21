@@ -44,7 +44,7 @@ const avgTagsPerItem =
     <section class="panel section-block">
       <h2>Tag Frequency</h2>
       <p class="muted">Sortable table. Click column headers to sort.</p>
-      <div class="table-wrap">
+      <div class="table-wrap analytics-table-wrap">
         <table class="table analytics-table">
           <thead>
             <tr>
@@ -69,21 +69,19 @@ const avgTagsPerItem =
     </section>
 
     <section class="panel section-block">
-      <h2>Top Tags Histogram</h2>
-      <canvas id="analytics-tag-chart" height="140"></canvas>
-    </section>
-
-    <section class="panel section-block">
       <h2>Tag Hierarchy (Static Treemap)</h2>
       <p class="muted">Minimal static preview. Interactive treemap improvements are planned in future versions.</p>
-      <div id="analytics-treemap" class="analytics-treemap" aria-label="Tag hierarchy treemap"></div>
+      <div class="analytics-treemap-wrap">
+        <div id="analytics-treemap" class="analytics-treemap" aria-label="Tag hierarchy treemap"></div>
+      </div>
     </section>
 
     <section class="panel section-block">
       <h2>Relationships Graph</h2>
+      <p class="muted">Legend: Green = post, Blue = snippet.</p>
       <div class="analytics-graph-layout">
         <div id="analytics-graph" class="analytics-graph"></div>
-        <aside class="panel analytics-graph-side">
+        <aside class="analytics-graph-side">
           <h3>Selection</h3>
           <div id="analytics-selection" class="muted">Select a node to inspect metadata.</div>
         </aside>
@@ -98,17 +96,13 @@ const avgTagsPerItem =
     set:html={JSON.stringify(relationsAnalytics)}
   ></script>
 
-  <script type="module">
-    import Chart from 'chart.js/auto';
-    import cytoscape from 'cytoscape';
-
+  <script>
     const tagsData = JSON.parse(document.getElementById('analytics-tags-json')?.textContent || '{}');
     const relationsData = JSON.parse(document.getElementById('analytics-relations-json')?.textContent || '{}');
     const tags = Array.isArray(tagsData.tags) ? [...tagsData.tags] : [];
-    const hierarchy = Array.isArray(tagsData.hierarchy) ? tagsData.hierarchy : [];
-
     const tableBody = document.getElementById('analytics-tags-table-body');
     const sortButtons = Array.from(document.querySelectorAll('.sort-btn'));
+    const ENABLE_TAG_HISTOGRAM = false;
     let sortKey = 'count_total';
     let sortDirection = -1;
 
@@ -148,135 +142,289 @@ const avgTagsPerItem =
 
     renderTable(sortedTags());
 
-    const chartCanvas = document.getElementById('analytics-tag-chart');
-    if (chartCanvas instanceof HTMLCanvasElement) {
-      const top = [...tags].sort((a, b) => b.count_total - a.count_total).slice(0, 20);
-      new Chart(chartCanvas, {
-        type: 'bar',
-        data: {
-          labels: top.map((entry) => entry.name),
-          datasets: [
-            {
-              label: 'Tag count',
-              data: top.map((entry) => entry.count_total)
-            }
-          ]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          }
-        }
-      });
-    }
+    function buildTagTree(tagRows) {
+      const roots = new Map();
+      const nodeByPath = new Map();
 
-    const treemapEl = document.getElementById('analytics-treemap');
-    if (treemapEl) {
-      const top = hierarchy
-        .filter((node) => node.depth === 1)
-        .sort((a, b) => b.count_total - a.count_total || a.path.localeCompare(b.path));
-      const total = top.reduce((sum, node) => sum + node.count_total, 0) || 1;
-      const width = treemapEl.clientWidth || 900;
-      const height = 320;
-      let xOffset = 0;
-
-      const pieces = [];
-      for (const root of top) {
-        const rootWidth = Math.max(1, (root.count_total / total) * width);
-        const children = hierarchy
-          .filter((node) => node.depth === 2 && node.parent === root.path)
-          .sort((a, b) => b.count_total - a.count_total || a.path.localeCompare(b.path));
-
-        if (children.length === 0) {
-          pieces.push({
-            x: xOffset,
-            y: 0,
-            w: rootWidth,
-            h: height,
-            label: root.path,
-            count: root.count_total
-          });
+      function ensureNode(path, name, depth, parentPath) {
+        if (nodeByPath.has(path)) return nodeByPath.get(path);
+        const node = { path, name, depth, parentPath, children: [], selfCount: 0, count: 0, descendants: 0 };
+        nodeByPath.set(path, node);
+        if (parentPath) {
+          const parent = ensureNode(
+            parentPath,
+            parentPath.split('.').at(-1) || parentPath,
+            depth - 1,
+            parentPath.includes('.') ? parentPath.slice(0, parentPath.lastIndexOf('.')) : null
+          );
+          parent.children.push(node);
         } else {
-          let yOffset = 0;
-          for (const child of children) {
-            const childHeight = Math.max(1, (child.count_total / root.count_total) * height);
-            pieces.push({
-              x: xOffset,
-              y: yOffset,
-              w: rootWidth,
-              h: childHeight,
-              label: child.path,
-              count: child.count_total
-            });
-            yOffset += childHeight;
-          }
+          roots.set(path, node);
         }
-        xOffset += rootWidth;
+        return node;
       }
 
-      treemapEl.innerHTML = pieces
+      for (const tag of tagRows) {
+        if (!tag?.name || !Number.isFinite(tag.count_total) || tag.count_total <= 0) continue;
+        const segments = tag.name.split('.');
+        let currentPath = '';
+        let parentPath = null;
+        for (let depth = 1; depth <= segments.length; depth += 1) {
+          currentPath = currentPath ? `${currentPath}.${segments[depth - 1]}` : segments[depth - 1];
+          ensureNode(currentPath, segments[depth - 1], depth, parentPath);
+          parentPath = currentPath;
+        }
+        const leaf = nodeByPath.get(tag.name);
+        if (leaf) leaf.selfCount += tag.count_total;
+      }
+
+      function aggregate(node) {
+        let total = node.selfCount;
+        let descendants = 0;
+        for (const child of node.children) {
+          total += aggregate(child);
+          descendants += 1 + child.descendants;
+        }
+        node.count = total;
+        node.descendants = descendants;
+        return total;
+      }
+
+      for (const root of roots.values()) aggregate(root);
+      return Array.from(roots.values()).filter((node) => node.count > 0);
+    }
+
+    function compareNodes(a, b) {
+      return b.count - a.count || b.descendants - a.descendants || a.path.localeCompare(b.path);
+    }
+
+    function allocateChildHeights(children, parentHeight) {
+      if (children.length === 0) return [];
+      const sum = children.reduce((acc, child) => acc + child.count, 0) || 1;
+      const raw = children.map((child) => (child.count / sum) * parentHeight);
+      const rounded = raw.map((value) => Math.max(1, Math.round(value * 100) / 100));
+      const roundedSum = rounded.reduce((acc, value) => acc + value, 0);
+      const delta = Math.round((parentHeight - roundedSum) * 100) / 100;
+      if (Math.abs(delta) > 0) {
+        const idx = rounded.reduce((best, value, index, arr) => (value > arr[best] ? index : best), 0);
+        rounded[idx] = Math.max(1, Math.round((rounded[idx] + delta) * 100) / 100);
+      }
+      return rounded;
+    }
+
+    function renderTreemap(tagRows) {
+      const treemapEl = document.getElementById('analytics-treemap');
+      if (!treemapEl) return;
+
+      const roots = buildTagTree(tagRows).sort(compareNodes);
+      if (roots.length === 0) {
+        treemapEl.innerHTML = '<p class="muted">No tags to display.</p>';
+        return;
+      }
+      const rawMinHeight = getComputedStyle(document.documentElement)
+        .getPropertyValue('--analytics-treemap-min-height')
+        .trim();
+      const minHeight = Number.parseFloat(rawMinHeight) || 360;
+
+      const allNodes = [];
+      const queue = [...roots];
+      while (queue.length > 0) {
+        const node = queue.shift();
+        if (!node) continue;
+        allNodes.push(node);
+        const sortedChildren = [...node.children].sort(compareNodes);
+        queue.push(...sortedChildren);
+      }
+
+      const positiveCounts = allNodes.map((node) => node.count).filter((count) => count > 0);
+      const minCount = Math.min(...positiveCounts);
+      const minNodeHeightPx = 16;
+
+      for (const node of allNodes) {
+        node.h = Math.max(minNodeHeightPx, Math.round((minNodeHeightPx * node.count) / minCount * 100) / 100);
+      }
+
+      const colWidth = 220;
+      const gap = 8;
+      let maxDepth = 1;
+      for (const node of allNodes) maxDepth = Math.max(maxDepth, node.depth);
+
+      let yOffset = 0;
+      const placed = [];
+
+      function placeNode(node, x, y, h) {
+        const sortedChildren = [...node.children].sort(compareNodes);
+        placed.push({ node, x, y, w: colWidth, h });
+        if (sortedChildren.length === 0) return;
+        const childHeights = allocateChildHeights(sortedChildren, h);
+        let childY = y;
+        sortedChildren.forEach((child, index) => {
+          placeNode(child, x + colWidth + gap, childY, childHeights[index]);
+          childY += childHeights[index];
+        });
+      }
+
+      for (const root of roots) {
+        placeNode(root, 0, yOffset, root.h);
+        yOffset += root.h;
+      }
+
+      const contentWidth = Math.max(
+        treemapEl.parentElement?.clientWidth ?? 0,
+        maxDepth * colWidth + Math.max(0, maxDepth - 1) * gap
+      );
+      const contentHeight = Math.max(minHeight, Math.round(yOffset));
+
+      treemapEl.style.width = `${contentWidth}px`;
+      treemapEl.style.height = `${contentHeight}px`;
+
+      treemapEl.innerHTML = placed
         .map((piece) => {
-          const style = `left:${piece.x}px;top:${piece.y}px;width:${piece.w}px;height:${piece.h}px;`;
-          return `<div class="analytics-treemap-node" style="${style}" title="${piece.label} (${piece.count})"><span>${piece.label}</span></div>`;
+          const style = [
+            `left:${piece.x}px`,
+            `top:${piece.y}px`,
+            `width:${piece.w}px`,
+            `height:${piece.h}px`
+          ].join(';');
+          return `<div class="analytics-treemap-node" style="${style}" title="${piece.node.path} (${piece.node.count})"><span>${piece.node.path}</span></div>`;
         })
         .join('');
+    }
+
+    renderTreemap(tags);
+
+    const chartCanvas = document.getElementById('analytics-tag-chart');
+    if (ENABLE_TAG_HISTOGRAM && chartCanvas instanceof HTMLCanvasElement) {
+      import('chart.js/auto')
+        .then(({ default: Chart }) => {
+          const top = [...tags].sort((a, b) => b.count_total - a.count_total).slice(0, 20);
+          new Chart(chartCanvas, {
+            type: 'bar',
+            data: {
+              labels: top.map((entry) => entry.name),
+              datasets: [
+                {
+                  label: 'Tag count',
+                  data: top.map((entry) => entry.count_total)
+                }
+              ]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              plugins: {
+                legend: { display: false }
+              }
+            }
+          });
+        })
+        .catch((error) => {
+          console.warn('Analytics chart dependency failed to load.', error);
+        });
     }
 
     const graphEl = document.getElementById('analytics-graph');
     const selectionEl = document.getElementById('analytics-selection');
     if (graphEl) {
-      const elements = [
-        ...(relationsData.nodes || []).map((node) => ({ data: { ...node } })),
-        ...(relationsData.edges || []).map((edge) => ({
-          data: { id: `${edge.source}--${edge.target}`, source: edge.source, target: edge.target, kind: edge.kind }
-        }))
-      ];
+      import('cytoscape')
+        .then(({ default: cytoscape }) => {
+          const elements = [
+            ...(relationsData.nodes || []).map((node) => ({ data: { ...node } })),
+            ...(relationsData.edges || []).map((edge) => ({
+              data: { id: `${edge.source}--${edge.target}`, source: edge.source, target: edge.target, kind: edge.kind }
+            }))
+          ];
 
-      const cy = cytoscape({
-        container: graphEl,
-        elements,
-        style: [
-          {
-            selector: 'node',
-            style: {
-              'background-color': (ele) => (ele.data('type') === 'post' ? '#1f7a5a' : '#2878c8'),
-              label: 'data(id)',
-              color: '#f2f2f2',
-              'font-size': 10,
-              'text-wrap': 'none',
-              width: 18,
-              height: 18
+          const cy = cytoscape({
+            container: graphEl,
+            elements,
+            wheelSensitivity: 0.2,
+            style: [
+              {
+                selector: 'node',
+                style: {
+                  'background-color': (ele) => (ele.data('type') === 'post' ? '#1f7a5a' : '#2878c8'),
+                  label: 'data(id)',
+                  color: '#f2f2f2',
+                  'font-size': 10,
+                  'text-wrap': 'none',
+                  width: 18,
+                  height: 18
+                }
+              },
+              {
+                selector: 'edge',
+                style: {
+                  width: 1.5,
+                  'line-color': '#6b7280',
+                  opacity: 0.7
+                }
+              }
+            ],
+            layout: {
+              name: 'cose',
+              animate: 'end',
+              fit: true,
+              randomize: true,
+              nodeRepulsion: () => 12000,
+              idealEdgeLength: () => 110,
+              edgeElasticity: () => 120,
+              numIter: 1200
             }
-          },
-          {
-            selector: 'edge',
-            style: {
-              width: 1.5,
-              'line-color': '#6b7280',
-              opacity: 0.7
-            }
+          });
+
+          function syncZoomStyles() {
+            const zoom = cy.zoom();
+            const scale = Math.min(1, 1 / zoom);
+            cy.style()
+              .selector('node')
+              .style({
+                width: 18 * scale,
+                height: 18 * scale,
+                'font-size': 10 * scale
+              })
+              .selector('edge')
+              .style({
+                width: 1.5 * scale
+              })
+              .update();
           }
-        ],
-        layout: {
-          name: 'cose',
-          animate: false,
-          fit: true
-        }
-      });
 
-      cy.on('tap', 'node', (event) => {
-        const data = event.target.data();
-        if (!selectionEl) return;
-        selectionEl.innerHTML = `
-          <p><strong>${data.title}</strong></p>
-          <p>ID: <code>${data.id}</code></p>
-          <p>Type: ${data.type}</p>
-          <p>Neighbors: ${data.degree}</p>
-          <p><a href="${data.href}">Open item</a></p>
-        `;
-      });
+          syncZoomStyles();
+          cy.on('zoom', syncZoomStyles);
+          cy.on('dragfree', 'node', () => {
+            cy.layout({
+              name: 'cose',
+              animate: 'end',
+              fit: false,
+              randomize: false,
+              nodeRepulsion: () => 12000,
+              idealEdgeLength: () => 110,
+              edgeElasticity: () => 120,
+              numIter: 500
+            }).run();
+          });
+
+          cy.on('tap', 'node', (event) => {
+            const data = event.target.data();
+            if (!selectionEl) return;
+            selectionEl.innerHTML = `
+              <p>
+                <a href="${data.href}" target="_blank" rel="noopener noreferrer" title="Open in new tab."><strong>${data.title}</strong></a>
+              </p>
+              <p>ID:
+                <a href="#" class="copy-link" data-copy-link data-copy-url="${data.href}" title="Copy permalink">
+                  <code>${data.id}</code>
+                </a>
+              </p>
+              <p>Type: ${data.type}</p>
+              <p>Neighbors: ${data.degree}</p>
+            `;
+          });
+        })
+        .catch((error) => {
+          console.warn('Analytics graph dependency failed to load.', error);
+        });
     }
   </script>
 </SiteShell>

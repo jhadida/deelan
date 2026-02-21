@@ -1,6 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathExists, resolvePackageRoot } from '../src/lib/util';
+import { createLogger } from '../src/lib/logger';
+
+const logger = createLogger('prepare-search');
 
 async function main(): Promise<void> {
   const root = process.cwd();
@@ -14,13 +17,11 @@ async function main(): Promise<void> {
 
   await fs.mkdir(path.dirname(dst), { recursive: true });
   await fs.copyFile(src, dst);
-  console.log(
-    `prepare-search: copied ${path.relative(root, src) || src} -> public/js/search-core.js`
-  );
+  logger.info(`copied ${path.relative(root, src) || src} -> public/js/search-core.js`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`prepare-search failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

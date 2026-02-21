@@ -59,6 +59,41 @@ a:hover {
   color: color-mix(in oklab, var(--accent) 84%, var(--fg));
 }
 
+.copy-link {
+  color: inherit;
+  text-decoration-style: dotted;
+  text-decoration-color: currentColor;
+  cursor: pointer;
+}
+
+.copy-link:hover {
+  color: inherit;
+}
+
+.copy-toast {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 40;
+  background: color-mix(in oklab, var(--surface) 86%, var(--bg));
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 140ms ease, transform 140ms ease;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 input,
 button,
 select,
@@ -310,13 +345,26 @@ button:disabled {
   padding: 0;
 }
 
+.analytics-table-wrap {
+  max-height: min(62vh, 34rem);
+  overflow: auto;
+}
+
+.analytics-treemap-wrap {
+  min-width: 100%;
+  max-width: 100%;
+  max-height: min(66vh, 38rem);
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface-elevated) 92%, var(--bg));
+}
+
 .analytics-treemap {
   position: relative;
-  width: 100%;
-  min-height: 320px;
-  border: 1px solid var(--line);
-  overflow: hidden;
-  background: color-mix(in oklab, var(--surface-elevated) 92%, var(--bg));
+  min-width: 100%;
+  min-height: var(--analytics-treemap-min-height);
+  overflow: visible;
+  background: color-mix(in oklab, var(--surface-elevated) 94%, var(--bg));
 }
 
 .analytics-treemap-node {
@@ -324,18 +372,22 @@ button:disabled {
   border: 1px solid color-mix(in oklab, var(--line-strong) 75%, transparent);
   background: color-mix(in oklab, var(--accent) 18%, var(--surface));
   overflow: hidden;
-  padding: 2px 4px;
+  padding: 1px 2px;
 }
 
 .analytics-treemap-node span {
-  font-size: 0.7rem;
+  display: block;
+  font-size: 0.65rem;
+  line-height: 1.1;
   color: color-mix(in oklab, var(--fg) 85%, var(--muted));
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .analytics-graph-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -346,7 +398,16 @@ button:disabled {
 }
 
 .analytics-graph-side {
-  min-height: 420px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--surface) 92%, var(--bg));
+  padding: var(--space-3) var(--space-4);
+}
+
+.analytics-table th,
+.analytics-table td {
+  padding: var(--space-2) var(--space-3);
+  line-height: 1.35;
 }
 
 .table {

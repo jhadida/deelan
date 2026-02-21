@@ -2,8 +2,7 @@
 title: New Snippet
 tags:
   - topic.example
-summary: Optional summary
-notes: Optional notes
+description: Optional description
 related_ids:
   - post--example-post
 ---

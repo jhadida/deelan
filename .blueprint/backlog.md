@@ -10,30 +10,27 @@
 - Analytics phase 1 implemented (`/analytics` + build artifacts).
 - Storybook integrated and refreshed.
 - Synthetic content generation/cleanup workflow added.
+- Documentation IA redesign:
+    - split docs into User/CLI/Developer tracks
+    - streamlined getting started navigation and command flow
+- Analytics interaction hardening:
+    - tag table column sorting fixed
+    - treemap and relation graph render path stabilized
+- UI scaling and discoverability (partially completed):
+    - bounded heights + internal scroll for `posts/` table view and analytics tag table
+    - snippets explorer deep-link UX added (open in `/view` + permalink copy)
+- Quality hardening before alpha:
+    - expanded regression coverage for asset URL rewriting, internal-link validation failures, timezone behavior
+    - end-to-end export fixtures added (HTML + PDF command path, PDF skip when Chromium unavailable)
+    - shared logger implemented and wired into CLI entrypoints + prebuild scripts
 
 ## In Progress
 
-### 1. Documentation IA redesign
+### 1. Packaging/publish readiness
 
-- Split docs into clear tracks:
-    - User Guide
-    - CLI Reference
-    - Developer Guide
-- Keep advanced internals out of Getting Started.
-- Add quick “I want to do X -> go to Y” navigation aid.
-
-### 2. Quality hardening before alpha
-
-- Expand regression coverage:
-    - asset URL rewriting across routes
-    - internal-link validation failures
-    - timezone formatting behavior
-- Add end-to-end export fixture (HTML + PDF command success path).
-- Add shared logger:
-    - `src/lib/logger.ts`
-    - levels: `error`, `warn`, `info`, `debug`
-    - verbosity control via CLI/env/config
-    - optional log-file sink
+- Finalize publish surface (`.npmignore` sanity pass, package size budget).
+- Ensure `deelan --help` and docs stay fully aligned.
+- Prepare alpha release checklist and notes.
 
 ## Remaining
 
@@ -44,12 +41,6 @@
     - color/accent guidance and typography pairing
     - usage notes for app, docs, Storybook, and exported artifacts
 
-### 3. Packaging/publish readiness
-
-- Finalize publish surface (`.npmignore` sanity pass, package size budget).
-- Ensure `deelan --help` and docs stay fully aligned.
-- Prepare alpha release checklist and notes.
-
 ### 4. Optional UX polish (post-alpha candidate)
 
 - Keyboard shortcuts in snippets explorer.
@@ -58,18 +49,9 @@
 
 ### 5. UI scaling and discoverability
 
-- Add bounded table/list heights for high-volume datasets:
-    - max-height + internal scroll for `posts/` table view
-    - max-height + internal scroll for analytics tag table
 - Improve post list scalability:
     - [P2] add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
-- Snippets explorer deep-link UX:
-    - add "open in /view" action (new tab) from right-pane snippet display
-    - add quick permalink copy affordance (icon or clickable ID in subtitle)
-- Analytics interaction hardening:
-    - ensure tag table column sorting is functional
-    - ensure treemap and relation graph render path is active and resilient
 
 ### 6. Corporate hosting and access control
 

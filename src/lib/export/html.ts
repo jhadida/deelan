@@ -225,13 +225,7 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
         <h1 class="page-title">${item.frontmatter.title}</h1>
         <p class="page-subtitle">${subtitle}</p>
       </header>
-      ${
-        isPost && item.frontmatter.summary
-          ? `<p class="detail-width">${item.frontmatter.summary}</p>`
-          : !isPost && item.frontmatter.notes
-            ? `<p class="detail-width">${item.frontmatter.notes}</p>`
-            : ''
-      }
+      ${item.frontmatter.description ? `<p class="detail-width">${item.frontmatter.description}</p>` : ''}
       <article class="detail-width markdown-body">${contentHtml}</article>
       <footer class="site-footer">
         <div class="container muted">${config.footer_text}</div>

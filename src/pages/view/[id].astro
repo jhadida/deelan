@@ -11,7 +11,7 @@ import {
   loadTimeline,
   type GeneratedIndexItem
 } from '../../lib/content/generated';
-import { renderMarkdown } from '../../lib/content/render-markdown';
+import { renderInlineMarkdown, renderMarkdown } from '../../lib/content/render-markdown';
 import { getSiteConfig } from '../../lib/site-config';
 import { formatTimestamp } from '../../lib/time';
 
@@ -57,6 +57,7 @@ const sourcePath = path.join(process.cwd(), item.file_path);
 const raw = await fs.readFile(sourcePath, 'utf8');
 const parsed = matter(raw);
 const renderedHtml = await renderMarkdown(parsed.content, { sourceFilePath: item.file_path });
+const descriptionHtml = await renderInlineMarkdown(item.description ?? '');
 
 function buildCommitUrl(template: string, commitSha: string): string | null {
   if (!template || !template.includes('${COMMIT_SHA}')) return null;
@@ -85,16 +86,23 @@ function buildCommitUrl(template: string, commitSha: string): string | null {
       <span class="eyebrow">{item.type === 'post' ? 'Post' : 'Snippet'}</span>
       <h1 class="page-title">{item.title}</h1>
       <p class="page-subtitle">
+        <a
+          href="#"
+          class="copy-link"
+          data-copy-link
+          data-copy-url={`/view/${item.id}`}
+          title="Copy permalink"
+          >{item.id}</a
+        >
         {
           item.type === 'post'
-            ? `${item.id} (${item.status ?? 'published'}) — Version: ${item.version ?? 'N/A'} — Last updated: ${updatedAt}`
-            : `${item.id} — Last updated: ${updatedAt}`
+            ? ` (${item.status ?? 'published'}) — Version: ${item.version ?? 'N/A'} — Last updated: ${updatedAt}`
+            : ` — Last updated: ${updatedAt}`
         }
       </p>
     </header>
 
-    {item.type === 'post' && item.summary ? <p class="detail-width">{item.summary}</p> : null}
-    {item.type === 'snippet' && item.notes ? <p class="detail-width">{item.notes}</p> : null}
+    {item.description ? <p class="detail-width" set:html={descriptionHtml}></p> : null}
 
     <article
       class={

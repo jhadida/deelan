@@ -7,7 +7,7 @@ import RelatedList from '../../components/RelatedList.astro';
 import SearchShell from '../../components/SearchShell.astro';
 import TagCloud from '../../components/TagCloud.astro';
 import { loadPostsIndex, loadSnippetsIndex, loadTimeline } from '../../lib/content/generated';
-import { renderMarkdown } from '../../lib/content/render-markdown';
+import { renderInlineMarkdown, renderMarkdown } from '../../lib/content/render-markdown';
 import { getSiteConfig } from '../../lib/site-config';
 import { formatTimestamp } from '../../lib/time';
 
@@ -45,15 +45,16 @@ const snippetDetails = await Promise.all(
     const raw = await fs.readFile(sourcePath, 'utf8');
     const parsed = matter(raw);
     const html = await renderMarkdown(parsed.content, { sourceFilePath: snippet.file_path });
+    const descriptionHtml = await renderInlineMarkdown(snippet.description ?? '');
     const updatedRaw = resolveSnippetUpdatedAt(snippet.id, snippet.updated_at ?? snippet.created_at ?? null);
     const updated = formatTimestamp(updatedRaw, siteConfig.timezone);
-    const meta = `${snippet.id} — Last updated: ${updated}`;
 
     return {
       id: snippet.id,
       title: snippet.title,
-      notes: snippet.notes ?? '',
-      meta,
+      descriptionHtml,
+      permalink: `/view/${snippet.id}`,
+      updated,
       html,
       relatedItems: resolveRelatedItems(snippet.related_ids)
     };
@@ -97,7 +98,7 @@ const snippetDetails = await Promise.all(
               data-snippet-item
               data-key={snippet.id}
               data-title={snippet.title}
-              data-text={`${snippet.title} ${snippet.notes ?? ''} ${snippet.content_text}`}
+              data-text={`${snippet.title} ${snippet.description ?? ''} ${snippet.content_text}`}
               data-tags={snippet.tags.join(',')}
               data-date={resolveSnippetUpdatedAt(snippet.id, snippet.updated_at ?? snippet.created_at ?? null)}
             >
@@ -112,9 +113,11 @@ const snippetDetails = await Promise.all(
 
       <section class="panel snippet-detail-panel">
         <div class="section-block">
-          <h2 id="snippet-detail-title">Snippet</h2>
+          <h2 id="snippet-detail-title">
+            <a href="#" target="_blank" rel="noopener noreferrer" title="Open in new tab.">Snippet</a>
+          </h2>
           <p id="snippet-detail-meta" class="page-subtitle"></p>
-          <p id="snippet-detail-notes" class="muted"></p>
+          <p id="snippet-detail-description" class="muted"></p>
         </div>
         <div id="snippet-detail-content" class="markdown-body"></div>
         <hr class="section-separator" />
@@ -130,9 +133,10 @@ const snippetDetails = await Promise.all(
       <article
         data-snippet-payload={detail.id}
         data-title={detail.title}
-        data-meta={detail.meta}
-        data-notes={detail.notes}
+        data-href={detail.permalink}
+        data-updated={detail.updated}
       >
+        <div data-snippet-description set:html={detail.descriptionHtml}></div>
         <div data-snippet-html set:html={detail.html}></div>
         <div data-snippet-related>
           <RelatedList items={detail.relatedItems} />
@@ -148,7 +152,7 @@ const snippetDetails = await Promise.all(
       listSelector: '#snippet-list',
       detailTitleSelector: '#snippet-detail-title',
       detailMetaSelector: '#snippet-detail-meta',
-      detailNotesSelector: '#snippet-detail-notes',
+      detailNotesSelector: '#snippet-detail-description',
       detailContentSelector: '#snippet-detail-content',
       detailRelatedSelector: '#snippet-detail-related',
       payloadSelector: '#snippet-detail-payloads'

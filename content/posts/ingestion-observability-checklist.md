@@ -4,7 +4,7 @@ tags:
   - data.ingestion
   - reliability.monitoring
 version: 1.0.0
-summary: A compact checklist for instrumenting ingestion jobs before production rollout.
+description: A compact checklist for instrumenting ingestion jobs before production rollout.
 related_ids:
   - snippet--sql-window-dedupe-snippet
   - snippet--pandas-groupby-snippet

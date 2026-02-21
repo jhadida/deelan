@@ -10,17 +10,19 @@ import {
   type ContentFrontmatter
 } from '../src/lib/content/schema';
 import { buildContentGlobs } from '../src/lib/content/files';
+import { createLogger } from '../src/lib/logger';
+import { toPosixPath, uniqueSorted, writeJsonFile } from '../src/lib/util';
 
 const ROOT = process.cwd();
 const SEARCH_DIR = path.join(ROOT, '.generated', 'search');
 const MANIFEST_DIR = path.join(ROOT, '.generated', 'manifests');
+const logger = createLogger('build-indexes');
 
 interface IndexItem {
   id: string;
   type: ContentType;
   title: string;
-  summary: string | null;
-  notes: string | null;
+  description: string | null;
   version: string | null;
   status: 'draft' | 'published' | 'archived' | null;
   tags: string[];
@@ -47,14 +49,6 @@ interface ManifestItem {
   status: 'draft' | 'published' | 'archived' | null;
 }
 
-function toPosixPath(input: string): string {
-  return input.split(path.sep).join('/');
-}
-
-function uniqueSorted(values: string[]): string[] {
-  return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
-}
-
 function buildIndexItem(filePath: string, body: string, frontmatter: ContentFrontmatter): IndexItem {
   const status = frontmatter.type === 'post' ? frontmatter.status ?? 'published' : null;
   const version = frontmatter.type === 'post' ? frontmatter.version : null;
@@ -65,8 +59,7 @@ function buildIndexItem(filePath: string, body: string, frontmatter: ContentFron
     id: frontmatter.id,
     type: frontmatter.type,
     title: frontmatter.title,
-    summary: frontmatter.summary ?? null,
-    notes: frontmatter.notes ?? null,
+    description: frontmatter.description ?? null,
     version,
     status,
     tags: uniqueSorted(frontmatter.tags),
@@ -77,11 +70,6 @@ function buildIndexItem(filePath: string, body: string, frontmatter: ContentFron
     file_path: toPosixPath(filePath),
     content_text: normalizedBody
   };
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(value, null, 2) + '\n', 'utf8');
 }
 
 async function main(): Promise<void> {
@@ -127,7 +115,7 @@ async function main(): Promise<void> {
   }
 
   for (const warning of warnings) {
-    console.warn(`build-indexes warning: ${warning}`);
+    logger.warn(warning);
   }
 
   const idMap = new Map<string, IndexItem>();
@@ -146,9 +134,9 @@ async function main(): Promise<void> {
   }
 
   if (issues.length > 0) {
-    console.error('build-indexes failed with validation issues:');
+    logger.error('failed with validation issues:');
     for (const issue of issues) {
-      console.error(`- ${issue}`);
+      logger.error(`- ${issue}`);
     }
     process.exitCode = 1;
     return;
@@ -187,18 +175,16 @@ async function main(): Promise<void> {
   await fs.mkdir(MANIFEST_DIR, { recursive: true });
 
   await Promise.all([
-    writeJson(path.join(SEARCH_DIR, 'posts-index.json'), postsIndex),
-    writeJson(path.join(SEARCH_DIR, 'snippets-index.json'), snippetsIndex),
-    writeJson(path.join(MANIFEST_DIR, 'content-manifest.json'), manifest)
+    writeJsonFile(path.join(SEARCH_DIR, 'posts-index.json'), postsIndex),
+    writeJsonFile(path.join(SEARCH_DIR, 'snippets-index.json'), snippetsIndex),
+    writeJsonFile(path.join(MANIFEST_DIR, 'content-manifest.json'), manifest)
   ]);
 
-  console.log(
-    `build-indexes complete: ${items.length} items (${posts.length} posts, ${snippets.length} snippets).`
-  );
+  logger.info(`complete: ${items.length} items (${posts.length} posts, ${snippets.length} snippets).`);
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`build-indexes crashed: ${message}`);
+  logger.error(`crashed: ${message}`);
   process.exitCode = 1;
 });

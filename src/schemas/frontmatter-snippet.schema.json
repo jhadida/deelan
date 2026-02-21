@@ -22,10 +22,7 @@
         "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
       }
     },
-    "summary": {
-      "type": "string"
-    },
-    "notes": {
+    "description": {
       "type": "string"
     },
     "related_ids": {

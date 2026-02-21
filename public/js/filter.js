@@ -156,7 +156,7 @@ export function initSnippetExplorer(config) {
   const payloadRoot = config.payloadSelector ? document.querySelector(config.payloadSelector) : null;
   const detailTitle = document.querySelector(config.detailTitleSelector);
   const detailMeta = document.querySelector(config.detailMetaSelector);
-  const detailNotes = document.querySelector(config.detailNotesSelector);
+  const detailDescription = document.querySelector(config.detailNotesSelector);
   const detailContent = document.querySelector(config.detailContentSelector);
   const detailRelated = document.querySelector(config.detailRelatedSelector);
   if (!list || !detailTitle || !detailMeta || !detailContent || !detailRelated) return;
@@ -169,11 +169,13 @@ export function initSnippetExplorer(config) {
       const key = payload.getAttribute('data-snippet-payload');
       if (!key) continue;
       const htmlNode = payload.querySelector('[data-snippet-html]');
+      const descriptionNode = payload.querySelector('[data-snippet-description]');
       const relatedNode = payload.querySelector('[data-snippet-related]');
       detailMap.set(key, {
         title: payload.getAttribute('data-title') || key,
-        meta: payload.getAttribute('data-meta') || '',
-        notes: payload.getAttribute('data-notes') || '',
+        href: payload.getAttribute('data-href') || `/view/${key}`,
+        updated: payload.getAttribute('data-updated') || '',
+        descriptionHtml: descriptionNode ? descriptionNode.innerHTML : '',
         html: htmlNode ? htmlNode.innerHTML : '',
         relatedHtml: relatedNode
           ? relatedNode.innerHTML
@@ -186,11 +188,28 @@ export function initSnippetExplorer(config) {
     if (!detailMap.has(key)) return;
     const item = detailMap.get(key);
     if (!item) return;
-    detailTitle.textContent = item.title;
-    detailMeta.textContent = item.meta;
-    if (detailNotes) {
-      detailNotes.textContent = item.notes;
-      detailNotes.style.display = item.notes ? '' : 'none';
+    detailTitle.innerHTML = '';
+    const titleLink = document.createElement('a');
+    titleLink.href = item.href;
+    titleLink.target = '_blank';
+    titleLink.rel = 'noopener noreferrer';
+    titleLink.title = 'Open in new tab.';
+    titleLink.textContent = item.title;
+    detailTitle.appendChild(titleLink);
+
+    detailMeta.innerHTML = '';
+    const idLink = document.createElement('a');
+    idLink.href = '#';
+    idLink.className = 'copy-link';
+    idLink.setAttribute('data-copy-link', '');
+    idLink.setAttribute('data-copy-url', item.href);
+    idLink.title = 'Copy permalink';
+    idLink.textContent = key;
+    detailMeta.appendChild(idLink);
+    detailMeta.appendChild(document.createTextNode(` — Last updated: ${item.updated}`));
+    if (detailDescription) {
+      detailDescription.innerHTML = item.descriptionHtml;
+      detailDescription.style.display = item.descriptionHtml ? '' : 'none';
     }
     detailContent.innerHTML = item.html;
     detailRelated.innerHTML = item.relatedHtml;
@@ -229,9 +248,9 @@ export function initSnippetExplorer(config) {
     } else {
       detailTitle.textContent = 'No snippet selected';
       detailMeta.textContent = '';
-      if (detailNotes) {
-        detailNotes.textContent = '';
-        detailNotes.style.display = 'none';
+      if (detailDescription) {
+        detailDescription.textContent = '';
+        detailDescription.style.display = 'none';
       }
       detailContent.innerHTML = '<p class="muted">No matching snippets.</p>';
       detailRelated.innerHTML = '<p class="muted">No related items.</p>';

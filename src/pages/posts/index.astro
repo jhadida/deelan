@@ -69,14 +69,23 @@ function displayDate(value: string | null): string {
             <tr
               data-post-item
               data-key={post.id}
-              data-text={`${post.title} ${post.summary ?? ''} ${post.content_text}`}
+              data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
               data-tags={post.tags.join(',')}
               data-title={post.title}
               data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
             >
               <td>
-                <a href={`/view/${post.id}`}>{post.title}</a>
-                <div class="muted">{post.id}</div>
+                <a href={`/view/${post.id}`} target="_blank" rel="noopener noreferrer">{post.title}</a>
+                <div class="muted">
+                  <a
+                    href="#"
+                    class="copy-link"
+                    data-copy-link
+                    data-copy-url={`/view/${post.id}`}
+                    title="Copy permalink"
+                    >{post.id}</a
+                  >
+                </div>
               </td>
               <td>{post.status ?? 'published'}</td>
               <td>{displayDate(effectiveDate(post.id, post.updated_at ?? post.created_at))}</td>
@@ -96,14 +105,23 @@ function displayDate(value: string | null): string {
             class="panel"
             data-post-item
             data-key={post.id}
-            data-text={`${post.title} ${post.summary ?? ''} ${post.content_text}`}
+            data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
             data-tags={post.tags.join(',')}
             data-title={post.title}
             data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
           >
-            <h2><a href={`/view/${post.id}`}>{post.title}</a></h2>
-            <p class="muted">{post.id}</p>
-            {post.summary ? <p>{post.summary}</p> : null}
+            <h2><a href={`/view/${post.id}`} target="_blank" rel="noopener noreferrer">{post.title}</a></h2>
+            <p class="muted">
+              <a
+                href="#"
+                class="copy-link"
+                data-copy-link
+                data-copy-url={`/view/${post.id}`}
+                title="Copy permalink"
+                >{post.id}</a
+              >
+            </p>
+            {post.description ? <p>{post.description}</p> : null}
             <TagCloud tags={post.tags} className="posts-card-tags" />
           </li>
         ))}

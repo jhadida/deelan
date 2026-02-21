@@ -3,8 +3,7 @@ title: New Post
 tags:
   - topic.example
 version: v0.1.0
-summary: Short summary
-notes: Optional notes
+description: Short summary
 related_ids:
   - snippet--example-snippet
 status: draft

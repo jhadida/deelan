@@ -10,8 +10,10 @@ import {
 } from '../src/lib/content/schema';
 import { extractInternalLinks } from '../src/lib/content/internal-links';
 import { buildContentGlobs } from '../src/lib/content/files';
+import { createLogger } from '../src/lib/logger';
 
 const ROOT = process.cwd();
+const logger = createLogger('validate');
 
 interface ItemError {
   filePath: string;
@@ -129,11 +131,11 @@ function validateCrossReferences(items: ValidatedContent[]): ItemError[] {
 }
 
 function printIssues(issues: ItemError[]): void {
-  console.error(`\nContent validation failed with ${issues.length} issue(s):`);
+  logger.error(`Content validation failed with ${issues.length} issue(s):`);
   for (const issue of issues) {
-    console.error(`\n- ${issue.filePath}`);
+    logger.error(`- ${issue.filePath}`);
     for (const entry of issue.errors) {
-      console.error(`  - ${entry}`);
+      logger.error(`  - ${entry}`);
     }
   }
 }
@@ -141,11 +143,11 @@ function printIssues(issues: ItemError[]): void {
 function printWarnings(warnings: ItemWarning[]): void {
   if (warnings.length === 0) return;
 
-  console.warn(`\nContent validation warnings (${warnings.length}):`);
+  logger.warn(`Content validation warnings (${warnings.length}):`);
   for (const warning of warnings) {
-    console.warn(`- ${warning.filePath}`);
-    console.warn(`  - ${warning.warning}`);
-    console.warn('  - excluded from validation/build artifacts');
+    logger.warn(`- ${warning.filePath}`);
+    logger.warn(`  - ${warning.warning}`);
+    logger.warn('  - excluded from validation/build artifacts');
   }
 }
 
@@ -155,9 +157,7 @@ function summarize(items: ValidatedContent[]): void {
     counters[item.frontmatter.type] += 1;
   }
 
-  console.log(
-    `content validated: ${items.length} file(s) (${counters.post} posts, ${counters.snippet} snippets).`
-  );
+  logger.info(`content validated: ${items.length} file(s) (${counters.post} posts, ${counters.snippet} snippets).`);
 }
 
 async function main(): Promise<void> {
@@ -168,7 +168,7 @@ async function main(): Promise<void> {
   const items: ValidatedContent[] = [];
 
   if (files.length === 0) {
-    console.log('no content files found under content/posts or content/snippets.');
+    logger.info('no content files found under content/posts or content/snippets.');
     return;
   }
 
@@ -193,6 +193,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`validation crashed: ${message}`);
+  logger.error(`validation crashed: ${message}`);
   process.exitCode = 1;
 });

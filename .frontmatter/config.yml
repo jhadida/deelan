@@ -14,9 +14,7 @@ content:
         type: list
       - name: version
         type: string
-      - name: summary
-        type: string
-      - name: notes
+      - name: description
         type: string
       - name: related_ids
         type: list
@@ -44,9 +42,7 @@ content:
         type: string
       - name: tags
         type: list
-      - name: summary
-        type: string
-      - name: notes
+      - name: description
         type: string
       - name: related_ids
         type: list

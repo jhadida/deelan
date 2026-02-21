@@ -4,7 +4,7 @@ tags:
   - demo.authoring
   - demo.markdown
 version: v0.1.0
-summary: Synthetic post demonstrating DEELAN authoring features end-to-end.
+description: Synthetic post demonstrating DEELAN authoring features end-to-end.
 related_ids:
   - post--de-partitioning-primer
   - snippet--pandas-groupby-snippet

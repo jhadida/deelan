@@ -1,6 +1,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createLogger } from '../src/lib/logger';
+import {
+  copyRelativeDir,
+  copyRelativeFile,
+  ensureEmptyOrForce,
+  pathExists,
+  writeTextFile
+} from '../src/lib/util';
+import { getParsedBoolFlag, hasHelpFlag, parseCliArgs } from '../src/lib/args';
 
 interface InitOptions {
   targetDir: string;
@@ -11,6 +20,12 @@ interface InitOptions {
   includeLfsAttrs: boolean;
   force: boolean;
   help: boolean;
+}
+
+const logger = createLogger('init');
+
+function writeStdout(text: string): void {
+  process.stdout.write(`${text}\n`);
 }
 
 const PACKAGE_ROOT = process.env.DEELAN_PACKAGE_ROOT
@@ -95,7 +110,7 @@ export default defineConfig({
 `;
 
 function printHelp(): void {
-  console.log(`DEELAN init
+  writeStdout(`DEELAN init
 
 Usage:
   deelan init [dir] [options]
@@ -119,58 +134,35 @@ Defaults:
 }
 
 function parseArgs(argv: string[]): InitOptions {
-  let targetDir = '.';
-  let includeVscode = true;
-  let includeFrontmatter = true;
-  let includeSrc = false;
-  let includeGit = true;
-  let includeLfsAttrs = true;
-  let force = false;
-  let help = false;
+  const parsed = parseCliArgs(argv);
+  const targetDir = parsed.positionals[0] ?? '.';
+  const help = hasHelpFlag(argv);
+  const includeSrc = getParsedBoolFlag(parsed.flags, 'with-src');
+  const includeVscode = !getParsedBoolFlag(parsed.flags, 'no-vscode');
+  const includeFrontmatter = !getParsedBoolFlag(parsed.flags, 'no-frontmatter');
+  const includeGit = !getParsedBoolFlag(parsed.flags, 'no-git');
+  const includeLfsAttrs = !getParsedBoolFlag(parsed.flags, 'no-lfs-attrs');
+  const force = getParsedBoolFlag(parsed.flags, 'yes') || getParsedBoolFlag(parsed.flags, 'force');
 
-  for (const token of argv) {
-    if (token === '--help' || token === '-h') help = true;
-    else if (token === '--with-src') includeSrc = true;
-    if (token === '--no-vscode') includeVscode = false;
-    else if (token === '--no-frontmatter') includeFrontmatter = false;
-    else if (token === '--no-git') includeGit = false;
-    else if (token === '--no-lfs-attrs') includeLfsAttrs = false;
-    else if (token === '--yes' || token === '--force') force = true;
-    else if (!token.startsWith('--')) targetDir = token;
-  }
-
-  return { targetDir, includeVscode, includeFrontmatter, includeSrc, includeGit, includeLfsAttrs, force, help };
-}
-
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function ensureEmptyOrForce(target: string, force: boolean): Promise<void> {
-  if (!(await exists(target))) {
-    await fs.mkdir(target, { recursive: true });
-    return;
-  }
-
-  const entries = await fs.readdir(target);
-  if (entries.length === 0 || force) return;
-
-  throw new Error(
-    `Target directory is not empty: ${target}\nRe-run with --yes to allow writing into an existing directory.`
-  );
+  return {
+    targetDir,
+    includeVscode,
+    includeFrontmatter,
+    includeSrc,
+    includeGit,
+    includeLfsAttrs,
+    force,
+    help
+  };
 }
 
 async function copyFileRelative(rel: string, targetRoot: string): Promise<void> {
-  const src = path.join(PACKAGE_ROOT, rel);
-  const dst = path.join(targetRoot, rel);
-  await fs.mkdir(path.dirname(dst), { recursive: true });
-  if (await exists(src)) {
-    await fs.copyFile(src, dst);
+  const copied = await copyRelativeFile({
+    sourceRoot: PACKAGE_ROOT,
+    targetRoot,
+    relativePath: rel
+  });
+  if (copied) {
     return;
   }
 
@@ -179,18 +171,23 @@ async function copyFileRelative(rel: string, targetRoot: string): Promise<void> 
     throw new Error(`Required file missing in package and no fallback is defined: ${rel}`);
   }
 
-  await fs.writeFile(dst, fallback, 'utf8');
+  await writeTextFile(dst, fallback);
 }
 
 async function copyDirRelative(rel: string, targetRoot: string): Promise<void> {
-  const src = path.join(PACKAGE_ROOT, rel);
-  const dst = path.join(targetRoot, rel);
-  await fs.cp(src, dst, { recursive: true, force: true });
+  const copied = await copyRelativeDir({
+    sourceRoot: PACKAGE_ROOT,
+    targetRoot,
+    relativePath: rel
+  });
+  if (!copied) {
+    throw new Error(`Required directory missing in package: ${rel}`);
+  }
 }
 
 async function writeGitignore(targetRoot: string): Promise<void> {
   const gitignorePath = path.join(targetRoot, '.gitignore');
-  await fs.writeFile(gitignorePath, GITIGNORE_TEMPLATE, 'utf8');
+  await writeTextFile(gitignorePath, GITIGNORE_TEMPLATE);
 }
 
 function runGit(args: string[], cwd: string): { ok: boolean; output: string } {
@@ -205,8 +202,8 @@ function runGit(args: string[], cwd: string): { ok: boolean; output: string } {
 
 async function writeDefaultGitattributes(targetRoot: string): Promise<void> {
   const attrsPath = path.join(targetRoot, '.gitattributes');
-  if (await exists(attrsPath)) return;
-  await fs.writeFile(attrsPath, GITATTRIBUTES_LFS_TEMPLATE, 'utf8');
+  if (await pathExists(attrsPath)) return;
+  await writeTextFile(attrsPath, GITATTRIBUTES_LFS_TEMPLATE);
 }
 
 function looksLikeGitRepo(targetRoot: string): boolean {
@@ -220,8 +217,8 @@ async function maybeInitializeGit(targetRoot: string, options: InitOptions): Pro
 
   const init = runGit(['init'], targetRoot);
   if (!init.ok) {
-    console.warn('init warning: unable to initialize git repository automatically.');
-    if (init.output) console.warn(init.output);
+    logger.warn('unable to initialize git repository automatically.');
+    if (init.output) logger.warn(init.output);
     return;
   }
 
@@ -239,13 +236,22 @@ async function main(): Promise<void> {
 
   const targetRoot = path.resolve(process.cwd(), options.targetDir);
 
-  await ensureEmptyOrForce(targetRoot, options.force);
+  try {
+    await ensureEmptyOrForce(targetRoot, options.force);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('Target directory is not empty: ')) {
+      throw new Error(
+        `${error.message}\nRe-run with --yes to allow writing into an existing directory.`
+      );
+    }
+    throw error;
+  }
 
   for (const rel of REQUIRED_FILES) {
     if (rel === 'astro.config.mjs' && !options.includeSrc) {
       const dst = path.join(targetRoot, rel);
       await fs.mkdir(path.dirname(dst), { recursive: true });
-      await fs.writeFile(dst, ASTRO_CONFIG_EXTERNAL_SRC_TEMPLATE, 'utf8');
+      await writeTextFile(dst, ASTRO_CONFIG_EXTERNAL_SRC_TEMPLATE);
       continue;
     }
     await copyFileRelative(rel, targetRoot);
@@ -261,32 +267,32 @@ async function main(): Promise<void> {
     }
   }
 
-  if (options.includeVscode && (await exists(path.join(PACKAGE_ROOT, '.vscode')))) {
+  if (options.includeVscode && (await pathExists(path.join(PACKAGE_ROOT, '.vscode')))) {
     await copyDirRelative('.vscode', targetRoot);
   }
 
-  if (options.includeFrontmatter && (await exists(path.join(PACKAGE_ROOT, '.frontmatter')))) {
+  if (options.includeFrontmatter && (await pathExists(path.join(PACKAGE_ROOT, '.frontmatter')))) {
     await copyDirRelative('.frontmatter', targetRoot);
   }
 
   await writeGitignore(targetRoot);
   await maybeInitializeGit(targetRoot, options);
 
-  console.log(`Initialized DEELAN project at ${targetRoot}`);
-  console.log('Next steps:');
-  console.log(`- cd ${targetRoot}`);
-  console.log('- edit content under content/posts and content/snippets');
+  logger.info(`Initialized DEELAN project at ${targetRoot}`);
+  writeStdout('Next steps:');
+  writeStdout(`- cd ${targetRoot}`);
+  writeStdout('- edit content under content/posts and content/snippets');
   if (!options.includeSrc) {
-    console.log('- optional: run `deelan init . --with-src --yes` later if you want local src customization');
+    writeStdout('- optional: run `deelan init . --with-src --yes` later if you want local src customization');
   }
   if (options.includeGit) {
-    console.log('- optional: run `git lfs install` if you plan to track non-text assets with LFS');
+    writeStdout('- optional: run `git lfs install` if you plan to track non-text assets with LFS');
   }
-  console.log('- run `deelan build` then `deelan serve`');
+  writeStdout('- run `deelan build` then `deelan serve`');
 }
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error);
-  console.error(`init failed: ${message}`);
+  logger.error(`failed: ${message}`);
   process.exitCode = 1;
 });

@@ -3,7 +3,7 @@ title: Pandas GroupBy Cheatsheet
 tags:
   - python.pandas.groupby
   - data.transform
-notes: Useful aggregation patterns for exploratory work.
+description: Useful aggregation patterns for exploratory work.
 related_ids:
   - post--de-partitioning-primer
 ---

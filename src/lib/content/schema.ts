@@ -13,8 +13,7 @@ interface ContentFrontmatterBase {
   type: ContentType;
   title: string;
   tags: string[];
-  summary?: string;
-  notes?: string;
+  description?: string;
   related_ids?: string[];
   created_at?: string;
   updated_at?: string;
@@ -93,14 +92,13 @@ export function validateFrontmatter(
           'title',
           'tags',
           'version',
-          'summary',
-          'notes',
+          'description',
           'related_ids',
           'created_at',
           'updated_at',
           'status'
         ])
-      : new Set(['type', 'title', 'tags', 'summary', 'notes', 'related_ids', 'created_at', 'updated_at']);
+      : new Set(['type', 'title', 'tags', 'description', 'related_ids', 'created_at', 'updated_at']);
 
   for (const key of Object.keys(data)) {
     if (!allowedFields.has(key)) {
@@ -151,12 +149,8 @@ export function validateFrontmatter(
     }
   }
 
-  if (data.summary !== undefined && typeof data.summary !== 'string') {
-    errors.push('field `summary` must be a string when provided.');
-  }
-
-  if (data.notes !== undefined && typeof data.notes !== 'string') {
-    errors.push('field `notes` must be a string when provided.');
+  if (data.description !== undefined && typeof data.description !== 'string') {
+    errors.push('field `description` must be a string when provided.');
   }
 
   if (data.created_at !== undefined) {
@@ -190,8 +184,7 @@ export function validateFrontmatter(
         title: title as string,
         tags: tags as string[],
         version: (data.version as string).trim(),
-        summary: data.summary as string | undefined,
-        notes: data.notes as string | undefined,
+        description: data.description as string | undefined,
         related_ids: relatedIds,
         created_at: data.created_at as string | undefined,
         updated_at: data.updated_at as string | undefined,
@@ -207,8 +200,7 @@ export function validateFrontmatter(
       type: 'snippet',
       title: title as string,
       tags: tags as string[],
-      summary: data.summary as string | undefined,
-      notes: data.notes as string | undefined,
+      description: data.description as string | undefined,
       related_ids: relatedIds,
       created_at: data.created_at as string | undefined,
       updated_at: data.updated_at as string | undefined
