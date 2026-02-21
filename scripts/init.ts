@@ -66,6 +66,8 @@ export default defineConfig({
 footer_text: "Built with \u2665 using Deelan."
 default_theme: dark
 timezone: UTC
+accent_hue: 150
+content_max_width: 1100px
 code_theme_light: material-theme-lighter
 code_theme_dark: material-theme-darker
 timeline_commit_url_template: https://github.com/OWNER/REPO/commit/\${COMMIT_SHA}
@@ -278,7 +280,7 @@ async function main(): Promise<void> {
     console.log('- optional: run `deelan init . --with-src --yes` later if you want local src customization');
   }
   if (options.includeGit) {
-    console.log('- optional: run `git lfs install` if you plan to track large binary assets with LFS');
+    console.log('- optional: run `git lfs install` if you plan to track non-text assets with LFS');
   }
   console.log('- run `deelan build` then `deelan serve`');
 }

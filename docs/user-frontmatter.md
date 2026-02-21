@@ -1,24 +1,15 @@
-# Content Schema
+# Frontmatter
 
-DEELAN supports two frontmatter schemas:
+DEELAN uses separate frontmatter schemas for posts and snippets.
 
-- Posts: `src/schemas/frontmatter-post.schema.json`
-- Snippets: `src/schemas/frontmatter-snippet.schema.json`
+## File Naming and Discovery
 
-Combined reference schema:
-
-- `src/schemas/frontmatter.schema.json`
-
-## File Naming Rules
-
-Content discovery scans only:
+Default discovery scans only:
 
 - `content/posts/*.md`
 - `content/snippets/*.md`
 
-Subfolders are allowed but ignored for content discovery.
-
-To include selected subfolders, pass repeated flags:
+Subfolders are ignored unless explicitly included via repeated:
 
 - `--include-subfolder <name>`
 
@@ -32,23 +23,23 @@ Discovered files must be:
 - lowercase kebab-case filename
 - single `.md` extension
 
-Valid examples:
+Valid:
 
 - `de-partitioning-primer.md`
 - `sql-window-dedupe-snippet.md`
 
-Invalid examples (excluded at build time with warnings):
+Invalid (excluded with warnings):
 
 - `Foo-bar.md` (uppercase)
 - `foo.bar.md` (multiple extensions)
 - `foo_bar.md` (underscore)
 
-## Generated ID and Type
+## Identity Derivation
 
-- `type` is inferred from directory:
+- `type` inferred from directory:
     - `content/posts/*` -> `post`
     - `content/snippets/*` -> `snippet`
-- `id` is generated at build time from type + filename stem:
+- `id` generated from type + slug:
     - `post--<slug>`
     - `snippet--<slug>`
 
@@ -57,11 +48,12 @@ Examples:
 - `content/posts/de-partitioning-primer.md` -> `post--de-partitioning-primer`
 - `content/snippets/pandas-groupby-snippet.md` -> `snippet--pandas-groupby-snippet`
 
-`type` is optional in frontmatter. If provided, it must match the directory-inferred type.
-
+`type` is optional in frontmatter. If provided, it must match inferred type.
 `id` should not be provided in frontmatter.
 
-## Post Frontmatter
+## Frontmatter Schemas
+
+### Post
 
 Required:
 
@@ -74,12 +66,12 @@ Optional:
 - `type` (`post`)
 - `summary`
 - `notes`
-- `related_ids` (generated IDs like `snippet--...` / `post--...`)
+- `related_ids` (`post--...` / `snippet--...`)
 - `created_at`
 - `updated_at`
 - `status` (`draft | published | archived`)
 
-## Snippet Frontmatter
+### Snippet
 
 Required:
 
@@ -96,3 +88,4 @@ Optional:
 - `updated_at`
 
 Snippets do not support `version` or `status`.
+

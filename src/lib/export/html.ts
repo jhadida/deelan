@@ -197,8 +197,9 @@ export async function exportHtml(context: ExportContext): Promise<{ htmlPath: st
     ? `${item.frontmatter.id} (${item.frontmatter.status ?? 'published'}) — Version: ${item.frontmatter.version} — Last updated: ${updated}`
     : `${item.frontmatter.id} — Last updated: ${updated}`;
   const contentHtml = await rewriteHtmlAssets(renderedHtml, item.filePath, exportDir);
+  const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config.content_max_width}; --detail-max: ${config.content_max_width};`;
   const html = `<!doctype html>
-<html lang="en" data-theme="${theme}">
+<html lang="en" data-theme="${theme}" style="${rootStyle}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />

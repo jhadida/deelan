@@ -10,9 +10,10 @@ interface Props {
 const { pageTitle } = Astro.props;
 const config = await getSiteConfig();
 const fullTitle = pageTitle ? `${pageTitle} | ${config.blog_title}` : config.blog_title;
+const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config.content_max_width}; --detail-max: ${config.content_max_width};`;
 ---
 
-<html lang="en" data-theme={config.default_theme}>
+<html lang="en" data-theme={config.default_theme} style={rootStyle}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />

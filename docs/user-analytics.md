@@ -2,7 +2,7 @@
 
 DEELAN includes a static `analytics/` route generated from build artifacts.
 
-## What it shows (v1)
+## What it shows
 
 - summary cards (items, tags, average tags per item, relation edges)
 - sortable tag frequency table

@@ -32,7 +32,9 @@ Thin wrapper CLI is also available:
 
 ## Documentation
 
-- User/developer docs: `docs/`
+- User docs track: `docs/user-guide.md`
+- CLI reference track: `docs/cli-reference.md`
+- Developer docs track: `docs/developer-guide.md`
 - MkDocs config: `mkdocs.yml`
 - Install docs tooling: `npm run docs:install`
 - Serve docs locally: `npm run docs:serve`

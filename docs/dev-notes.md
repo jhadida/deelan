@@ -118,7 +118,7 @@ Example:
 - Client registration:
     - `public/js/pwa-register.js`
 - Detailed behavior:
-    - `docs/pwa.md`
+    - `docs/topic-caching.md`
 
 ## Current Gaps
 

@@ -17,7 +17,7 @@
     - minimal static hierarchy/treemap-style view
     - relations graph with node selection panel
 - Documentation and tests added:
-    - `docs/analytics.md`
+    - `docs/user-analytics.md`
     - analytics build test coverage
 
 ### In Progress
@@ -52,4 +52,3 @@
 ### Phase 2 (v2) — Open
 
 - Rich interaction and deeper metrics, after core alpha hardening priorities.
-

@@ -15,8 +15,7 @@ Recommended extensions are listed in `.vscode/extensions.json` (all optional).
 Use snippets when editing Markdown files directly.
 If suggestions still do not appear, use `Insert Snippet` from the command palette.
 
-Use the Front Matter dashboard/forms when you prefer structured field editing.
-
+Use the Front Matter extension dashboard/forms when you prefer structured field editing.
 Folder-scoped snippet activation (for `content/**` only) is not supported natively by VSCode workspace snippets.
 
 ### Validation
@@ -30,7 +29,7 @@ deelan validate
 
 ## Obsidian
 
-Use DEELAN as a vault rooted at the repository directory.
+Use Obsidian to edit contents by creating a vault at the root of any new project folder.
 
 ### Recommended Setup
 

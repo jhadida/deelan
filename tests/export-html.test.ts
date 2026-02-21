@@ -58,7 +58,7 @@ test('exportHtml rewrites local assets/links and honors config theme default', a
 
     const html = await fs.readFile(htmlPath, 'utf8');
 
-    assert.match(html, /<html lang="en" data-theme="dark">/);
+    assert.match(html, /<html lang="en" data-theme="dark"(?:\s+style="[^"]*")?>/);
     assert.match(html, /src="\.\/media\/diagram\.png"/);
     assert.match(html, /href="\.\/media\/ref\.txt"/);
     assert.match(html, /href="\.\/other\.html"/);

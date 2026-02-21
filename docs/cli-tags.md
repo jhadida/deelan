@@ -1,4 +1,4 @@
-# Tag CLI
+# Tag Management
 
 Run via:
 
