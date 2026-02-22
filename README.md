@@ -15,9 +15,9 @@ Deelan gives you a gorgeous, scalable, private, and feature-rich navigation expe
 
 ## What Deelan Gives You
 
-- Post + snippet content model with strong frontmatter validation. Templates and snippets provided for VSCode and Obsidian.
-- Fast filtering based on advanced search grammar and hierarchical tag model. So you can quickly find what you are looking for.
-- Rich rendered views with code highlighting, Mathjax, git timelines, internal links, and more. Out-of-the-box is all you need.
+- Post + snippet content model with frontmatter validation. Templates provided for VSCode and Obsidian.
+- Fast filtering based using search grammar and tags. Quickly find what you are looking for.
+- Rich rendered views with code highlighting, Mathjax, git timelines, internal links, and more. 
 - Static, local-first workflow (offline-friendly), with guidance and template configs for secure private deployment.
 - Export to self-contained HTML and PDF, share permalinks, explore and extend analytics.
 
@@ -120,4 +120,4 @@ If you deploy the Astro site publicly, set `site` in `astro.config.mjs` to your 
 
 ## About this app 
 
-Created by [Jonathan Hadida](https://github.com/jhadida) proudly with the help of OpenAI Codex (GPT-5.3-Codex) and minimal permissive dependencies (MIT/Apache-2.0 only for top-level dependencies). Released under MIT license.
+Created by [Jonathan Hadida](https://github.com/jhadida) proudly with the help of GPT-5.3-Codex and minimal permissive dependencies (MIT/Apache-2.0 only for top-level dependencies).
