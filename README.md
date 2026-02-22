@@ -3,6 +3,9 @@
 Data Engineering Electronic LAboratory Notebook.  
 **Elevate your note-keeping experience.**
 
+[![npm version](https://img.shields.io/npm/v/%40jhadida%2Fdeelan)](https://www.npmjs.com/package/@jhadida/deelan)
+[![docs](https://img.shields.io/badge/docs-online-2ea44f)](https://jhadida.github.io/deelan)
+
 <p align="center">
   <img src="logos/deelan-cartoon.png" alt="Deelan logo" width="280" />
 </p>
