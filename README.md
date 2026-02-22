@@ -16,7 +16,7 @@ Deelan gives you a gorgeous, scalable, private, and feature-rich navigation expe
 ## What Deelan Gives You
 
 - Post + snippet content model with frontmatter validation. Templates provided for VSCode and Obsidian.
-- Fast filtering based using search grammar and tags. Quickly find what you are looking for.
+- Quickly find contents with an advanced search grammar, hierarchical tags, date ranges, and more.
 - Rich rendered views with code highlighting, Mathjax, git timelines, internal links, and more. 
 - Static, local-first workflow (offline-friendly), with guidance and template configs for secure private deployment.
 - Export to self-contained HTML and PDF, share permalinks, explore and extend analytics.
