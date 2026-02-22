@@ -1,4 +1,4 @@
-site_name: Deelan
+site_name: Deelan.
 site_description: Data Engineering Electronic LAboratory Notebook
 site_url: https://jhadida.github.io/deelan
 repo_url: https://github.com/jhadida/deelan
@@ -8,6 +8,8 @@ site_dir: .site-docs
 
 theme:
   name: material
+  logo: assets/deelan-logo.png
+  favicon: assets/favicon.png
   palette:
     scheme: slate
     primary: black
@@ -33,6 +35,7 @@ nav:
       - Tag Management: cli-tags.md
       - HTML/PDF Export: cli-export.md
   - Advanced Topics:
+      - Visual Identity: topic-branding.md
       - Editor Integration: user-editor.md
       - Keyboard Shortcuts: topic-keyboard-shortcuts.md
       - Search Grammar: topic-search.md

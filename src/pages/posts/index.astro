@@ -58,9 +58,17 @@ function displayDate(value: string | null): string {
       <table class="table">
         <thead>
           <tr>
-            <th>Title</th>
+            <th>
+              <button type="button" class="sort-btn" data-sort-key="title" data-sort-direction="none">
+                <span>Title</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+              </button>
+            </th>
             <th>Status</th>
-            <th>Updated</th>
+            <th>
+              <button type="button" class="sort-btn" data-sort-key="date" data-sort-direction="none">
+                <span>Updated</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+              </button>
+            </th>
             <th>Tags</th>
           </tr>
         </thead>
@@ -154,5 +162,81 @@ function displayDate(value: string | null): string {
       tableSelector: '#posts-table-view',
       listSelector: '#posts-list-view'
     });
+
+    const tableBody = document.querySelector('#posts-table-view tbody');
+    const listRoot = document.querySelector('#posts-list-view .cards');
+    const sortButtons = Array.from(document.querySelectorAll('#posts-table-view .sort-btn'));
+    let sortKey = 'date';
+    let sortDirection = -1;
+
+    function compareDate(aValue, bValue) {
+      const a = Date.parse(aValue || '');
+      const b = Date.parse(bValue || '');
+      if (Number.isNaN(a) && Number.isNaN(b)) return 0;
+      if (Number.isNaN(a)) return -1;
+      if (Number.isNaN(b)) return 1;
+      return a - b;
+    }
+
+    function compareByKey(a, b) {
+      if (sortKey === 'title') {
+        const aTitle = (a.getAttribute('data-title') || '').toLowerCase();
+        const bTitle = (b.getAttribute('data-title') || '').toLowerCase();
+        return sortDirection * aTitle.localeCompare(bTitle);
+      }
+      const aDate = a.getAttribute('data-date') || '';
+      const bDate = b.getAttribute('data-date') || '';
+      return sortDirection * compareDate(aDate, bDate);
+    }
+
+    function syncSortIndicators() {
+      sortButtons.forEach((button) => {
+        const key = button.getAttribute('data-sort-key');
+        const direction = key === sortKey ? (sortDirection > 0 ? 'asc' : 'desc') : 'none';
+        button.setAttribute('data-sort-direction', direction);
+        const th = button.closest('th');
+        if (th) {
+          th.setAttribute(
+            'aria-sort',
+            direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
+          );
+        }
+      });
+    }
+
+    function applySort() {
+      const tableRows = Array.from(document.querySelectorAll('#posts-table-view tbody tr[data-post-item]'));
+      const listRows = Array.from(document.querySelectorAll('#posts-list-view li[data-post-item]'));
+      const listByKey = new Map(listRows.map((row) => [row.getAttribute('data-key'), row]));
+      const sortedTable = [...tableRows].sort(compareByKey);
+      const sortedKeys = sortedTable.map((row) => row.getAttribute('data-key'));
+
+      if (tableBody) {
+        sortedTable.forEach((row) => tableBody.appendChild(row));
+      }
+      if (listRoot) {
+        sortedKeys.forEach((key) => {
+          const item = key ? listByKey.get(key) : null;
+          if (item) listRoot.appendChild(item);
+        });
+      }
+    }
+
+    sortButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.getAttribute('data-sort-key');
+        if (!key) return;
+        if (key === sortKey) sortDirection *= -1;
+        else {
+          sortKey = key;
+          sortDirection = key === 'title' ? 1 : -1;
+        }
+        syncSortIndicators();
+        applySort();
+      });
+    });
+
+    syncSortIndicators();
+    applySort();
   </script>
 </SiteShell>

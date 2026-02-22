@@ -288,6 +288,107 @@ button:disabled {
   color: var(--muted);
 }
 
+.home-logo {
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-8);
+}
+
+.home-wordmark {
+  display: grid;
+  place-items: center;
+}
+
+.home-wordmark img {
+  width: 50%;
+  min-width: 240px;
+  max-width: 560px;
+  height: auto;
+  display: block;
+}
+
+.home-logo-frame {
+  position: relative;
+  width: 50%;
+  min-width: 240px;
+  max-width: 560px;
+  border-radius: 50%;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  box-shadow:
+    0 20px 44px -22px color-mix(in oklab, var(--overlay) 95%, transparent),
+    0 8px 22px -14px color-mix(in oklab, var(--accent) 26%, transparent);
+}
+
+.home-logo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--accent) 46%, var(--line-strong));
+  box-shadow:
+    inset 0 0 0 2px color-mix(in oklab, var(--surface-elevated) 62%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--line) 70%, transparent);
+  pointer-events: none;
+}
+
+.home-logo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.home-resources {
+  width: 50%;
+  min-width: 300px;
+  max-width: var(--detail-max);
+  margin: 0 auto;
+}
+
+.resource-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.resource-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.resource-links a:hover {
+  color: var(--accent);
+}
+
+.resource-icon {
+  width: 1.22rem;
+  height: 1.22rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resource-icon svg {
+  width: 1.22rem;
+  height: 1.22rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.resource-icon-github svg {
+  fill: currentColor;
+  stroke: none;
+}
+
 .reader-width {
   max-width: var(--reader-max);
 }
@@ -334,7 +435,8 @@ button:disabled {
   line-height: var(--lh-tight);
 }
 
-.analytics-table th .sort-btn {
+.table .sort-btn {
+  width: 100%;
   border: 0;
   background: transparent;
   color: inherit;
@@ -343,6 +445,25 @@ button:disabled {
   letter-spacing: inherit;
   cursor: pointer;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.table .sort-btn .sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.6;
+  gap: 0.26rem;
+  color: color-mix(in oklab, var(--muted) 86%, var(--fg));
+  font-size: 0.62rem;
+  margin-left: var(--space-2);
+}
+
+.table .sort-btn[data-sort-direction='asc'] .sort-arrows .arrow-up,
+.table .sort-btn[data-sort-direction='desc'] .sort-arrows .arrow-down {
+  color: #ff5a3d;
 }
 
 .analytics-table-wrap {

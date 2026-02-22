@@ -15,4 +15,5 @@ For authors and users working with content and site configuration.
 
 - [Configuration](user-configuration.md)
 - [Analytics](user-analytics.md)
+- [Branding and Visual Identity](topic-branding.md)
 - [Editor Integration](user-editor.md)

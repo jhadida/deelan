@@ -211,7 +211,7 @@ async function main(): Promise<void> {
     writeJsonFile(path.join(ANALYTICS_DIR, 'relations.json'), relationsFile)
   ]);
 
-  logger.info(
+  logger.debug(
     `complete: ${tagsFile.tags.length} tags, ${relationsFile.totals.nodes} nodes, ${relationsFile.totals.edges} edges.`
   );
 }

@@ -180,7 +180,7 @@ async function main(): Promise<void> {
     writeJsonFile(path.join(MANIFEST_DIR, 'content-manifest.json'), manifest)
   ]);
 
-  logger.info(`complete: ${items.length} items (${posts.length} posts, ${snippets.length} snippets).`);
+  logger.debug(`complete: ${items.length} items (${posts.length} posts, ${snippets.length} snippets).`);
 }
 
 main().catch((error: unknown) => {

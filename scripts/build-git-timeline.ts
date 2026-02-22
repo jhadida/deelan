@@ -165,7 +165,7 @@ async function main(): Promise<void> {
   };
 
   await writeJsonFile(OUTPUT, out);
-  logger.info(`complete: ${out.total} items.`);
+  logger.debug(`complete: ${out.total} items.`);
 }
 
 main().catch((error: unknown) => {

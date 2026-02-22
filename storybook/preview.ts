@@ -1,4 +1,5 @@
 import '../src/styles/global.css';
+import { themes } from 'storybook/theming';
 
 const preview = {
   parameters: {
@@ -7,17 +8,20 @@ const preview = {
       expanded: true
     },
     backgrounds: {
-      default: 'light',
+      default: 'dark',
       values: [
         { name: 'light', value: '#f5f4ef' },
         { name: 'dark', value: '#101312' }
       ]
+    },
+    docs: {
+      theme: themes.dark
     }
   },
   globalTypes: {
     theme: {
       description: 'Theme for CSS variables',
-      defaultValue: 'light',
+      defaultValue: 'dark',
       toolbar: {
         title: 'Theme',
         icon: 'mirror',
@@ -47,11 +51,12 @@ const preview = {
   },
   decorators: [
     (Story: () => unknown, context: { globals: { theme?: string; accentHue?: string } }) => {
-      const theme = context.globals.theme ?? 'light';
+      const theme = context.globals.theme ?? 'dark';
       const accentHue = context.globals.accentHue ?? '156';
       if (typeof document !== 'undefined') {
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.style.setProperty('--accent-hue', accentHue);
+        document.body?.setAttribute('data-theme', theme);
       }
       return Story();
     }

@@ -1,5 +1,9 @@
 # Deelan Documentation
 
+<p align="center" style="margin: 0.6rem 0;">
+  <img src="assets/deelan-cartoon.png" alt="Deelan cartoon logo" style="width: 32%; min-width: 200px; height: auto;" />
+</p>
+
 ## What is Deelan?
 
 Deelan (Data Engineering Electronic LAboratory Notebook) is a static-first knowledge management tool for technical individuals and teams. It is designed for people who want a durable, searchable, versioned knowledge base that stays close to plain text authoring and yet provides a useful, scaleable, and beautiful web-based view to navigate contents.
@@ -17,7 +21,8 @@ The project intentionally favors transparent files and reproducible build steps 
 
 If you are new to Deelan, start with the User Guide.  
 If you are integrating or automating workflows, use the CLI Reference.  
-If you are extending internals or build behavior, use the Developer Guide.
+If you are extending internals or build behavior, use the Developer Guide.  
+Take a look at the collection of advanced topics if anything piques your interest.
 
 ## Choose a Track
 

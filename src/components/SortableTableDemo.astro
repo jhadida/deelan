@@ -1,0 +1,48 @@
+---
+interface Props {
+  sortedBy?: 'title' | 'date';
+  direction?: 'asc' | 'desc';
+}
+
+const { sortedBy = 'date', direction = 'desc' } = Astro.props;
+
+function sortDirectionFor(key: string): 'asc' | 'desc' | 'none' {
+  return key === sortedBy ? direction : 'none';
+}
+---
+
+<div style="max-width: 860px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          <button type="button" class="sort-btn" data-sort-direction={sortDirectionFor('title')}>
+            <span>Title</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+          </button>
+        </th>
+        <th>Status</th>
+        <th>
+          <button type="button" class="sort-btn" data-sort-direction={sortDirectionFor('date')}>
+            <span>Updated</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+          </button>
+        </th>
+        <th>Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Partitioning Primer</td>
+        <td>published</td>
+        <td>2026-02-21 14:00:00</td>
+        <td>data.lake, partitions</td>
+      </tr>
+      <tr>
+        <td>Ingestion Observability</td>
+        <td>draft</td>
+        <td>2026-02-20 18:42:13</td>
+        <td>data.ingestion, monitoring</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

@@ -3,6 +3,7 @@ import type { StorybookConfig } from 'storybook-astro';
 const config: StorybookConfig = {
   stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: ['@storybook/addon-docs'],
+  staticDirs: [],
   framework: {
     name: 'storybook-astro',
     options: {}

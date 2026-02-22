@@ -29,11 +29,11 @@ async function main(): Promise<void> {
   }
 
   if (copied.length === 0) {
-    logger.info('no content asset directories found.');
+    logger.debug('no content asset directories found.');
     return;
   }
 
-  logger.info(`copied ${copied.join(', ')} -> public/content-assets`);
+  logger.debug(`copied ${copied.join(', ')} -> public/content-assets`);
 }
 
 main().catch((error: unknown) => {

@@ -17,7 +17,7 @@ async function main(): Promise<void> {
 
   await fs.mkdir(path.dirname(dst), { recursive: true });
   await fs.copyFile(src, dst);
-  logger.info(`copied ${path.relative(root, src) || src} -> public/js/search-core.js`);
+  logger.debug(`copied ${path.relative(root, src) || src} -> public/js/search-core.js`);
 }
 
 main().catch((error: unknown) => {

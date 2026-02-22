@@ -37,12 +37,15 @@ const title = currentTheme === 'dark' ? 'Switch to light theme' : 'Switch to dar
   <svg
     class="theme-icon theme-icon-moon"
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.8"
+    fill="currentColor"
+    stroke="none"
     aria-hidden="true"
   >
-    <path d="M19 14.5A8 8 0 1 1 9.5 5a7 7 0 1 0 9.5 9.5z"></path>
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M9.528 1.718a.75.75 0 0 1 .162.812 8.25 8.25 0 0 0 10.78 10.78.75.75 0 0 1 .974.974A9.75 9.75 0 1 1 8.556 1.394a.75.75 0 0 1 .972.324Z"
+    ></path>
   </svg>
   <span class="sr-only">Toggle theme</span>
 </button>

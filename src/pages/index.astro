@@ -4,18 +4,52 @@ import SiteShell from '../components/SiteShell.astro';
 
 <SiteShell>
   <div class="container stack">
-    <header class="page-header reader-width">
+    <header class="page-header detail-width">
       <span class="eyebrow">Data Engineering Electronic LAboratory Notebook</span>
-      <h1 class="page-title">DEELAN</h1>
       <p class="page-subtitle">Elevate your note-keeping experience.</p>
     </header>
 
-    <section class="panel reader-width section-block">
+    <section class="home-logo detail-width" aria-label="Deelan visual identity">
+      <div class="home-logo-frame">
+        <img src="/images/deelan-hires.png" alt="Deelan visual identity" loading="eager" />
+      </div>
+    </section>
+
+    <section class="panel home-resources section-block">
       <h2>Resources</h2>
-      <ul>
-        <li><a href="https://jhadida.github.io/deelan">Documentation</a></li>
-        <li><a href="https://github.com/jhadida/deelan">Repository</a></li>
-        <li><a href="#">NPM Package</a></li>
+      <ul class="resource-links">
+        <li>
+          <a href="https://jhadida.github.io/deelan">
+            <span class="resource-icon resource-icon-book" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11a4 4 0 0 1 2.83 1.17L14.66 5A2.4 2.4 0 0 0 16.35 5.7H18.5A2.5 2.5 0 0 1 21 8.2V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <path d="M8 8h8M8 12h8M8 16h5"></path>
+              </svg>
+            </span>
+            Documentation
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/jhadida/deelan">
+            <span class="resource-icon resource-icon-github" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3a9 9 0 0 0-2.85 17.54c.45.08.62-.2.62-.45v-1.6c-2.53.55-3.06-1.09-3.06-1.09-.41-1.05-1.01-1.33-1.01-1.33-.83-.57.06-.56.06-.56.92.07 1.4.95 1.4.95.81 1.4 2.13 1 2.65.76.08-.59.32-1 .58-1.24-2.02-.23-4.13-1-4.13-4.52 0-1 .36-1.81.95-2.45-.1-.23-.42-1.16.09-2.43 0 0 .77-.25 2.53.94a8.7 8.7 0 0 1 4.6 0c1.76-1.2 2.53-.94 2.53-.94.5 1.27.18 2.2.09 2.43.59.64.95 1.45.95 2.45 0 3.53-2.11 4.29-4.14 4.52.32.28.61.83.61 1.67v2.47c0 .25.17.53.62.45A9 9 0 0 0 12 3z"></path>
+              </svg>
+            </span>
+            Repository
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="resource-icon resource-icon-package" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2.8 3 7.2v9.6l9 4.4 9-4.4V7.2z"></path>
+                <path d="M3 7.2 12 12l9-4.8M12 12v9.2"></path>
+              </svg>
+            </span>
+            NPM Package
+          </a>
+        </li>
       </ul>
     </section>
   </div>

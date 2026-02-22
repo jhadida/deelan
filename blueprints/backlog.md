@@ -34,14 +34,14 @@
 
 ## In Progress
 
-## Remaining
-
 ### 0. Brand and visual identity
 
 - [P0] Create Deelan logo and visual identity kit:
-    - logo exploration and final mark (SVG + icon variants)
-    - color/accent guidance and typography pairing
-    - usage notes for app, docs, Storybook, and exported artifacts
+    - [x] Usage notes for app, docs, Storybook, and exported artifacts (`logos/BRAND.md`, `docs/topic-branding.md`)
+    - [x] Color/accent guidance and typography pairing documentation
+    - [ ] Final vector mark package (SVG icon + lockup variants)
+
+## Remaining
 
 ### 1. Packaging/publish readiness
 
@@ -49,18 +49,23 @@
 - Ensure `deelan --help` and docs stay fully aligned.
 - Prepare alpha release checklist and notes.
 
-### 4. Optional UX polish (post-alpha candidate)
+### 2. UI refinement
 
-- [P2] Heading copy-link controls in rendered content.
-
-### 5. UI scaling and discoverability
-
-- [P2] Improve post list scalability:
+- [P1] Improve post list scalability:
     - add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
+- [P2] UI blueprint phase 4.
 
-### 6. Corporate hosting and access control
+### 3. UX refinement
 
+- [P2] Investigate command output verbosity controls:
+    - evaluate using `npm_config_loglevel` to reduce routine script trace output
+    - define a clean default vs debug mode convention for local workflows
+- [P2] Heading copy-link controls in rendered content.
+
+### 4. Feature enhancements
+
+- [P1] Analytics blueprint phase 2.
 - [P2] Explore enterprise auth integration options (OIDC/SAML/SSO):
     - assess required runtime changes beyond static preview serving
     - define scope boundaries (viewer-only auth vs role-based permissions)

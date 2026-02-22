@@ -33,7 +33,7 @@ async function main(): Promise<void> {
   await copyDirRecursive(sourceDir, TARGET_DIR, {
     includeFile: (fileName) => !fileName.endsWith('.md')
   });
-  logger.info(`complete: copied assets to ${path.relative(ROOT, TARGET_DIR)}.`);
+  logger.debug(`complete: copied assets to ${path.relative(ROOT, TARGET_DIR)}.`);
 }
 
 main().catch((error: unknown) => {

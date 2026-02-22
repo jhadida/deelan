@@ -41,17 +41,33 @@ const avgTagsPerItem =
       </article>
     </section>
 
-    <section class="panel section-block">
+    <section id="analytics-tag-frequency" class="panel section-block">
       <h2>Tag Frequency</h2>
       <p class="muted">Sortable table. Click column headers to sort.</p>
       <div class="table-wrap analytics-table-wrap">
         <table class="table analytics-table">
           <thead>
             <tr>
-              <th><button type="button" class="sort-btn" data-sort-key="name">Tag</button></th>
-              <th><button type="button" class="sort-btn" data-sort-key="count_total">Count</button></th>
-              <th><button type="button" class="sort-btn" data-sort-key="count_posts">Posts</button></th>
-              <th><button type="button" class="sort-btn" data-sort-key="count_snippets">Snippets</button></th>
+              <th>
+                <button type="button" class="sort-btn" data-sort-key="name" data-sort-direction="none">
+                  <span>Tag</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort-key="count_total" data-sort-direction="none">
+                  <span>Count</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort-key="count_posts" data-sort-direction="none">
+                  <span>Posts</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort-key="count_snippets" data-sort-direction="none">
+                  <span>Snippets</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody id="analytics-tags-table-body">
@@ -101,7 +117,9 @@ const avgTagsPerItem =
     const relationsData = JSON.parse(document.getElementById('analytics-relations-json')?.textContent || '{}');
     const tags = Array.isArray(tagsData.tags) ? [...tagsData.tags] : [];
     const tableBody = document.getElementById('analytics-tags-table-body');
-    const sortButtons = Array.from(document.querySelectorAll('.sort-btn'));
+    const sortButtons = Array.from(
+      document.querySelectorAll('#analytics-tag-frequency .sort-btn')
+    );
     const ENABLE_TAG_HISTOGRAM = false;
     let sortKey = 'count_total';
     let sortDirection = -1;
@@ -127,6 +145,21 @@ const avgTagsPerItem =
       return rows;
     }
 
+    function syncSortIndicators() {
+      sortButtons.forEach((button) => {
+        const key = button.getAttribute('data-sort-key');
+        const direction = key === sortKey ? (sortDirection > 0 ? 'asc' : 'desc') : 'none';
+        button.setAttribute('data-sort-direction', direction);
+        const th = button.closest('th');
+        if (th) {
+          th.setAttribute(
+            'aria-sort',
+            direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
+          );
+        }
+      });
+    }
+
     sortButtons.forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.getAttribute('data-sort-key');
@@ -136,10 +169,12 @@ const avgTagsPerItem =
           sortKey = key;
           sortDirection = key === 'name' ? 1 : -1;
         }
+        syncSortIndicators();
         renderTable(sortedTags());
       });
     });
 
+    syncSortIndicators();
     renderTable(sortedTags());
 
     function buildTagTree(tagRows) {
