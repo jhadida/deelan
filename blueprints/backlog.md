@@ -31,17 +31,16 @@
 - Optional UX polish (partially completed):
     - keyboard shortcuts added in snippets explorer
     - admonitions styling refined (title banner, color coding, icons, optional collapsible syntax)
+- Brand and visual identity (phase 1):
+    - usage notes for app, docs, Storybook, and exported artifacts (`logos/BRAND.md`, `docs/topic-branding.md`)
+    - color/accent guidance and typography pairing documentation
+    - docs/app/home branding integration (favicon, homepage hero, docs index branding pass)
+    - publish-size optimization recorded:
+      - canonical hires source kept in `logos/`
+      - runtime hero switched to high-quality JPG in `public/images/`
+      - measured `npm pack --dry-run` footprint improved from ~1.8 MB to ~551.2 kB in replacement simulation
 
 ## In Progress
-
-### 0. Brand and visual identity
-
-- [P0] Create Deelan logo and visual identity kit:
-    - [x] Usage notes for app, docs, Storybook, and exported artifacts (`logos/BRAND.md`, `docs/topic-branding.md`)
-    - [x] Color/accent guidance and typography pairing documentation
-    - [ ] Final vector mark package (SVG icon + lockup variants)
-
-## Remaining
 
 ### 1. Packaging/publish readiness
 
@@ -49,12 +48,15 @@
 - Ensure `deelan --help` and docs stay fully aligned.
 - Prepare alpha release checklist and notes.
 
+## Remaining
+
 ### 2. UI refinement
 
 - [P1] Improve post list scalability:
     - add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
 - [P2] UI blueprint phase 4.
+- [P2] Final vector mark package (SVG icon + lockup variants).
 
 ### 3. UX refinement
 

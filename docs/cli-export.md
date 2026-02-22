@@ -3,8 +3,8 @@
 ## CLI
 
 ```bash
-npm run export -- --id <content-id> --format html --out ./exports
-npm run export -- --id <content-id> --format pdf --out ./exports
+deelan export --id <content-id> --format html --out ./exports
+deelan export --id <content-id> --format pdf --out ./exports
 ```
 
 Arguments:
@@ -40,12 +40,18 @@ Output path:
 Scale can be tuned to fit page content density:
 
 ```bash
-npm run export -- --id post--partitioning-primer --format pdf --pdf-scale 0.95
+deelan export --id post--partitioning-primer --format pdf --pdf-scale 0.95
 ```
 
-Playwright browser binaries are **not guaranteed to be present** after npm install in every environment.
+Playwright/Chromium is optional and only required for PDF export.
+If missing, install:
 
-If Chromium is not installed yet, run:
+```bash
+npm install playwright
+npx playwright install chromium
+```
+
+Repository maintainers can also use:
 
 ```bash
 npm run optional:pdf

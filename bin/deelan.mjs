@@ -3,13 +3,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
-const TSX_CLI = path.join(ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs');
 const ASTRO_CLI = path.join(ROOT, 'node_modules', 'astro', 'astro.js');
+const TSX_LOADER = pathToFileURL(path.join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs')).href;
 
 const LOG_LEVEL_WEIGHT = {
   error: 0,
@@ -95,7 +95,7 @@ Examples:
   deelan build --include-subfolder synthetic
   deelan serve --port 4321
   deelan tags stats
-  deelan export --id post--de-partitioning-primer --format pdf --pdf-scale 0.95
+  deelan export --id post--partitioning-primer --format pdf --pdf-scale 0.95
   deelan validate
 ` + '\n');
 }
@@ -112,6 +112,15 @@ function runNode(args, logging) {
     process.exit(1);
   }
   process.exit(result.status ?? 1);
+}
+
+function runTsScript(scriptPath, args = []) {
+  const result = spawnSync(process.execPath, ['--import', TSX_LOADER, scriptPath, ...args], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    env: { ...process.env, DEELAN_PACKAGE_ROOT: ROOT }
+  });
+  if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
 }
 
 function splitBuildArgs(args) {
@@ -144,6 +153,10 @@ function splitBuildArgs(args) {
 }
 
 function runBuild(args, logging) {
+  if (args.includes('--help') || args.includes('-h')) {
+    runNode([ASTRO_CLI, 'build', ...args], logging);
+  }
+
   const { scriptArgs, astroArgs } = splitBuildArgs(args);
   const chain = [
     ['scripts/prepare-mathjax.ts'],
@@ -156,12 +169,7 @@ function runBuild(args, logging) {
   ];
 
   for (const [script] of chain) {
-    const result = spawnSync(process.execPath, [TSX_CLI, path.join(ROOT, script), ...scriptArgs], {
-      cwd: process.cwd(),
-      stdio: 'inherit',
-      env: { ...process.env, DEELAN_PACKAGE_ROOT: ROOT }
-    });
-    if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
+    runTsScript(path.join(ROOT, script), scriptArgs);
   }
 
   runNode([ASTRO_CLI, 'build', ...astroArgs], logging);
@@ -195,4 +203,4 @@ if (!scriptPath) {
   process.exit(1);
 }
 
-runNode([TSX_CLI, scriptPath, ...argv.slice(1)], logging);
+runTsScript(scriptPath, argv.slice(1));

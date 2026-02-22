@@ -1,9 +1,15 @@
 # Build outputs / generated artifacts
 .generated/
+.npm-packages/
+*.tgz
 .site-deelan/
 .site-docs/
 .site-storybook/
 exports/
+.astro/
+
+# Internal planning / non-runtime docs
+blueprints/
 
 # Local automation/context
 .codex/
@@ -19,6 +25,10 @@ tests/
 docs/
 mkdocs.yml
 requirements-docs.txt
+storybook/
+logos/
+src/stories/
+src/components/*Demo.astro
 
 # Local env and logs
 *.log
@@ -29,3 +39,11 @@ pnpm-debug.log*
 
 # Coverage
 coverage/
+
+# Generated/runtime assets not required in published package
+public/mathjax/
+public/content-assets/
+
+# Exclude synthetic sample corpus from package payload
+content/posts/synthetic/
+content/snippets/synthetic/

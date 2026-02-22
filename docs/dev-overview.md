@@ -8,7 +8,7 @@ For maintainers working on internals, build orchestration, docs tooling, and Sto
 - npm (with dev dependencies installed; do not use `--omit=dev`)
 - Python 3 (for MkDocs tooling)
 - Git + Git LFS
-- Chromium browser binary for Playwright PDF export
+- Optional: Playwright + Chromium for PDF export
 
 Install project dependencies:
 
@@ -22,7 +22,14 @@ Install docs dependencies:
 npm run docs:install
 ```
 
-Install Chromium for PDF export:
+Install optional PDF export dependencies:
+
+```bash
+npm install playwright
+npx playwright install chromium
+```
+
+Repository shortcut:
 
 ```bash
 npm run optional:pdf

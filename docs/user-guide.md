@@ -49,6 +49,7 @@ For step-by-step examples, see [Reverse Proxy and HTTPS](topic-reverse-proxy.md)
 - `deelan serve` - serve the built site.
 - `deelan tags --help` - inspect and manage tags.
 - `deelan export --help` - export an item as HTML or PDF.
+  PDF export additionally requires optional Playwright/Chromium setup (see [Export Contents](cli-export.md)).
 
 ## Content Types
 

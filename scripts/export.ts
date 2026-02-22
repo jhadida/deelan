@@ -83,7 +83,7 @@ function printHelp(): void {
   writeStdout(`Deelan export CLI
 
 Usage:
-  npm run export -- --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]
+  deelan export --id <content-id> [--format html|pdf] [--out <dir>] [--theme light|dark] [--pdf-scale <n>] [--include-subfolder <name>]
 
 Arguments:
   --id       Required. Generated ID (e.g. post--partitioning-primer)
@@ -94,10 +94,10 @@ Arguments:
   --include-subfolder Optional, repeatable. Include content/posts/<name>/*.md and content/snippets/<name>/*.md in discovery.
 
 Examples:
-  npm run export -- --id post--partitioning-primer
-  npm run export -- --id snippet--pandas-groupby --format html --theme light
-  npm run export -- --id post--partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
-  npm run export -- --id post--synthetic-post-0001 --include-subfolder synthetic
+  deelan export --id post--partitioning-primer
+  deelan export --id snippet--pandas-groupby --format html --theme light
+  deelan export --id post--partitioning-primer --format pdf --out ./exports --pdf-scale 0.95
+  deelan export --id post--synthetic-post-0001 --include-subfolder synthetic
 `);
 }
 

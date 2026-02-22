@@ -34,7 +34,7 @@ Generated derivatives:
 - Astro app
   - Browser tab/favicon: `public/favicon.ico`, `public/icons/favicon-32.png`
   - Apple touch icon: `public/icons/deelan-favicon-192.png`
-  - Home hero: `public/images/deelan-hires.png`
+  - Home hero (optimized runtime derivative): `public/images/deelan-hires.jpg`
 - MkDocs site
   - Header logo: `docs/assets/deelan-logo.png`
   - Favicon: `docs/assets/favicon.png`
@@ -78,3 +78,12 @@ Guideline:
   - `logos/deelan-mark.svg`
   - `logos/deelan-lockup.svg`
   - `logos/deelan-favicon.svg`
+
+## Packaging Optimization Record
+
+- Preserved canonical source art in `logos/deelan-hires.png`.
+- Switched runtime app hero asset from PNG to high-quality JPG (`public/images/deelan-hires.jpg`, quality ~92).
+- Measured publish impact with `npm pack --dry-run`:
+  - PNG runtime hero case: package ~`1.8 MB`, unpacked ~`2.1 MB`
+  - JPG runtime hero case: package ~`551.2 kB`, unpacked ~`746.0 kB`
+  - Source image bytes: PNG `1,669,119` -> JPG `364,087`

@@ -18,34 +18,69 @@ Deelan gives you a gorgeous, scalable, private, and feature-rich navigation expe
 - Static, local-first workflow (offline-friendly), with guidance and template configs for secure private deployment.
 - Export to self-contained HTML and PDF, share permalinks, explore and extend analytics.
 
-## Quick Start (This Repository)
+> [!NOTE]
+> Deelan is currently published as an early `0.x` alpha workflow.
+> Expect iterative changes to CLI surface, generated outputs, and docs while the release hardening pass continues.
+
+## Install
+
+From npm (once published):
 
 ```bash
-npm install
-npm run build
-npm run preview
+npm install -g deelan@alpha
+deelan --help
 ```
 
-Open `http://localhost:4321`.
-
-## Core CLI Commands
+Without global install:
 
 ```bash
-npx deelan --help
-npx deelan init --help
-npx deelan build --help
-npx deelan validate --help
-npx deelan tags --help
-npx deelan export --help
+npx deelan@alpha --help
 ```
 
-Equivalent npm wrappers are available (`npm run validate`, `npm run tags`, `npm run export`, etc.).
-
-For contributors working directly in this repository, local bin execution also works:
+Repository-local usage for contributors:
 
 ```bash
 node ./bin/deelan.mjs --help
 ```
+
+## Quickstart
+
+```bash
+deelan init my-notebook
+cd my-notebook
+deelan validate
+deelan build
+deelan serve
+```
+
+Open `http://localhost:4321`.
+
+## Core Commands
+
+```bash
+deelan --help
+deelan init --help
+deelan validate --help
+deelan build --help
+deelan serve --help
+deelan tags --help
+deelan export --help
+```
+
+Optional PDF export dependencies:
+
+```bash
+npm install playwright
+npx playwright install chromium
+```
+
+## Configuration Basics
+
+Project settings live in `deelan.config.yml`.
+Common options include default theme, timezone for rendered timestamps, and code highlighting themes.
+
+See full reference in docs:
+- `docs/user-configuration.md`
 
 ## Documentation
 
@@ -62,6 +97,15 @@ npm run docs:install
 npm run docs:serve
 npm run docs:build
 ```
+
+## Content ID Convention
+
+IDs are filename-derived and type-prefixed:
+
+- `content/posts/partitioning-primer.md` -> `post--partitioning-primer`
+- `content/snippets/pandas-groupby.md` -> `snippet--pandas-groupby`
+
+These IDs are used by search, related links, routes, and export commands.
 
 ## For Contributors
 

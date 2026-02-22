@@ -1,8 +1,37 @@
 {
   "name": "deelan",
   "version": "0.1.0",
-  "private": true,
-  "description": "Data Engineering Electronic LAboratory Notebook",
+  "private": false,
+  "description": "A private-first markdown notebook site builder for posts and snippets.",
+  "license": "MIT",
+  "author": {
+    "name": "Jonathan Hadida",
+    "url": "https://github.com/jhadida"
+  },
+  "contributors": [
+    {
+      "name": "Jonathan Hadida",
+      "url": "https://github.com/jhadida"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhadida/deelan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jhadida/deelan/issues"
+  },
+  "homepage": "https://github.com/jhadida/deelan#readme",
+  "keywords": [
+    "markdown",
+    "notes",
+    "knowledge-base",
+    "astro",
+    "static-site",
+    "cli",
+    "mathjax",
+    "shiki"
+  ],
   "type": "module",
   "bin": {
     "deelan": "./bin/deelan.mjs"
@@ -29,6 +58,8 @@
     "docs:serve": "mkdocs serve -w docs/ -w mkdocs.yml --livereload",
     "docs:build": "mkdocs build",
     "docs:deploy": "mkdocs gh-deploy --force",
+    "pack:dry-run": "mkdir -p .npm-packages && npm pack --dry-run --pack-destination .npm-packages --cache ./.generated/.npm-cache",
+    "pack:local": "mkdir -p .npm-packages && npm pack --pack-destination .npm-packages --cache ./.generated/.npm-cache",
     "dev": "npm run build:prepare-mathjax && npm run build:prepare-search && npm run build:prepare-content-assets && astro dev",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "prebuild": "npm run build:preflight",
@@ -54,8 +85,10 @@
     "marked": "^17.0.3",
     "marked-highlight": "^2.2.3",
     "mathjax": "^4.1.0",
-    "playwright": "^1.58.2",
     "shiki": "^3.22.0"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.58.2"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.2.10",
