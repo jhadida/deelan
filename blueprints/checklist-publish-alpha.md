@@ -21,7 +21,8 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 
 ### 1) Naming and ownership
 
-- [ ] Decide final npm package name (`deelan` or scoped alternative).
+- [x] Decide final npm package name (`deelan` or scoped alternative).
+    - Selected: `@jhadida/deelan`.
 - [ ] Confirm npm name availability.
 - [ ] Reserve matching GitHub repository naming.
 - [ ] Ensure stable maintainer ownership.
@@ -77,7 +78,7 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 - [x] Draft release notes (`alpha scope`, `known limitations`).
     - Draft file: `RELEASE_NOTES-alpha.md`.
 - [ ] Publish with dist-tag:
-    - `npm publish --tag alpha`
+    - `npm publish --tag alpha --access public`
 - [ ] Create git tag:
     - `v0.1.0-alpha.0`
 - [ ] Post-publish verification in clean temp install.
