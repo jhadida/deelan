@@ -30,14 +30,14 @@ Deelan gives you a gorgeous, scalable, private, and feature-rich navigation expe
 From npm (once published):
 
 ```bash
-npm install -g @jhadida/deelan@alpha
+npm install -g @jhadida/deelan
 deelan --help
 ```
 
 Without global install:
 
 ```bash
-npx @jhadida/deelan@alpha --help
+npx @jhadida/deelan --help
 ```
 
 Repository-local usage for contributors:
