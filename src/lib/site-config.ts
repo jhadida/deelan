@@ -14,6 +14,8 @@ export interface SiteConfig {
   code_theme_light: string;
   code_theme_dark: string;
   timeline_commit_url_template: string;
+  enable_posts_list_view: boolean;
+  enable_tailwind_pilot: boolean;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
@@ -25,7 +27,9 @@ const DEFAULT_CONFIG: SiteConfig = {
   content_max_width: '1100px',
   code_theme_light: 'github-light',
   code_theme_dark: 'github-dark',
-  timeline_commit_url_template: ''
+  timeline_commit_url_template: '',
+  enable_posts_list_view: false,
+  enable_tailwind_pilot: false
 };
 
 let cached: SiteConfig | null = null;
@@ -49,6 +53,16 @@ function asCssLength(value: unknown): string {
     return DEFAULT_CONFIG.content_max_width;
   }
   return trimmed;
+}
+
+function asBoolean(value: unknown, fallback: boolean): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') return true;
+    if (normalized === 'false') return false;
+  }
+  return fallback;
 }
 
 export async function getSiteConfig(): Promise<SiteConfig> {
@@ -85,7 +99,9 @@ export async function getSiteConfig(): Promise<SiteConfig> {
       timeline_commit_url_template:
         typeof parsed.timeline_commit_url_template === 'string'
           ? parsed.timeline_commit_url_template.trim()
-          : DEFAULT_CONFIG.timeline_commit_url_template
+          : DEFAULT_CONFIG.timeline_commit_url_template,
+      enable_posts_list_view: asBoolean(parsed.enable_posts_list_view, DEFAULT_CONFIG.enable_posts_list_view),
+      enable_tailwind_pilot: asBoolean(parsed.enable_tailwind_pilot, DEFAULT_CONFIG.enable_tailwind_pilot)
     };
 
     return cached;

@@ -1,0 +1,69 @@
+@config "../../tailwind.config.mjs";
+@import "tailwindcss";
+
+@layer components {
+  .posts-tailwind-pilot .pilot-note {
+    @apply inline-flex w-fit items-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--accent)_15%,var(--surface))] px-3 py-1 text-xs font-[var(--font-ui)] tracking-[0.02em] text-[var(--fg)];
+  }
+
+  .posts-tailwind-pilot .search-shell {
+    @apply gap-0;
+  }
+
+  .posts-tailwind-pilot .search-tabs {
+    @apply w-fit border-b border-[var(--line)];
+  }
+
+  .posts-tailwind-pilot .search-tab {
+    @apply inline-flex h-9 items-center border border-b-0 border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_88%,var(--bg))] px-4 text-sm text-[var(--muted)] translate-y-px;
+  }
+
+  .posts-tailwind-pilot .search-tab[aria-selected='true'] {
+    @apply border-[color-mix(in_oklab,var(--accent)_52%,var(--line))] bg-[var(--surface)] text-[var(--fg)];
+  }
+
+  .posts-tailwind-pilot .search-panel {
+    @apply rounded-none border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_92%,var(--bg))] p-4 shadow-none;
+  }
+
+  .posts-tailwind-pilot .filter-grid {
+    @apply gap-2.5;
+  }
+
+  .posts-tailwind-pilot .view-toggle {
+    @apply flex justify-end;
+  }
+
+  .posts-tailwind-pilot .view-toggle button {
+    @apply h-9 w-10 border border-[var(--line)] bg-[var(--surface)] text-[var(--fg)];
+  }
+
+  .posts-tailwind-pilot .table-wrap {
+    @apply overflow-x-auto rounded-md border border-[var(--line)];
+  }
+
+  .posts-tailwind-pilot .table {
+    @apply min-w-full border-none bg-[var(--surface)];
+  }
+
+  .posts-tailwind-pilot .table th,
+  .posts-tailwind-pilot .table td {
+    @apply px-3 py-2.5;
+  }
+
+  .posts-tailwind-pilot .table th {
+    @apply border-b border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-elevated)_92%,var(--bg))] font-[var(--font-ui)] text-[0.7rem] uppercase tracking-[0.06em] text-[var(--muted)];
+  }
+
+  .posts-tailwind-pilot .table td {
+    @apply align-top border-b border-[var(--line)];
+  }
+
+  .posts-tailwind-pilot .table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .posts-tailwind-pilot .tag-cloud {
+    @apply gap-1.5;
+  }
+}

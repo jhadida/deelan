@@ -1,6 +1,6 @@
-# Codex Contributor Context
+# Contributor Agent Context
 
-This file is a quick orientation for contributors using Codex on this repository.
+This file is a quick orientation for contributors using AI coding agents on this repository.
 
 ## Repository Purpose
 

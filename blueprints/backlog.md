@@ -48,12 +48,20 @@
 - Ensure `deelan --help` and docs stay fully aligned.
 - Prepare alpha release checklist and notes.
 
+### 2. Tailwind pilot branch (`codex/tailwind-pilot`)
+
+- Add pilot feature flag plumbing (`enable_tailwind_pilot`) for controlled side-by-side comparison workflow.
+- Pending: install and wire Tailwind toolchain (`tailwindcss`, `@tailwindcss/vite`) and migrate first pilot surface (`posts/`).
+  - Blocked in current sandbox due npm registry network restriction.
+
 ## Remaining
 
 ### 2. UI refinement
 
-- [P1] Improve post list scalability:
-    - add "load more" incremental loading strategy for list view
+- [P2] Revisit posts list view feature-flag decision:
+    - currently gated by `enable_posts_list_view` (default: `false`)
+    - decide whether to remove list view permanently after table scaling pass
+    - if retained, add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
 - [P2] UI blueprint phase 4.
 - [P2] Final vector mark package (SVG icon + lockup variants).
