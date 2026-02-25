@@ -115,6 +115,10 @@ These IDs are used by search, related links, routes, and export commands.
 - Run tests: `npm test`
 - Run Storybook: `npm run storybook:serve`
 - Build Storybook: `npm run storybook:build`
+- Automated release (tests + build + pack dry-run + version/tag + publish + push):
+  - `npm run release -- 0.1.3`
+  - Optional npm dist-tag: `npm run release -- 0.1.3 --npm-tag alpha`
+  - Local dry run (no publish/push): `npm run release:local -- 0.1.3`
 
 If you deploy the Astro site publicly, set `site` in `astro.config.mjs` to your canonical URL.
 

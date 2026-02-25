@@ -39,6 +39,10 @@ const avgTagsPerItem =
         <h2>Relation edges</h2>
         <p class="analytics-kpi">{relationsAnalytics.totals.edges}</p>
       </article>
+      <article class="panel">
+        <h2>Graph components</h2>
+        <p class="analytics-kpi">{relationsAnalytics.totals.components}</p>
+      </article>
     </section>
 
     <section id="analytics-tag-frequency" class="panel section-block">
@@ -50,22 +54,22 @@ const avgTagsPerItem =
             <tr>
               <th>
                 <button type="button" class="sort-btn" data-sort-key="name" data-sort-direction="none">
-                  <span>Tag</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                  <span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span><span>Tag</span>
                 </button>
               </th>
               <th>
                 <button type="button" class="sort-btn" data-sort-key="count_total" data-sort-direction="none">
-                  <span>Count</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                  <span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span><span>Count</span>
                 </button>
               </th>
               <th>
                 <button type="button" class="sort-btn" data-sort-key="count_posts" data-sort-direction="none">
-                  <span>Posts</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                  <span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span><span>Posts</span>
                 </button>
               </th>
               <th>
                 <button type="button" class="sort-btn" data-sort-key="count_snippets" data-sort-direction="none">
-                  <span>Snippets</span><span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span>
+                  <span class="sort-arrows" aria-hidden="true"><span class="arrow-up">▲</span><span class="arrow-down">▼</span></span><span>Snippets</span>
                 </button>
               </th>
             </tr>
@@ -94,7 +98,9 @@ const avgTagsPerItem =
 
     <section class="panel section-block">
       <h2>Relationships Graph</h2>
-      <p class="muted">Legend: Green = post, Blue = snippet.</p>
+      <p class="muted">
+        Legend: Green = post, Blue = snippet. <a href="https://js.cytoscape.org/#eles.degreeCentrality" target="_blank" rel="noopener noreferrer">Graph metrics</a>
+      </p>
       <div class="analytics-graph-layout">
         <div id="analytics-graph" class="analytics-graph"></div>
         <aside class="analytics-graph-side">
@@ -452,8 +458,18 @@ const avgTagsPerItem =
                   <code>${data.id}</code>
                 </a>
               </p>
-              <p>Type: ${data.type}</p>
-              <p>Neighbors: ${data.degree}</p>
+              <table class="analytics-selection-grid">
+                <tbody>
+                  <tr><td class="label">Type</td><td class="sep">:</td><td class="value">${data.type}</td></tr>
+                  <tr><td class="label">Neighbors</td><td class="sep">:</td><td class="value">${data.degree}</td></tr>
+                  <tr><td class="label">Degree (norm)</td><td class="sep">:</td><td class="value">${Number(data.degree_normalized ?? 0).toFixed(4)}</td></tr>
+                  <tr><td class="label">Closeness</td><td class="sep">:</td><td class="value">${Number(data.closeness ?? 0).toFixed(4)}</td></tr>
+                  <tr><td class="label">Betweenness</td><td class="sep">:</td><td class="value">${Number(data.betweenness ?? 0).toFixed(4)}</td></tr>
+                  <tr><td class="label">Betweenness (norm)</td><td class="sep">:</td><td class="value">${Number(data.betweenness_normalized ?? 0).toFixed(4)}</td></tr>
+                  <tr><td class="label">PageRank</td><td class="sep">:</td><td class="value">${Number(data.pagerank ?? 0).toFixed(4)}</td></tr>
+                  <tr><td class="label">Component</td><td class="sep">:</td><td class="value">#${(Number(data.component_id ?? 0) + 1).toString()} (${Number(data.component_size ?? 1)} node(s))</td></tr>
+                </tbody>
+              </table>
             `;
           });
         })

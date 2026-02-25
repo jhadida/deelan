@@ -1,6 +1,6 @@
 {
   "name": "@jhadida/deelan",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "A private-first markdown notebook site builder for posts and snippets.",
   "license": "MIT",
@@ -63,6 +63,8 @@
     "docs:deploy": "mkdocs gh-deploy --force",
     "pack:dry-run": "mkdir -p .npm-packages && npm pack --dry-run --pack-destination .npm-packages --cache ./.generated/.npm-cache",
     "pack:local": "mkdir -p .npm-packages && npm pack --pack-destination .npm-packages --cache ./.generated/.npm-cache",
+    "release": "tsx scripts/release.ts",
+    "release:local": "tsx scripts/release.ts --no-publish --no-push --allow-dirty",
     "dev": "npm run build:prepare-mathjax && npm run build:prepare-search && npm run build:prepare-content-assets && astro dev",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "prebuild": "npm run build:preflight",

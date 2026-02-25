@@ -48,6 +48,18 @@
 - Test file:
     - `tests/search.test.ts`
 
+## Release Workflow
+
+- End-to-end release automation:
+    - `npm run release -- <version>`
+- What it does:
+    - runs `validate`, `test`, `build`, `pack:dry-run`
+    - bumps package version and creates git commit+tag via `npm version`
+    - publishes to npm (default tag: `latest`, override with `--npm-tag <tag>`)
+    - pushes commit and tag to `origin`
+- Local check only (no npm publish, no git push):
+    - `npm run release:local -- <version>`
+
 ## Load/Stress Testing with Synthetic Content
 
 Synthetic content is ignored by default because discovery scans only top-level files.

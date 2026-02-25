@@ -1,4 +1,5 @@
 import path from 'node:path';
+import cytoscape from 'cytoscape';
 import type { GeneratedIndexItem, GeneratedIndexFile } from '../src/lib/content/generated';
 import { createLogger } from '../src/lib/logger';
 import { readJsonFile, uniqueSorted, writeJsonFile } from '../src/lib/util';
@@ -44,6 +45,7 @@ interface RelationsAnalyticsFile {
   totals: {
     nodes: number;
     edges: number;
+    components: number;
   };
   nodes: Array<{
     id: string;
@@ -51,12 +53,34 @@ interface RelationsAnalyticsFile {
     title: string;
     href: string;
     degree: number;
+    degree_normalized: number;
+    closeness: number;
+    betweenness: number;
+    betweenness_normalized: number;
+    pagerank: number;
+    component_id: number;
+    component_size: number;
   }>;
   edges: Array<{
     source: string;
     target: string;
     kind: 'related';
   }>;
+}
+
+interface RelationNodeRecord {
+  id: string;
+  type: 'post' | 'snippet';
+  title: string;
+  href: string;
+  degree: number;
+  degree_normalized: number;
+  closeness: number;
+  betweenness: number;
+  betweenness_normalized: number;
+  pagerank: number;
+  component_id: number;
+  component_size: number;
 }
 
 function addTagCount(item: GeneratedIndexItem, tag: string, bucket: Map<string, TagStats>): void {
@@ -142,7 +166,7 @@ function buildHierarchy(tagStats: TagStats[]): HierarchyNode[] {
 }
 
 function buildRelations(items: GeneratedIndexItem[]): RelationsAnalyticsFile {
-  const nodeMap = new Map(
+  const nodeMap = new Map<string, RelationNodeRecord>(
     items.map((item) => [
       item.id,
       {
@@ -150,7 +174,14 @@ function buildRelations(items: GeneratedIndexItem[]): RelationsAnalyticsFile {
         type: item.type,
         title: item.title,
         href: `/view/${item.id}`,
-        degree: 0
+        degree: 0,
+        degree_normalized: 0,
+        closeness: 0,
+        betweenness: 0,
+        betweenness_normalized: 0,
+        pagerank: 0,
+        component_id: 0,
+        component_size: 1
       }
     ])
   );
@@ -175,9 +206,83 @@ function buildRelations(items: GeneratedIndexItem[]): RelationsAnalyticsFile {
     if (target) target.degree += 1;
   }
 
+  const adjacency = new Map<string, Set<string>>();
+  for (const id of nodeMap.keys()) adjacency.set(id, new Set<string>());
+  for (const edge of edges) {
+    adjacency.get(edge.source)?.add(edge.target);
+    adjacency.get(edge.target)?.add(edge.source);
+  }
+
+  const componentByNode = new Map<string, number>();
+  const componentSizes: number[] = [];
+  let componentIndex = 0;
+  for (const id of nodeMap.keys()) {
+    if (componentByNode.has(id)) continue;
+    const queue = [id];
+    componentByNode.set(id, componentIndex);
+    let size = 0;
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current) continue;
+      size += 1;
+      for (const next of adjacency.get(current) ?? []) {
+        if (componentByNode.has(next)) continue;
+        componentByNode.set(next, componentIndex);
+        queue.push(next);
+      }
+    }
+    componentSizes[componentIndex] = size;
+    componentIndex += 1;
+  }
+
+  const cy = cytoscape({
+    headless: true,
+    elements: [
+      ...Array.from(nodeMap.values()).map((node) => ({
+        data: {
+          id: node.id,
+          type: node.type,
+          title: node.title,
+          href: node.href
+        }
+      })),
+      ...edges.map((edge) => ({
+        data: {
+          id: `${edge.source}--${edge.target}`,
+          source: edge.source,
+          target: edge.target
+        }
+      }))
+    ]
+  });
+  const all = cy.elements();
+  const degreeNormalized = all.degreeCentralityNormalized({ directed: false, alpha: 0 });
+  const closenessNormalized = all.closenessCentralityNormalized({ directed: false, harmonic: true });
+  const betweenness = all.betweennessCentrality({ directed: false });
+  const pageRank = all.pageRank({ dampingFactor: 0.85 });
+
+  function metric(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.round(value * 1_000_000) / 1_000_000;
+  }
+
+  for (const node of nodeMap.values()) {
+    const ele = cy.$id(node.id);
+    node.degree = Math.round(node.degree);
+    node.degree_normalized = metric(degreeNormalized.degree(ele));
+    node.closeness = metric(closenessNormalized.closeness(ele));
+    node.betweenness = metric(betweenness.betweenness(ele));
+    node.betweenness_normalized = metric(betweenness.betweennessNormalized(ele));
+    node.pagerank = metric(pageRank.rank(ele));
+    const compId = componentByNode.get(node.id) ?? 0;
+    node.component_id = compId;
+    node.component_size = componentSizes[compId] ?? 1;
+  }
+  cy.destroy();
+
   return {
     generated_at: new Date().toISOString(),
-    totals: { nodes: nodeMap.size, edges: edges.length },
+    totals: { nodes: nodeMap.size, edges: edges.length, components: componentIndex },
     nodes: Array.from(nodeMap.values()).sort((a, b) => a.id.localeCompare(b.id)),
     edges
   };

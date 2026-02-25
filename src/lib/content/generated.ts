@@ -89,6 +89,7 @@ export interface GeneratedRelationsAnalyticsFile {
   totals: {
     nodes: number;
     edges: number;
+    components: number;
   };
   nodes: Array<{
     id: string;
@@ -96,6 +97,13 @@ export interface GeneratedRelationsAnalyticsFile {
     title: string;
     href: string;
     degree: number;
+    degree_normalized: number;
+    closeness: number;
+    betweenness: number;
+    betweenness_normalized: number;
+    pagerank: number;
+    component_id: number;
+    component_size: number;
   }>;
   edges: Array<{
     source: string;
@@ -152,7 +160,7 @@ export async function loadTagsAnalytics(): Promise<GeneratedTagsAnalyticsFile> {
 export async function loadRelationsAnalytics(): Promise<GeneratedRelationsAnalyticsFile> {
   return readJsonOrDefault(path.join(ROOT, '.generated', 'analytics', 'relations.json'), {
     generated_at: new Date(0).toISOString(),
-    totals: { nodes: 0, edges: 0 },
+    totals: { nodes: 0, edges: 0, components: 0 },
     nodes: [],
     edges: []
   });
