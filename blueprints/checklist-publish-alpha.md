@@ -57,7 +57,7 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
     - config basics (`deelan.config.yml`)
     - filename-derived ID conventions
 - [x] Add explicit alpha support/expectation notice.
-- [x] Add top-level `CODEX.md` contributor context for Codex-assisted development:
+- [x] Add top-level `AGENTS.md` contributor context for AI-assisted development:
     - repository map and folder intent
     - command/script conventions and quality gates
     - content/model conventions and generated artifacts

@@ -9,6 +9,7 @@ import { formatTimestamp } from '../../lib/time';
 const posts = await loadPostsIndex();
 const timeline = await loadTimeline();
 const siteConfig = await getSiteConfig();
+const enablePostsListView = siteConfig.enable_posts_list_view;
 
 function effectiveDate(id: string, fallback: string | null): string | null {
   const item = timeline.items[id];
@@ -21,7 +22,7 @@ function displayDate(value: string | null): string {
 ---
 
 <SiteShell pageTitle="Posts">
-  <div class="container stack">
+  <div class="container stack" data-posts-list-view-enabled={enablePostsListView ? 'true' : 'false'}>
     <header class="page-header">
       <span class="eyebrow">Library</span>
       <h1 class="page-title">Posts</h1>
@@ -33,26 +34,30 @@ function displayDate(value: string | null): string {
 
     <SearchShell idPrefix="posts" ariaLabel="Posts search mode" />
 
-    <section class="view-toggle">
-      <button id="posts-view-table" type="button" aria-pressed="true" title="Table view" aria-label="Table view">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="3" y="5" width="18" height="14" rx="1"></rect>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-          <line x1="9" y1="5" x2="9" y2="19"></line>
-          <line x1="15" y1="5" x2="15" y2="19"></line>
-        </svg>
-      </button>
-      <button id="posts-view-list" type="button" aria-pressed="false" title="List view" aria-label="List view">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <line x1="6" y1="7" x2="21" y2="7"></line>
-          <line x1="6" y1="12" x2="21" y2="12"></line>
-          <line x1="6" y1="17" x2="21" y2="17"></line>
-          <circle cx="3.5" cy="7" r="1.2"></circle>
-          <circle cx="3.5" cy="12" r="1.2"></circle>
-          <circle cx="3.5" cy="17" r="1.2"></circle>
-        </svg>
-      </button>
-    </section>
+    {
+      enablePostsListView ? (
+        <section class="view-toggle">
+          <button id="posts-view-table" type="button" aria-pressed="true" title="Table view" aria-label="Table view">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="1"></rect>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <line x1="9" y1="5" x2="9" y2="19"></line>
+              <line x1="15" y1="5" x2="15" y2="19"></line>
+            </svg>
+          </button>
+          <button id="posts-view-list" type="button" aria-pressed="false" title="List view" aria-label="List view">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <line x1="6" y1="7" x2="21" y2="7"></line>
+              <line x1="6" y1="12" x2="21" y2="12"></line>
+              <line x1="6" y1="17" x2="21" y2="17"></line>
+              <circle cx="3.5" cy="7" r="1.2"></circle>
+              <circle cx="3.5" cy="12" r="1.2"></circle>
+              <circle cx="3.5" cy="17" r="1.2"></circle>
+            </svg>
+          </button>
+        </section>
+      ) : null
+    }
 
     <div id="posts-table-view" class="table-wrap">
       <table class="table">
@@ -106,35 +111,39 @@ function displayDate(value: string | null): string {
       </table>
     </div>
 
-    <div id="posts-list-view" style="display: none;">
-      <ul class="cards">
-        {posts.items.map((post) => (
-          <li
-            class="panel"
-            data-post-item
-            data-key={post.id}
-            data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
-            data-tags={post.tags.join(',')}
-            data-title={post.title}
-            data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
-          >
-            <h2><a href={`/view/${post.id}`} target="_blank" rel="noopener noreferrer">{post.title}</a></h2>
-            <p class="muted">
-              <a
-                href="#"
-                class="copy-link"
-                data-copy-link
-                data-copy-url={`/view/${post.id}`}
-                title="Copy permalink"
-                >{post.id}</a
+    {
+      enablePostsListView ? (
+        <div id="posts-list-view" style="display: none;">
+          <ul class="cards">
+            {posts.items.map((post) => (
+              <li
+                class="panel"
+                data-post-item
+                data-key={post.id}
+                data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
+                data-tags={post.tags.join(',')}
+                data-title={post.title}
+                data-date={effectiveDate(post.id, post.updated_at ?? post.created_at) ?? ''}
               >
-            </p>
-            {post.description ? <p>{post.description}</p> : null}
-            <TagCloud tags={post.tags} className="posts-card-tags" />
-          </li>
-        ))}
-      </ul>
-    </div>
+                <h2><a href={`/view/${post.id}`} target="_blank" rel="noopener noreferrer">{post.title}</a></h2>
+                <p class="muted">
+                  <a
+                    href="#"
+                    class="copy-link"
+                    data-copy-link
+                    data-copy-url={`/view/${post.id}`}
+                    title="Copy permalink"
+                    >{post.id}</a
+                  >
+                </p>
+                {post.description ? <p>{post.description}</p> : null}
+                <TagCloud tags={post.tags} className="posts-card-tags" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null
+    }
   </div>
 
   <script type="module">
@@ -156,12 +165,16 @@ function displayDate(value: string | null): string {
       countSelector: '#posts-visible-count'
     });
 
-    initViewToggle({
-      tableButtonSelector: '#posts-view-table',
-      listButtonSelector: '#posts-view-list',
-      tableSelector: '#posts-table-view',
-      listSelector: '#posts-list-view'
-    });
+    const listViewEnabled =
+      document.querySelector('.container[data-posts-list-view-enabled]')?.getAttribute('data-posts-list-view-enabled') === 'true';
+    if (listViewEnabled) {
+      initViewToggle({
+        tableButtonSelector: '#posts-view-table',
+        listButtonSelector: '#posts-view-list',
+        tableSelector: '#posts-table-view',
+        listSelector: '#posts-list-view'
+      });
+    }
 
     const tableBody = document.querySelector('#posts-table-view tbody');
     const listRoot = document.querySelector('#posts-list-view .cards');
@@ -206,15 +219,19 @@ function displayDate(value: string | null): string {
 
     function applySort() {
       const tableRows = Array.from(document.querySelectorAll('#posts-table-view tbody tr[data-post-item]'));
-      const listRows = Array.from(document.querySelectorAll('#posts-list-view li[data-post-item]'));
-      const listByKey = new Map(listRows.map((row) => [row.getAttribute('data-key'), row]));
+      const listRows = listViewEnabled
+        ? Array.from(document.querySelectorAll('#posts-list-view li[data-post-item]'))
+        : [];
+      const listByKey = listViewEnabled
+        ? new Map(listRows.map((row) => [row.getAttribute('data-key'), row]))
+        : new Map();
       const sortedTable = [...tableRows].sort(compareByKey);
       const sortedKeys = sortedTable.map((row) => row.getAttribute('data-key'));
 
       if (tableBody) {
         sortedTable.forEach((row) => tableBody.appendChild(row));
       }
-      if (listRoot) {
+      if (listViewEnabled && listRoot) {
         sortedKeys.forEach((key) => {
           const item = key ? listByKey.get(key) : null;
           if (item) listRoot.appendChild(item);

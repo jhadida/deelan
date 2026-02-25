@@ -31,6 +31,9 @@
 - Optional UX polish (partially completed):
     - keyboard shortcuts added in snippets explorer
     - admonitions styling refined (title banner, color coding, icons, optional collapsible syntax)
+- Tailwind pilot decision:
+    - pilot completed in branch `codex/tailwind-pilot`
+    - decision: no full migration for now; keep current CSS architecture
 - Brand and visual identity (phase 1):
     - usage notes for app, docs, Storybook, and exported artifacts (`logos/BRAND.md`, `docs/topic-branding.md`)
     - color/accent guidance and typography pairing documentation
@@ -52,8 +55,10 @@
 
 ### 2. UI refinement
 
-- [P1] Improve post list scalability:
-    - add "load more" incremental loading strategy for list view
+- [P2] Revisit posts list view feature-flag decision:
+    - currently gated by `enable_posts_list_view` (default: `false`)
+    - decide whether to remove list view permanently after table scaling pass
+    - if retained, add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
 - [P2] UI blueprint phase 4.
 - [P2] Final vector mark package (SVG icon + lockup variants).

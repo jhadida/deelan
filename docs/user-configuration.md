@@ -13,6 +13,7 @@ Runtime configuration is stored in `deelan.config.yml` at project root.
 - `code_theme_light` (`string`, default: `github-light`) Shiki theme for light mode code blocks
 - `code_theme_dark` (`string`, default: `github-dark`) Shiki theme for dark mode code blocks
 - `timeline_commit_url_template` (`string`, default: empty) URL template with `${COMMIT_SHA}`
+- `enable_posts_list_view` (`boolean`, default: `false`) enable optional posts list-card view and table/list toggle
 - `log_level` (`error | warn | info | debug`, default: `info`) global CLI/script logging threshold
 - `log_file` (`string`, optional) path to append logs to (relative to project root)
 
@@ -28,6 +29,7 @@ content_max_width: 1100px
 code_theme_light: material-theme-lighter
 code_theme_dark: material-theme-darker
 timeline_commit_url_template: https://github.com/jhadida/deelan/commit/${COMMIT_SHA}
+enable_posts_list_view: false
 log_level: info
 # log_file: .generated/logs/deelan.log
 ```
