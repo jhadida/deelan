@@ -176,12 +176,12 @@ function matchDate(filters, date) {
   if (!Number.isFinite(value)) return false;
 
   if (filters.from) {
-    const from = Date.parse(filters.from);
+    const from = Date.parse(`${filters.from}T00:00:00.000Z`);
     if (Number.isFinite(from) && value < from) return false;
   }
 
   if (filters.to) {
-    const to = Date.parse(`${filters.to}T23:59:59.999`);
+    const to = Date.parse(`${filters.to}T23:59:59.999Z`);
     if (Number.isFinite(to) && value > to) return false;
   }
 

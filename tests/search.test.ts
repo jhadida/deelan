@@ -45,8 +45,8 @@ test('matchesFilters handles hierarchical tags', () => {
 test('matchesFilters treats to: as inclusive end-of-day', () => {
   const parsed = parseQuery('from:2026-02-17 to:2026-02-17');
 
-  const sameDayLate = matchesFilters(parsed.filters, ['data.lake.partitioning'], '2026-02-17T21:30:00-08:00');
-  const nextDay = matchesFilters(parsed.filters, ['data.lake.partitioning'], '2026-02-18T00:00:00-08:00');
+  const sameDayLate = matchesFilters(parsed.filters, ['data.lake.partitioning'], '2026-02-17T23:59:00Z');
+  const nextDay = matchesFilters(parsed.filters, ['data.lake.partitioning'], '2026-02-18T00:00:00Z');
 
   assert.equal(sameDayLate, true);
   assert.equal(nextDay, false);
