@@ -159,6 +159,32 @@ function highestTaggedVersion(): string | null {
   return bestRaw;
 }
 
+function highestOriginTaggedVersion(): string | null {
+  const result = runCapture('git', ['ls-remote', '--tags', 'origin', 'refs/tags/v*']);
+  if (result.status !== 0) return null;
+  const lines = result.stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  let bestRaw: string | null = null;
+  let bestParsed: Semver | null = null;
+  for (const line of lines) {
+    const parts = line.split(/\s+/);
+    const ref = parts[1] ?? '';
+    if (!ref.startsWith('refs/tags/v')) continue;
+    const tag = ref.replace('refs/tags/', '').replace(/\^\{\}$/, '');
+    const raw = tag.startsWith('v') ? tag.slice(1) : tag;
+    const parsed = parseSemver(raw);
+    if (!parsed) continue;
+    if (!bestParsed || compareSemver(parsed, bestParsed) > 0) {
+      bestParsed = parsed;
+      bestRaw = raw;
+    }
+  }
+  return bestRaw;
+}
+
 function printHelp(): void {
   console.log(`Usage:
   npm run release -- <version> [--execute] [--npm-tag <tag>] [--no-publish] [--no-push] [--allow-dirty]
@@ -236,7 +262,6 @@ function main(): void {
   if (!packageSemver) fail(`current package.json version is invalid semver: ${packageVersion}`);
   const tagExists = existingTag === tagName;
   const published = shouldPublish ? isVersionPublished(packageName, version) : false;
-  let cleanedStaleLocalTag = false;
 
   if (tagExists) {
     if (!hasRemoteOrigin()) {
@@ -258,7 +283,6 @@ function main(): void {
     } else {
       console.log(`[dry-run] git tag -d ${tagName} # stale local unpushed tag cleanup`);
     }
-    cleanedStaleLocalTag = true;
   }
 
   if (shouldPublish) {
@@ -269,14 +293,16 @@ function main(): void {
     }
   }
 
-  const resumeInterruptedRelease = cleanedStaleLocalTag && packageVersion === version;
+  const packageAtTargetVersion = packageVersion === version;
+  const publishPending = !shouldPublish || !published;
+  const resumeInterruptedRelease = packageAtTargetVersion && publishPending;
   if (resumeInterruptedRelease) {
     console.log(`release: detected interrupted release for ${version}; resuming with direct tag recreation.`);
   } else {
     if (compareSemver(targetSemver, packageSemver) <= 0) {
       fail(`target version (${version}) must be greater than package.json version (${packageVersion})`);
     }
-    const latestTag = highestTaggedVersion();
+    const latestTag = highestOriginTaggedVersion() ?? highestTaggedVersion();
     if (latestTag) {
       const latestTagSemver = parseSemver(latestTag);
       if (latestTagSemver && compareSemver(targetSemver, latestTagSemver) <= 0) {
