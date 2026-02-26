@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-theme="dark" style="--accent-hue: 170; --container-max: 1100px; --detail-max: 1100px;">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hi, Bob! | Deelan.</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="./mathjax/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <main class="container stack">
+      <header class="page-header detail-width">
+        <span class="eyebrow">Post</span>
+        <h1 class="page-title">Hi, Bob!</h1>
+        <p class="page-subtitle">post--showcase (draft) — Version: v0.1.0 — Last updated: 2026-02-21 14:49:06</p>
+      </header>
+      <p class="detail-width">Synthetic post showcasing Deelan authoring features.</p>
+      <article class="detail-width markdown-body"><nav class="md-toc" aria-label="Table of contents"><p class="md-toc-title">Contents</p><ul><li class="md-toc-level-2"><a href="#internal-links">Internal Links</a></li><li class="md-toc-level-2"><a href="#admonitions">Admonitions</a></li><li class="md-toc-level-2"><a href="#footnotes">Footnotes</a></li><li class="md-toc-level-2"><a href="#figure">Figure</a></li><li class="md-toc-level-2"><a href="#mermaid-diagram">Mermaid Diagram</a></li><li class="md-toc-level-2"><a href="#python-highlighting">Python Highlighting</a></li><li class="md-toc-level-2"><a href="#maths-rendering">Maths Rendering</a></li></ul></nav>
+<h2 id="internal-links">Internal Links</h2><p>This sentence links to another post: <a href="/view/post--partitioning-primer">Partitioning primer</a>.</p>
+<p>This sentence links to a snippet: <a href="/view/snippet--pandas-groupby">Pandas groupby snippet</a>.</p>
+<h2 id="admonitions">Admonitions</h2><aside class="md-admonition md-admonition-note"><p class="md-admonition-title"><span class="md-admonition-icon" aria-hidden="true">ℹ</span><span>Note Callout</span></p><p>This is a note admonition rendered from blockquote syntax.</p>
+</aside>
+<details class="md-admonition md-admonition-tip"><summary class="md-admonition-title"><span class="md-admonition-icon" aria-hidden="true">✓</span><span>Tip Callout</span></summary><p>Keep headings consistent to get a clean auto-generated table of contents.</p>
+</details>
+<aside class="md-admonition md-admonition-warning"><p class="md-admonition-title"><span class="md-admonition-icon" aria-hidden="true">⚠</span><span>Warning Callout</span></p><p>Unknown internal wiki links are validated and will fail <code>validate</code>.</p>
+</aside>
+<h2 id="footnotes">Footnotes</h2><p>Inline footnote reference example<sup class="md-footnote-ref" id="fnref-fn-demo"><a href="#fn-fn-demo">1</a></sup>.</p>
+<p>Another reference reusing the same footnote<sup class="md-footnote-ref" id="fnref-fn-demo"><a href="#fn-fn-demo">1</a></sup>.</p>
+<h2 id="figure">Figure</h2><figure class="md-figure" style="--md-figure-width: 65%;"><img src="./media/figure-01-overview.svg" alt="Minimal local SVG figure" loading="lazy" /><figcaption>Minimal local SVG figure</figcaption></figure>
+Text continues below the figure block to demonstrate normal flow.
+
+<h2 id="mermaid-diagram">Mermaid Diagram</h2><pre class="mermaid">flowchart TD
+  A[&quot;Raw Source&quot;] --&gt; B[&quot;Markdown Parser&quot;]
+  B --&gt; C[&quot;HTML Output&quot;]
+  C --&gt; D[&quot;Rendered View&quot;]</pre>
+
+<h2 id="python-highlighting">Python Highlighting</h2><pre class="shiki shiki-themes material-theme-lighter material-theme-darker" style="background-color:#FAFAFA;--shiki-dark-bg:#212121;color:#90A4AE;--shiki-dark:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#39ADB5;--shiki-light-font-style:italic;--shiki-dark:#89DDFF;--shiki-dark-font-style:italic">from</span><span style="color:#90A4AE;--shiki-dark:#EEFFFF"> collections </span><span style="color:#39ADB5;--shiki-light-font-style:italic;--shiki-dark:#89DDFF;--shiki-dark-font-style:italic">import</span><span style="color:#90A4AE;--shiki-dark:#EEFFFF"> Counter</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#90A4AE;--shiki-dark:#EEFFFF">events </span><span style="color:#39ADB5;--shiki-dark:#89DDFF">=</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> [</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#91B859;--shiki-dark:#C3E88D">ingest</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> "</span><span style="color:#91B859;--shiki-dark:#C3E88D">ingest</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> "</span><span style="color:#91B859;--shiki-dark:#C3E88D">validate</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> "</span><span style="color:#91B859;--shiki-dark:#C3E88D">build</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> "</span><span style="color:#91B859;--shiki-dark:#C3E88D">build</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#39ADB5;--shiki-dark:#89DDFF"> "</span><span style="color:#91B859;--shiki-dark:#C3E88D">build</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">]</span></span>
+<span class="line"><span style="color:#90A4AE;--shiki-dark:#EEFFFF">counts </span><span style="color:#39ADB5;--shiki-dark:#89DDFF">=</span><span style="color:#6182B8;--shiki-dark:#82AAFF"> Counter</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">(</span><span style="color:#6182B8;--shiki-dark:#82AAFF">events</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#39ADB5;--shiki-light-font-style:italic;--shiki-dark:#89DDFF;--shiki-dark-font-style:italic">for</span><span style="color:#90A4AE;--shiki-dark:#EEFFFF"> name</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">,</span><span style="color:#90A4AE;--shiki-dark:#EEFFFF"> n </span><span style="color:#39ADB5;--shiki-light-font-style:italic;--shiki-dark:#89DDFF;--shiki-dark-font-style:italic">in</span><span style="color:#90A4AE;--shiki-dark:#EEFFFF"> counts</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">.</span><span style="color:#6182B8;--shiki-dark:#82AAFF">items</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">():</span></span>
+<span class="line"><span style="color:#6182B8;--shiki-dark:#82AAFF">    print</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">(</span><span style="color:#9C3EDA;--shiki-dark:#C792EA">f</span><span style="color:#91B859;--shiki-dark:#C3E88D">"</span><span style="color:#F76D47;--shiki-dark:#F78C6C">{</span><span style="color:#6182B8;--shiki-dark:#82AAFF">name</span><span style="color:#F76D47;--shiki-dark:#F78C6C">}</span><span style="color:#91B859;--shiki-dark:#C3E88D">: </span><span style="color:#F76D47;--shiki-dark:#F78C6C">{</span><span style="color:#6182B8;--shiki-dark:#82AAFF">n</span><span style="color:#F76D47;--shiki-dark:#F78C6C">}</span><span style="color:#91B859;--shiki-dark:#C3E88D">"</span><span style="color:#39ADB5;--shiki-dark:#89DDFF">)</span></span></code></pre>
+<h2 id="maths-rendering">Maths Rendering</h2><p>Inline math: $e^{i\pi} + 1 = 0$.</p>
+<p>Block math:</p>
+<p>$$
+\nabla \cdot \vec{F} = \frac{\partial F_x}{\partial x} + \frac{\partial F_y}{\partial y} + \frac{\partial F_z}{\partial z}
+$$</p>
+<section class="md-footnotes" aria-label="Footnotes"><hr /><ol><li id="fn-fn-demo">Footnotes are rendered at the bottom with back-links. <a href="#fnref-fn-demo" class="md-footnote-backref" aria-label="Back to reference">↩</a></li></ol></section></article>
+      <footer class="site-footer">
+        <div class="container muted">Built with ♥ using Deelan.</div>
+      </footer>
+    </main>
+  </body>
+</html>
