@@ -80,23 +80,22 @@ npm install playwright
 npx playwright install chromium
 ```
 
-## Configuration Basics
+## High Level Guidance
 
-Project settings live in `deelan.config.yml`.
-Common options include default theme, timezone for rendered timestamps, and code highlighting themes.
-
-See full reference in docs:
-- `docs/user-configuration.md`
-
-
-## Content ID Convention
-
-IDs are filename-derived and type-prefixed:
+Markdown files are stored in a `content/` folder for both posts and snippets.
+Content IDs are filename-derived and type-prefixed:
 
 - `content/posts/partitioning-primer.md` -> `post--partitioning-primer`
 - `content/snippets/pandas-groupby.md` -> `snippet--pandas-groupby`
 
 These IDs are used by search, related links, routes, and export commands.
+Tags can be assigned to posts and snippets alike, and are hierarchical in nature with dot-separators e.g. `python.pandas.groupby`.
+Content assets (like figures) are typically stored under an asset folder `content/<type>/assets/`.
+We strongly recommend versioning text contents with Git and non-text assets with LFS.
+
+Project settings live in `deelan.config.yml`.
+Common options include default theme, timezone for rendered timestamps, and code highlighting themes.
+Learn more about typical workflows, and many more topics, in the [documentation](https://jhadida.github.io/deelan).
 
 ## About this app 
 
