@@ -2,7 +2,7 @@
 
 Data Engineering Electronic LAboratory Notebook (Deelan)
 
-## Status Snapshot (2026-02-20)
+## Status Snapshot (2026-02-26)
 
 ### Completed
 
@@ -33,6 +33,7 @@ Data Engineering Electronic LAboratory Notebook (Deelan)
     - Thin `deelan` CLI wrapper implemented (`init/build/serve/tags/export/validate`)
     - Storybook integrated
     - MkDocs docs pipeline integrated
+    - release automation baseline implemented (`release`, `release:check`, CI workflows)
 
 ### In Progress
 
@@ -41,7 +42,9 @@ Data Engineering Electronic LAboratory Notebook (Deelan)
 ### Remaining / Planned
 
 - Optional `--inline-assets` export mode
-- CI/release automation polish for alpha-to-stable flow
+- Release-policy hardening for alpha-to-stable flow:
+    - checks-only CI vs tag-driven publish gating decision
+    - optional manual approval gate before automated publish
 - Optional per-item changelog surfacing in UI
 
 ### Postponed
@@ -80,4 +83,4 @@ Data Engineering Electronic LAboratory Notebook (Deelan)
 
 - Inline-assets export mode
 - Changelog surfacing
-- Additional automation/CI hardening
+- Additional release-policy/CI hardening

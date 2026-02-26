@@ -12,10 +12,10 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 
 ## In Progress
 
-- [x] Confirm final publish surface for npm package contents (`.npmignore` review, `npm pack --dry-run`).
-    - Current dry-run tarball: ~551.2 kB package size / ~746.0 kB unpacked.
-- [x] Ensure CLI help and docs are fully drift-free before alpha cut.
-- [x] Confirm whether Playwright remains required dependency or is reclassified as optional strategy.
+- [ ] Keep CI as checks-only for now.
+    - `release:check` + `ci.yml` are active.
+    - package publish remains local via `npm run release -- <version> --execute`.
+    - revisit tag-driven auto-publish only after manual approval gate strategy is finalized.
 
 ## Remaining (Before Publish)
 
@@ -23,9 +23,9 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 
 - [x] Decide final npm package name (`deelan` or scoped alternative).
     - Selected: `@jhadida/deelan`.
-- [ ] Confirm npm name availability.
-- [ ] Reserve matching GitHub repository naming.
-- [ ] Ensure stable maintainer ownership.
+- [x] Confirm npm name availability.
+- [x] Reserve matching GitHub repository naming.
+- [x] Ensure stable maintainer ownership.
 
 ### 2) Package metadata
 
@@ -38,8 +38,8 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 
 ### 3) Publish surface control
 
-- [ ] Run `npm pack --dry-run` and verify tarball contents.
-- [ ] Ensure generated/local folders are excluded:
+- [x] Run `npm pack --dry-run` and verify tarball contents.
+- [x] Ensure generated/local folders are excluded:
     - `.site-deelan/`
     - `.site-docs/`
     - `.site-storybook/`
@@ -77,9 +77,9 @@ Target: publish an initial `0.x` alpha to npm with a controlled and reproducible
 
 - [x] Draft release notes (`alpha scope`, `known limitations`).
     - Draft file: `RELEASE_NOTES-alpha.md`.
-- [ ] Publish with dist-tag:
-    - `npm publish --tag alpha --access public`
-- [ ] Create git tag:
-    - `v0.1.0-alpha.0`
+- [x] Publish with dist-tag:
+    - `npm publish --tag alpha --access public` (initial alpha publish completed)
+- [x] Create git tag:
+    - stable tag flow now in use (`v0.1.1` published)
 - [ ] Post-publish verification in clean temp install.
-    - Blocked in current sandbox: no network access to npm registry (`ENOTFOUND registry.npmjs.org`).
+    - still recommended outside restricted sandbox environment.

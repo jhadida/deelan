@@ -19,6 +19,19 @@ function run(cmd: string, args: string[], options?: { allowFailure?: boolean }):
   fail(`command failed: ${rendered}`);
 }
 
+function renderCommand(cmd: string, args: string[]): string {
+  return [cmd, ...args].join(' ');
+}
+
+function planOrRun(execute: boolean, cmd: string, args: string[]): void {
+  const rendered = renderCommand(cmd, args);
+  if (!execute) {
+    console.log(`[dry-run] ${rendered}`);
+    return;
+  }
+  run(cmd, args);
+}
+
 function capture(cmd: string, args: string[]): string {
   const result = spawnSync(cmd, args, { encoding: 'utf8' });
   if (result.status !== 0) fail(`command failed: ${[cmd, ...args].join(' ')}`);
@@ -118,12 +131,17 @@ function highestTaggedVersion(): string | null {
 
 function printHelp(): void {
   console.log(`Usage:
-  npm run release -- <version> [--npm-tag <tag>] [--no-publish] [--no-push] [--allow-dirty]
+  npm run release -- <version> [--execute] [--npm-tag <tag>] [--no-publish] [--no-push] [--allow-dirty]
 
 Examples:
   npm run release -- 0.1.3
-  npm run release -- 0.1.3 --npm-tag alpha
-  npm run release -- 0.1.3 --no-publish --no-push --allow-dirty`);
+  npm run release -- 0.1.3 --execute
+  npm run release -- 0.1.3 --execute --npm-tag alpha
+  npm run release -- 0.1.3 --execute --no-publish --no-push
+
+Notes:
+  - Default mode is dry-run (safe): prints planned commands only.
+  - Add --execute to actually run version/tag/publish/push commands.`);
 }
 
 function ensureCleanWorkingTree(allowDirty: boolean, reason: string): void {
@@ -147,6 +165,7 @@ function main(): void {
   }
 
   const npmTag = (flags.get('npm-tag')?.at(-1) ?? 'latest').trim();
+  const execute = flags.has('execute');
   const allowDirty = flags.has('allow-dirty');
   const shouldPublish = !flags.has('no-publish');
   const shouldPush = !flags.has('no-push');
@@ -174,30 +193,34 @@ function main(): void {
     }
   }
 
-  run('npm', ['run', 'validate']);
-  run('npm', ['test']);
-  run('npm', ['run', 'build']);
-  run('npm', ['run', 'pack:dry-run']);
+  planOrRun(execute, 'npm', ['run', 'validate']);
+  planOrRun(execute, 'npm', ['test']);
+  planOrRun(execute, 'npm', ['run', 'build']);
+  planOrRun(execute, 'npm', ['run', 'pack:dry-run']);
   ensureCleanWorkingTree(allowDirty, 'after release checks');
 
-  run('npm', ['version', version]);
+  planOrRun(execute, 'npm', ['version', version]);
 
   if (shouldPublish) {
     const publishArgs = ['publish'];
     if (npmTag && npmTag !== 'latest') publishArgs.push('--tag', npmTag);
-    run('npm', publishArgs);
+    planOrRun(execute, 'npm', publishArgs);
   } else {
     console.log('release: skipping npm publish (--no-publish)');
   }
 
   if (shouldPush) {
-    if (!hasRemoteOrigin()) fail('git remote "origin" not configured; cannot push');
-    run('git', ['push']);
-    run('git', ['push', 'origin', tagName]);
+    if (execute && !hasRemoteOrigin()) fail('git remote "origin" not configured; cannot push');
+    planOrRun(execute, 'git', ['push']);
+    planOrRun(execute, 'git', ['push', 'origin', tagName]);
   } else {
     console.log('release: skipping git push (--no-push)');
   }
 
+  if (!execute) {
+    console.log('release: dry-run complete. Re-run with --execute to perform these actions.');
+    return;
+  }
   console.log(`release: complete (${version})`);
 }
 

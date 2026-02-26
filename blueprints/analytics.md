@@ -1,6 +1,6 @@
 # Analytics Blueprint
 
-## Status Snapshot (2026-02-20)
+## Status Snapshot (2026-02-26)
 
 ### Completed
 
@@ -13,9 +13,10 @@
 - Phase 1 UI implemented on `/analytics`:
     - summary cards
     - sortable tags table
-    - top-tags chart
     - minimal static hierarchy/treemap-style view
     - relations graph with node selection panel
+    - node selection metadata panel with build-time network metrics
+    - Cytoscape graph metrics reference link in UI
 - Documentation and tests added:
     - `docs/user-analytics.md`
     - analytics build test coverage
@@ -28,9 +29,9 @@
 
 - Phase 2 richer analytics:
     - interactive hierarchy drill-down (full treemap/icicle UX)
-    - advanced graph metrics (components/centrality/hubs)
     - co-occurrence exploration surface (matrix/heatmap)
     - optional analytics export formats (JSON/CSV/image)
+    - richer graph interactions (focus/expand/collapse/neighbor filtering)
 
 ### Postponed
 
@@ -48,6 +49,10 @@
 ### Phase 1 (v1) — Completed
 
 - High impact, low risk implementation now live.
+- Includes:
+    - build-time graph metrics (`degree`, `closeness`, `betweenness`, `pagerank`, components)
+    - sortable tag table and static treemap
+    - relation graph with node inspector
 
 ### Phase 2 (v2) — Open
 

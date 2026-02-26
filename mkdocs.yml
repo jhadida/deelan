@@ -23,11 +23,13 @@ nav:
   - Home: index.md
   - User Guide:
       - Overview: user-overview.md
+      - What Is Deelan?: user-what-is-deelan.md
       - Getting Started: user-guide.md
       - Authoring: user-authoring.md
       - Frontmatter: user-frontmatter.md
       - Configuration: user-configuration.md
       - Analytics: user-analytics.md
+      - Visual Gallery: user-gallery.md
   - CLI Reference:
       - Overview: cli-overview.md
       - Initialization: cli-init.md

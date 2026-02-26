@@ -116,9 +116,17 @@ These IDs are used by search, related links, routes, and export commands.
 - Run Storybook: `npm run storybook:serve`
 - Build Storybook: `npm run storybook:build`
 - Automated release (tests + build + pack dry-run + version/tag + publish + push):
-  - `npm run release -- 0.1.3`
-  - Optional npm dist-tag: `npm run release -- 0.1.3 --npm-tag alpha`
-  - Local dry run (no publish/push): `npm run release:local -- 0.1.3`
+  - Dry run (default, no side effects): `npm run release -- 0.1.3`
+  - Execute release: `npm run release -- 0.1.3 --execute`
+  - Execute with npm dist-tag: `npm run release -- 0.1.3 --execute --npm-tag alpha`
+  - Shortcut for execute mode: `npm run release:execute -- 0.1.3`
+  - CI quality gate only: `npm run release:check`
+
+GitHub Actions:
+
+- `.github/workflows/ci.yml` runs `release:check` on PRs and pushes to `main`.
+- `.github/workflows/release.yml` runs checks-only on `v*` tags (no publish side effects).
+- npm publishing remains a local/manual action via `npm run release -- <version> --execute`.
 
 If you deploy the Astro site publicly, set `site` in `astro.config.mjs` to your canonical URL.
 

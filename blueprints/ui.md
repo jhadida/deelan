@@ -1,6 +1,6 @@
 # Deelan Blueprint (UI)
 
-## Status Snapshot (2026-02-20)
+## Status Snapshot (2026-02-26)
 
 ### Completed
 
@@ -18,6 +18,10 @@
     - component reuse improved (shared shell, related list, timeline item reuse)
     - component folder structure flattened
 - Storybook integration completed and refreshed for current UI patterns.
+- Admonitions visual polish completed:
+    - title banner
+    - type color coding and icons
+    - collapsible syntax support
 
 ### In Progress
 
@@ -25,11 +29,10 @@
 
 ### Remaining / Planned
 
-- UI Phase 2 Tailwind pilot remains optional decision work:
-    - create pilot branch and benchmark maintainability/productivity
-    - decide adopt / hybrid / reject
-- If adopted, run controlled migration (former Phase 3).
-- Admonitions visual polish pass (styling consistency, spacing, iconography, readability).
+- UI Phase 2 Tailwind pilot closed:
+    - pilot executed in branch `codex/tailwind-pilot`
+    - decision: do not migrate, keep existing CSS architecture
+- If revisited later, rerun a scoped pilot only for specific pain points.
 
 ### Postponed
 
@@ -44,9 +47,9 @@
 
 - Goal achieved: high-quality CSS-only UI without framework migration.
 
-### UI Phase 2: Tailwind Pilot — Not Started (Optional)
+### UI Phase 2: Tailwind Pilot — Completed (Decision: No Migration)
 
-- Keep low-risk experiment separate from mainline.
+- Pilot completed; no full migration planned at this stage.
 
 ### UI Phase 3: Migration Plan (If Tailwind Adopted) — Conditional
 

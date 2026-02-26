@@ -42,14 +42,19 @@
       - canonical hires source kept in `logos/`
       - runtime hero switched to high-quality JPG in `public/images/`
       - measured `npm pack --dry-run` footprint improved from ~1.8 MB to ~551.2 kB in replacement simulation
+- Release automation baseline completed:
+    - `scripts/release.ts` added with semver/tag guardrails
+    - safe-by-default dry-run mode; `--execute` required for side effects
+    - `release:check` script added for reproducible quality gates
+    - CI workflows added (`ci.yml`, `release.yml`)
 
 ## In Progress
 
-### 1. Packaging/publish readiness
+### 1. Release policy
 
-- Finalize publish surface (`.npmignore` sanity pass, package size budget).
-- Ensure `deelan --help` and docs stay fully aligned.
-- Prepare alpha release checklist and notes.
+- Keep CI in checks-only operational mode until publish policy is finalized:
+    - keep local release publish path as source of truth (`npm run release -- <version> --execute`)
+    - decide if/when to enforce manual-approval gate for tag-driven publish workflow
 
 ## Remaining
 
