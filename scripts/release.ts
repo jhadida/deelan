@@ -10,6 +10,21 @@ function fail(message: string): never {
   process.exit(1);
 }
 
+interface CommandResult {
+  status: number | null;
+  stdout: string;
+  stderr: string;
+}
+
+function runCapture(cmd: string, args: string[]): CommandResult {
+  const result = spawnSync(cmd, args, { encoding: 'utf8' });
+  return {
+    status: result.status,
+    stdout: (result.stdout ?? '').trim(),
+    stderr: (result.stderr ?? '').trim()
+  };
+}
+
 function run(cmd: string, args: string[], options?: { allowFailure?: boolean }): void {
   const rendered = [cmd, ...args].join(' ');
   console.log(`$ ${rendered}`);
@@ -33,14 +48,20 @@ function planOrRun(execute: boolean, cmd: string, args: string[]): void {
 }
 
 function capture(cmd: string, args: string[]): string {
-  const result = spawnSync(cmd, args, { encoding: 'utf8' });
+  const result = runCapture(cmd, args);
   if (result.status !== 0) fail(`command failed: ${[cmd, ...args].join(' ')}`);
-  return result.stdout.trim();
+  return result.stdout;
 }
 
 function hasRemoteOrigin(): boolean {
   const result = spawnSync('git', ['remote', 'get-url', 'origin'], { stdio: 'ignore' });
   return result.status === 0;
+}
+
+function isTagOnOrigin(tagName: string): boolean | null {
+  const result = runCapture('git', ['ls-remote', '--tags', 'origin', `refs/tags/${tagName}`]);
+  if (result.status !== 0) return null;
+  return Boolean(result.stdout.trim());
 }
 
 interface Semver {
@@ -109,6 +130,15 @@ function readPackageVersion(): string {
   return pkg.version.trim();
 }
 
+function readPackageName(): string {
+  const raw = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8');
+  const pkg = JSON.parse(raw) as { name?: unknown };
+  if (typeof pkg.name !== 'string' || !pkg.name.trim()) {
+    fail('package.json name is missing or invalid');
+  }
+  return pkg.name.trim();
+}
+
 function highestTaggedVersion(): string | null {
   const lines = capture('git', ['tag', '--list', 'v*'])
     .split('\n')
@@ -141,7 +171,9 @@ Examples:
 
 Notes:
   - Default mode is dry-run (safe): prints planned commands only.
-  - Add --execute to actually run version/tag/publish/push commands.`);
+  - Add --execute to actually run version/tag/publish/push commands.
+  - Dry-run verifies npm auth and whether package@version already exists when publish is enabled.
+  - If a stale local unpushed tag is detected, release auto-cleans it and continues.`);
 }
 
 function ensureCleanWorkingTree(allowDirty: boolean, reason: string): void {
@@ -149,6 +181,28 @@ function ensureCleanWorkingTree(allowDirty: boolean, reason: string): void {
   const dirty = capture('git', ['status', '--porcelain']);
   if (!dirty) return;
   fail(`working tree is not clean (${reason}); commit or stash changes first (or pass --allow-dirty)`);
+}
+
+function ensureNpmWhoami(execute: boolean): void {
+  const cmd = ['whoami', '--registry', 'https://registry.npmjs.org'];
+  const result = runCapture('npm', cmd);
+  if (result.status === 0 && result.stdout) {
+    const mode = execute ? 'execute' : 'dry-run';
+    console.log(`release: npm auth OK (${mode}) as "${result.stdout}".`);
+    return;
+  }
+  const detail = result.stderr || result.stdout || 'unknown npm auth error';
+  fail(`npm auth check failed (run "npm login"). Details: ${detail}`);
+}
+
+function isVersionPublished(pkgName: string, version: string): boolean {
+  const result = runCapture('npm', ['view', `${pkgName}@${version}`, 'version', '--registry', 'https://registry.npmjs.org']);
+  if (result.status === 0) return true;
+  const detail = `${result.stdout}\n${result.stderr}`.toLowerCase();
+  if (detail.includes('e404') || detail.includes('not found') || detail.includes('no match found')) {
+    return false;
+  }
+  fail(`unable to check npm package version existence. Details: ${result.stderr || result.stdout}`);
 }
 
 function main(): void {
@@ -171,25 +225,63 @@ function main(): void {
   const shouldPush = !flags.has('no-push');
   const targetSemver = parseSemver(version);
   if (!targetSemver) fail(`invalid semver version: ${version}`);
+  const packageName = readPackageName();
 
   ensureCleanWorkingTree(allowDirty, 'before release checks');
 
   const tagName = `v${version}`;
   const existingTag = capture('git', ['tag', '--list', tagName]);
-  if (existingTag === tagName) {
-    fail(`tag already exists: ${tagName}`);
-  }
   const packageVersion = readPackageVersion();
   const packageSemver = parseSemver(packageVersion);
   if (!packageSemver) fail(`current package.json version is invalid semver: ${packageVersion}`);
-  if (compareSemver(targetSemver, packageSemver) <= 0) {
-    fail(`target version (${version}) must be greater than package.json version (${packageVersion})`);
+  const tagExists = existingTag === tagName;
+  const published = shouldPublish ? isVersionPublished(packageName, version) : false;
+  let cleanedStaleLocalTag = false;
+
+  if (tagExists) {
+    if (!hasRemoteOrigin()) {
+      fail(`tag ${tagName} exists locally and origin is unavailable; cannot determine pushed state safely`);
+    }
+    const onOrigin = isTagOnOrigin(tagName);
+    if (onOrigin === null) {
+      fail(`unable to determine whether ${tagName} exists on origin; aborting safe recovery`);
+    }
+    if (onOrigin) {
+      fail(`tag already exists on origin: ${tagName}`);
+    }
+    if (published) {
+      fail(`tag ${tagName} exists locally and ${packageName}@${version} is already published; refusing to overwrite`);
+    }
+    if (execute) {
+      run('git', ['tag', '-d', tagName]);
+      console.log(`release: removed stale local unpushed tag ${tagName}.`);
+    } else {
+      console.log(`[dry-run] git tag -d ${tagName} # stale local unpushed tag cleanup`);
+    }
+    cleanedStaleLocalTag = true;
   }
-  const latestTag = highestTaggedVersion();
-  if (latestTag) {
-    const latestTagSemver = parseSemver(latestTag);
-    if (latestTagSemver && compareSemver(targetSemver, latestTagSemver) <= 0) {
-      fail(`target version (${version}) must be greater than latest git tag version (${latestTag})`);
+
+  if (shouldPublish) {
+    ensureNpmWhoami(execute);
+    if (published) {
+      const mode = execute ? 'execute' : 'dry-run';
+      console.log(`release: ${packageName}@${version} is already published (${mode}).`);
+    }
+  }
+
+  const resumeInterruptedRelease = cleanedStaleLocalTag && packageVersion === version;
+  if (resumeInterruptedRelease) {
+    console.log(`release: detected interrupted release for ${version}; resuming with direct tag recreation.`);
+  } else {
+    if (compareSemver(targetSemver, packageSemver) <= 0) {
+      fail(`target version (${version}) must be greater than package.json version (${packageVersion})`);
+    }
+    const latestTag = highestTaggedVersion();
+    if (latestTag) {
+      const latestTagSemver = parseSemver(latestTag);
+      if (latestTagSemver && compareSemver(targetSemver, latestTagSemver) <= 0) {
+        fail(`target version (${version}) must be greater than latest git tag version (${latestTag})`);
+      }
     }
   }
 
@@ -199,12 +291,21 @@ function main(): void {
   planOrRun(execute, 'npm', ['run', 'pack:dry-run']);
   ensureCleanWorkingTree(allowDirty, 'after release checks');
 
-  planOrRun(execute, 'npm', ['version', version]);
+  if (!resumeInterruptedRelease) {
+    planOrRun(execute, 'npm', ['version', version]);
+  } else {
+    console.log('release: skipping npm version (package already at target version).');
+    planOrRun(execute, 'git', ['tag', tagName]);
+  }
 
   if (shouldPublish) {
-    const publishArgs = ['publish'];
-    if (npmTag && npmTag !== 'latest') publishArgs.push('--tag', npmTag);
-    planOrRun(execute, 'npm', publishArgs);
+    if (published) {
+      console.log(`release: skipping npm publish (${packageName}@${version} already exists).`);
+    } else {
+      const publishArgs = ['publish'];
+      if (npmTag && npmTag !== 'latest') publishArgs.push('--tag', npmTag);
+      planOrRun(execute, 'npm', publishArgs);
+    }
   } else {
     console.log('release: skipping npm publish (--no-publish)');
   }

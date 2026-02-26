@@ -58,9 +58,12 @@
     - `npm run release -- <version> --execute`
 - What it does:
     - runs `validate`, `test`, `build`, `pack:dry-run`
+    - verifies npm auth readiness before publish path
+    - checks if `package@version` already exists on npm
     - bumps package version and creates git commit+tag via `npm version`
     - publishes to npm (default tag: `latest`, override with `--npm-tag <tag>`)
     - pushes commit and tag to `origin`
+    - auto-cleans stale local unpushed tags for interrupted releases and continues
 - Execute shortcut:
     - `npm run release:execute -- <version>`
 - CI check command:

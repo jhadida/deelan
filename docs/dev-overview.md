@@ -92,9 +92,12 @@ Local release command (publish remains local/manual):
 Release script behavior:
 
 - validates semver ordering and tag constraints
+- verifies npm auth (`npm whoami`) before publish steps
+- checks whether `package@version` is already published
 - runs `validate`, `test`, `build`, and `pack:dry-run`
 - calls `npm version` (commit + tag)
 - publishes to npm and pushes git commit/tag only in `--execute` mode
+- auto-recovers from stale local unpushed tags after interrupted releases
 
 GitHub Actions in this repository:
 
