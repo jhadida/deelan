@@ -1,4 +1,4 @@
-# What Is Deelan?
+# Is Deelan for me?
 
 Deelan is a local-first publishing layer for Markdown notes.
 
@@ -8,6 +8,11 @@ If your current workflow is "Word files in folders", Deelan is the same core hab
 - you still organize files in folders
 - but the content is plain text (`.md`) instead of binary document formats
 - and Deelan turns those files into a searchable, linked, browsable site
+
+!!! tip 
+
+    If you are not familiar with Markdown or git, there are a lot of introduction texts and videos that can be found online.
+    Ask your favorite AI agent for a brief intro and recommendations to learn more. 
 
 ## The Core Idea
 
@@ -28,10 +33,9 @@ Deelan reads this repository and generates:
 
 Compared with ad-hoc document folders:
 
-- content is diffable and reviewable in git
+- content changes and history is traceable with git and can be sync'd between multiple devices
 - links between notes stay explicit and validated
 - metadata is structured (frontmatter)
-- timestamps and history are traceable from commits
 - outputs are static (simple hosting, private sharing, offline-friendly)
 
 ## What Writing Looks Like
@@ -77,11 +81,3 @@ For teams, the common model is:
 - author in git
 - validate/build in CI
 - serve static output behind your preferred access controls
-
-## Suggested Figures For This Page
-
-If you want to make this page more visual, add:
-
-- a folder-structure diagram (`content/posts`, `content/snippets`, generated outputs)
-- a workflow diagram (`write -> validate -> build -> serve/export`)
-- before/after comparison screenshot (raw Markdown vs rendered `/view/` page)

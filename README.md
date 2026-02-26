@@ -5,24 +5,27 @@ Data Engineering Electronic LAboratory Notebook.
 
 [![npm version](https://img.shields.io/npm/v/%40jhadida%2Fdeelan)](https://www.npmjs.com/package/@jhadida/deelan)
 [![docs](https://img.shields.io/badge/docs-online-2ea44f)](https://jhadida.github.io/deelan)
+[![gallery](https://img.shields.io/badge/gallery-screenshots-0ea5e9)](https://jhadida.github.io/deelan/main-gallery/)
 
 <p align="center">
   <img src="logos/deelan-cartoon.png" alt="Deelan logo" width="280" />
 </p>
 
-You keep writing Markdown notes in a git repo.  
-Deelan gives you a gorgeous, scalable, private, and feature-rich navigation experience with just a handful of configuration files and CLI commands.
+Deelan is designed for people who want a durable, searchable, versioned knowledge base that stays close to plain text authoring and yet provides a useful, scaleable, and beautiful web-based view to navigate contents. 
+
+You keep Markdown-formatted notes with rich authoring features in a simple git repo.  
+Deelan creates a beautiful, scalable, private, and feature-rich navigation experience with just a handful of configuration files and CLI commands. 
 
 ## What Deelan Gives You
 
 - Post + snippet content model with frontmatter validation. Templates provided for VSCode and Obsidian.
 - Quickly find contents with an advanced search grammar, hierarchical tags, date ranges, and more.
-- Rich rendered views with code highlighting, Mathjax, git timelines, internal links, and more. 
-- Static, local-first workflow (offline-friendly), with guidance and template configs for secure private deployment.
+- Rich rendered views out-of-the-box with code highlighting, Mathjax, git timelines, internal links, and more. 
+- Static, local-first workflow (offline-friendly), with guidance and templates for secure private deployment.
 - Export to self-contained HTML and PDF, share permalinks, explore and extend analytics.
 
 > [!NOTE]
-> Deelan is currently published as an early `0.x` alpha workflow.
+> Deelan is currently published as an early `0.x` experimental workflow.
 > Expect iterative changes to CLI surface, generated outputs, and docs while the release hardening pass continues.
 
 ## Install
@@ -85,21 +88,6 @@ Common options include default theme, timezone for rendered timestamps, and code
 See full reference in docs:
 - `docs/user-configuration.md`
 
-## Documentation
-
-- Online docs: [jhadida.github.io/deelan](https://jhadida.github.io/deelan)
-- Local docs source:
-  - User guide: `docs/user-overview.md`
-  - CLI reference: `docs/cli-overview.md`
-  - Developer guide: `docs/dev-overview.md`
-
-Docs tooling:
-
-```bash
-npm run docs:install
-npm run docs:serve
-npm run docs:build
-```
 
 ## Content ID Convention
 
@@ -109,26 +97,6 @@ IDs are filename-derived and type-prefixed:
 - `content/snippets/pandas-groupby.md` -> `snippet--pandas-groupby`
 
 These IDs are used by search, related links, routes, and export commands.
-
-## For Contributors
-
-- Run tests: `npm test`
-- Run Storybook: `npm run storybook:serve`
-- Build Storybook: `npm run storybook:build`
-- Automated release (tests + build + pack dry-run + version/tag + publish + push):
-  - Dry run (default, no side effects): `npm run release -- 0.1.3`
-  - Execute release: `npm run release -- 0.1.3 --execute`
-  - Execute with npm dist-tag: `npm run release -- 0.1.3 --execute --npm-tag alpha`
-  - Shortcut for execute mode: `npm run release:execute -- 0.1.3`
-  - CI quality gate only: `npm run release:check`
-
-GitHub Actions:
-
-- `.github/workflows/ci.yml` runs `release:check` on PRs and pushes to `main`.
-- `.github/workflows/release.yml` runs checks-only on `v*` tags (no publish side effects).
-- npm publishing remains a local/manual action via `npm run release -- <version> --execute`.
-
-If you deploy the Astro site publicly, set `site` in `astro.config.mjs` to your canonical URL.
 
 ## About this app 
 

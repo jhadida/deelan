@@ -63,3 +63,47 @@ MkDocs:
 - `npm run docs:serve`
 - `npm run docs:build`
 - `npm run docs:deploy`
+
+## Contributor Workflow
+
+Typical contributor loop:
+
+1. create a feature branch
+2. run local checks before opening PR
+3. open PR and iterate on review feedback
+4. merge only after required checks pass
+
+Useful commands:
+
+- validate content: `npm run validate`
+- run tests: `npm test`
+- full quality gate: `npm run release:check`
+
+If you deploy the Astro site publicly, set `site` in `astro.config.mjs` to your canonical URL.
+
+## Release and GitHub Actions
+
+Local release command (publish remains local/manual):
+
+- dry run (default): `npm run release -- <version>`
+- execute release: `npm run release -- <version> --execute`
+- execute shortcut: `npm run release:execute -- <version>`
+
+Release script behavior:
+
+- validates semver ordering and tag constraints
+- runs `validate`, `test`, `build`, and `pack:dry-run`
+- calls `npm version` (commit + tag)
+- publishes to npm and pushes git commit/tag only in `--execute` mode
+
+GitHub Actions in this repository:
+
+- `.github/workflows/ci.yml`
+  - runs `release:check` on PRs and pushes to `main`
+- `.github/workflows/release.yml`
+  - runs checks-only on `v*` tags
+  - verifies tag/version consistency
+  - does not publish to npm
+- `.github/workflows/docs.yml`
+  - deploys MkDocs to `gh-pages` on doc-related changes to `main`
+  - supports manual trigger via `workflow_dispatch`
