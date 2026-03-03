@@ -6,6 +6,7 @@ This section documents command-line workflows and command surfaces.
 
 ```bash
 deelan --help
+deelan --version
 deelan init my-notebook
 deelan validate
 deelan build
@@ -31,6 +32,7 @@ npx deelan --help
 | You want to... | Command | Go to |
 | --- | --- | --- |
 | Initialize a project scaffold | `deelan init [dir]` | [Initialization](cli-init.md) |
+| Show installed CLI version | `deelan --version` | - |
 | Validate content/frontmatter | `deelan validate` | - |
 | Build static site output | `deelan build` | [Build Workflow](cli-build.md) |
 | Serve built output locally | `deelan serve` | - |
@@ -40,6 +42,7 @@ npx deelan --help
 ## Command Syntax
 
 - `deelan init [dir] [options]`
+- `deelan --version`
 - `deelan build [--include-subfolder <name>]...`
 - `deelan serve [--port <n>]`
 - `deelan validate [--include-subfolder <name>]...`

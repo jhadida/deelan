@@ -91,7 +91,8 @@
     "marked": "^17.0.3",
     "marked-highlight": "^2.2.3",
     "mathjax": "^4.1.0",
-    "shiki": "^3.22.0"
+    "shiki": "^3.22.0",
+    "tsx": "^4.19.2"
   },
   "optionalDependencies": {
     "playwright": "^1.58.2"
@@ -101,7 +102,6 @@
     "@storybook/builder-vite": "^10.2.10",
     "storybook": "^10.2.10",
     "storybook-astro": "^0.1.0",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }

@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const ASTRO_CLI = path.join(ROOT, 'node_modules', 'astro', 'astro.js');
 const TSX_LOADER = pathToFileURL(path.join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs')).href;
+const PACKAGE_JSON_PATH = path.join(ROOT, 'package.json');
 
 const LOG_LEVEL_WEIGHT = {
   error: 0,
@@ -86,8 +87,10 @@ Commands:
   tags                Run tag management CLI
   export              Run export CLI
   validate            Validate content/frontmatter
+  --version           Print installed Deelan version
 
 Examples:
+  deelan --version
   deelan init --help
   deelan init my-notebook --no-vscode
   deelan init my-notebook --with-src
@@ -98,6 +101,19 @@ Examples:
   deelan export --id post--partitioning-primer --format pdf --pdf-scale 0.95
   deelan validate
 ` + '\n');
+}
+
+function printVersion() {
+  try {
+    const raw = fs.readFileSync(PACKAGE_JSON_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    const version = typeof parsed.version === 'string' ? parsed.version : null;
+    if (!version) throw new Error('missing version');
+    process.stdout.write(`${version}\n`);
+  } catch {
+    writeLog(resolveLogging([]), 'error', 'could not resolve package version');
+    process.exit(1);
+  }
 }
 
 function runNode(args, logging) {
@@ -115,6 +131,10 @@ function runNode(args, logging) {
 }
 
 function runTsScript(scriptPath, args = []) {
+  if (!fs.existsSync(path.join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs'))) {
+    writeLog(resolveLogging(args), 'error', 'missing runtime dependency "tsx". Reinstall package and retry.');
+    process.exit(1);
+  }
   const result = spawnSync(process.execPath, ['--import', TSX_LOADER, scriptPath, ...args], {
     cwd: process.cwd(),
     stdio: 'inherit',
@@ -185,6 +205,11 @@ const command = argv[0];
 
 if (!command || command === 'help' || command === '--help' || command === '-h') {
   printHelp();
+  process.exit(0);
+}
+
+if (command === '--version' || command === '-v' || command === 'version') {
+  printVersion();
   process.exit(0);
 }
 
