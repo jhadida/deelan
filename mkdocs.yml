@@ -45,6 +45,7 @@ nav:
       - Secure Deployment: topic-reverse-proxy.md
   - Developer Guide:
       - Overview: dev-overview.md
+      - Contributors: dev-contributors.md
       - Developer Notes: dev-notes.md
 
 markdown_extensions:

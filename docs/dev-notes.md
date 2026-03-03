@@ -48,40 +48,6 @@
 - Test file:
     - `tests/search.test.ts`
 
-## Release Workflow
-
-- End-to-end release automation:
-    - `npm run release -- <version>`
-- Default mode:
-    - Dry run only (prints planned commands, no side effects)
-- Execute mode:
-    - `npm run release -- <version> --execute`
-- What it does:
-    - runs `validate`, `test`, `build`, `pack:dry-run`
-    - verifies npm auth readiness before publish path
-    - checks if `package@version` already exists on npm
-    - bumps package version and creates git commit+tag via `npm version`
-    - publishes to npm (default tag: `latest`, override with `--npm-tag <tag>`)
-    - pushes commit and tag to `origin`
-    - auto-cleans stale local unpushed tags for interrupted releases and continues
-- Execute shortcut:
-    - `npm run release:execute -- <version>`
-- CI check command:
-    - `npm run release:check`
-
-## GitHub Actions
-
-- CI workflow:
-    - `.github/workflows/ci.yml`
-    - Runs `release:check` on pull requests and pushes to `main`.
-- Tag-check workflow:
-    - `.github/workflows/release.yml`
-    - Triggers on git tags matching `v*`.
-    - Verifies tag version matches `package.json` version.
-    - Runs `release:check` only (no npm publish, no GitHub release creation).
-- npm publish policy:
-    - Keep publishing local/manual via `npm run release -- <version> --execute`.
-
 ## Load/Stress Testing with Synthetic Content
 
 Synthetic content is ignored by default because discovery scans only top-level files.

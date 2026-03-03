@@ -70,6 +70,16 @@
 
 ### 3. UX refinement
 
+- [P1] Query-based search UX hardening:
+    - add an explicit trigger button next to the query field for query-mode execution
+    - bind `Enter` in query field to the same trigger action
+    - show red border on query field while pattern is invalid
+    - on `Enter` with invalid pattern, show "Invalid query" notification (same interaction style as "Permalink copied")
+- [P1] CLI framework migration to `commander`:
+    - refactor top-level `deelan` routing and shared flag/help behavior
+    - keep command contract backward compatible (`init`, `validate`, `build`, `serve`, `tags`, `export`, `--version`)
+    - reduce custom arg parsing in favor of framework primitives
+    - add regression tests for help, unknown-command handling, and packaged-install CLI behavior
 - [P2] Investigate command output verbosity controls:
     - evaluate using `npm_config_loglevel` to reduce routine script trace output
     - define a clean default vs debug mode convention for local workflows
