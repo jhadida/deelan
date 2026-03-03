@@ -2,14 +2,14 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
-const ASTRO_CLI = path.join(ROOT, 'node_modules', 'astro', 'astro.js');
-const TSX_LOADER = pathToFileURL(path.join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs')).href;
+const require = createRequire(import.meta.url);
 const PACKAGE_JSON_PATH = path.join(ROOT, 'package.json');
 
 const LOG_LEVEL_WEIGHT = {
@@ -116,6 +116,27 @@ function printVersion() {
   }
 }
 
+function resolveRuntimeModule(specifier, dependencyName, logging) {
+  try {
+    return require.resolve(specifier);
+  } catch {
+    writeLog(logging, 'error', `missing runtime dependency "${dependencyName}". Reinstall package and retry.`);
+    process.exit(1);
+  }
+}
+
+function resolveTsxLoader(logging) {
+  try {
+    const tsxPkg = require.resolve('tsx/package.json');
+    const loaderPath = path.join(path.dirname(tsxPkg), 'dist', 'loader.mjs');
+    if (fs.existsSync(loaderPath)) return loaderPath;
+  } catch {
+    // fall through to shared error handling below
+  }
+  writeLog(logging, 'error', 'missing runtime dependency "tsx". Reinstall package and retry.');
+  process.exit(1);
+}
+
 function runNode(args, logging) {
   const result = spawnSync(process.execPath, args, {
     cwd: process.cwd(),
@@ -131,11 +152,9 @@ function runNode(args, logging) {
 }
 
 function runTsScript(scriptPath, args = []) {
-  if (!fs.existsSync(path.join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs'))) {
-    writeLog(resolveLogging(args), 'error', 'missing runtime dependency "tsx". Reinstall package and retry.');
-    process.exit(1);
-  }
-  const result = spawnSync(process.execPath, ['--import', TSX_LOADER, scriptPath, ...args], {
+  const logging = resolveLogging(args);
+  const tsxLoader = resolveTsxLoader(logging);
+  const result = spawnSync(process.execPath, ['--import', tsxLoader, scriptPath, ...args], {
     cwd: process.cwd(),
     stdio: 'inherit',
     env: { ...process.env, DEELAN_PACKAGE_ROOT: ROOT }
@@ -173,8 +192,9 @@ function splitBuildArgs(args) {
 }
 
 function runBuild(args, logging) {
+  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
   if (args.includes('--help') || args.includes('-h')) {
-    runNode([ASTRO_CLI, 'build', ...args], logging);
+    runNode([astroCli, 'build', ...args], logging);
   }
 
   const { scriptArgs, astroArgs } = splitBuildArgs(args);
@@ -192,11 +212,12 @@ function runBuild(args, logging) {
     runTsScript(path.join(ROOT, script), scriptArgs);
   }
 
-  runNode([ASTRO_CLI, 'build', ...astroArgs], logging);
+  runNode([astroCli, 'build', ...astroArgs], logging);
 }
 
 function runServe(args, logging) {
-  runNode([ASTRO_CLI, 'preview', ...args], logging);
+  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
+  runNode([astroCli, 'preview', ...args], logging);
 }
 
 const argv = process.argv.slice(2);

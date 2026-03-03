@@ -18,3 +18,10 @@ test('tsx is a runtime dependency for packaged CLI commands', () => {
   assert.ok(pkg.dependencies?.tsx, 'tsx must be listed under dependencies');
   assert.ok(!pkg.devDependencies?.tsx, 'tsx should not be devDependency-only');
 });
+
+test('CLI resolves runtime dependencies via Node resolution (hoist-safe)', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'bin', 'deelan.mjs'), 'utf8');
+  assert.match(source, /resolveRuntimeModule\('astro\/astro\.js'/);
+  assert.match(source, /require\.resolve\('tsx\/package\.json'\)/);
+  assert.match(source, /dist', 'loader\.mjs'/);
+});
