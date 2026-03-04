@@ -33,7 +33,7 @@ const PACKAGE_ROOT = process.env.DEELAN_PACKAGE_ROOT
   : process.cwd();
 
 const REQUIRED_FILES = ['astro.config.mjs', 'tsconfig.json', 'deelan.config.yml'] as const;
-const REQUIRED_DIRS = ['public/js'] as const;
+const REQUIRED_DIRS = ['public'] as const;
 const OPTIONAL_SRC_DIRS = ['src/components', 'src/lib', 'src/pages', 'src/styles', 'src/schemas'] as const;
 
 const GITIGNORE_TEMPLATE = `.astro/

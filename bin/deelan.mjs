@@ -125,6 +125,40 @@ function resolveRuntimeModule(specifier, dependencyName, logging) {
   }
 }
 
+function resolveAstroCli(logging) {
+  let astroPackageJsonPath;
+  try {
+    astroPackageJsonPath = require.resolve('astro/package.json');
+  } catch {
+    writeLog(logging, 'error', 'missing runtime dependency "astro". Reinstall package and retry.');
+    process.exit(1);
+  }
+
+  try {
+    const raw = fs.readFileSync(astroPackageJsonPath, 'utf8');
+    const pkg = JSON.parse(raw);
+    const binEntry =
+      typeof pkg?.bin === 'string'
+        ? pkg.bin
+        : pkg?.bin && typeof pkg.bin.astro === 'string'
+          ? pkg.bin.astro
+          : null;
+
+    if (!binEntry) {
+      throw new Error('astro bin entry not found');
+    }
+
+    const cliPath = path.resolve(path.dirname(astroPackageJsonPath), binEntry);
+    if (!fs.existsSync(cliPath)) {
+      throw new Error(`astro cli not found at ${cliPath}`);
+    }
+    return cliPath;
+  } catch {
+    writeLog(logging, 'error', 'missing runtime dependency "astro". Reinstall package and retry.');
+    process.exit(1);
+  }
+}
+
 function resolveTsxLoader(logging) {
   try {
     const tsxPkg = require.resolve('tsx/package.json');
@@ -214,7 +248,7 @@ Examples:
     process.exit(0);
   }
 
-  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
+  const astroCli = resolveAstroCli(logging);
   const { scriptArgs, astroArgs } = splitBuildArgs(args);
   const chain = [
     ['scripts/prepare-mathjax.ts'],
@@ -251,7 +285,7 @@ Examples:
     process.exit(0);
   }
 
-  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
+  const astroCli = resolveAstroCli(logging);
   runNode([astroCli, 'preview', ...args], logging);
 }
 

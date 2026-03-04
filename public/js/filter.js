@@ -271,8 +271,8 @@ export function initSnippetExplorer(config) {
 
   function ensureVisibleSelection(visibleKeys) {
     const selected = itemButtons.find((button) => button.getAttribute('aria-selected') === 'true');
-    const selectedKey = selected ? selected.getAttribute('data-snippet-key') : null;
-    if (selectedKey && visibleKeys.has(selectedKey)) return;
+    const activeKey = selected ? selected.getAttribute('data-snippet-key') : null;
+    if (activeKey && visibleKeys.has(activeKey)) return;
     const firstVisible = itemButtons.find((button) => {
       const listItem = button.closest('[data-snippet-item]');
       const key = button.getAttribute('data-snippet-key') || '';

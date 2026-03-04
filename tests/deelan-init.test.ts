@@ -32,6 +32,9 @@ test('deelan init scaffolds minimal project and supports helper opt-out flags', 
     await fs.access(path.join(target, 'content', 'posts'));
     await fs.access(path.join(target, 'content', 'snippets'));
     await fs.access(path.join(target, 'public', 'js'));
+    await fs.access(path.join(target, 'public', 'service-worker.js'));
+    await fs.access(path.join(target, 'public', 'offline.html'));
+    await fs.access(path.join(target, 'public', 'images', 'deelan-hires.jpg'));
     await assert.rejects(() => fs.access(path.join(target, 'src', 'pages')));
     await fs.access(path.join(target, '.gitattributes'));
 
