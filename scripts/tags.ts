@@ -1,13 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import fg from 'fast-glob';
 import matter from 'gray-matter';
-import {
-  inferContentIdentity,
-  validateFrontmatter,
-  type ContentFrontmatter
-} from '../src/lib/content/schema';
-import { buildContentGlobs } from '../src/lib/content/files';
+import { validateFrontmatter, type ContentFrontmatter } from '../src/lib/content/schema';
+import { loadRawContent } from '../src/lib/content/files';
 import { createLogger } from '../src/lib/logger';
 import {
   getParsedBoolFlag,
@@ -31,32 +26,28 @@ function writeStdout(text: string): void {
 }
 
 async function loadContent(): Promise<ContentFile[]> {
-  const root = process.cwd();
-  const files = (await fg(buildContentGlobs(), { cwd: root, onlyFiles: true })).sort();
   const out: ContentFile[] = [];
 
-  for (const filePath of files) {
-    const absPath = path.join(root, filePath);
-    const raw = await fs.readFile(absPath, 'utf8');
-    const parsed = matter(raw);
-
-    const identity = inferContentIdentity(absPath);
-    if (!identity) continue;
-    if (!identity.validFileName) {
-      logger.warn(`${filePath}: ${identity.warning ?? 'invalid filename'} (excluded)`);
+  for (const file of await loadRawContent()) {
+    if (file.parseError) {
+      throw new Error(`${file.filePath}: unable to parse frontmatter (${file.parseError})`);
+    }
+    if (!file.identity) continue;
+    if (!file.identity.validFileName) {
+      logger.warn(`${file.filePath}: ${file.identity.warning ?? 'invalid filename'} (excluded)`);
       continue;
     }
 
-    const valid = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
+    const valid = validateFrontmatter(file.data, file.filePath, file.identity.type, file.identity.id);
     if (!valid.value) {
-      throw new Error(`Invalid frontmatter in ${filePath}: ${valid.errors.join('; ')}`);
+      throw new Error(`Invalid frontmatter in ${file.filePath}: ${valid.errors.join('; ')}`);
     }
 
     out.push({
-      filePath,
+      filePath: file.filePath,
       frontmatter: valid.value,
-      body: parsed.content,
-      rawData: parsed.data as Record<string, unknown>
+      body: file.content,
+      rawData: file.data
     });
   }
 
@@ -243,10 +234,10 @@ async function applyTagRewrite(
     if (!fileChanged) continue;
 
     const deduped = Array.from(new Set(after));
-    const replacedCount = before.filter((tag, idx) => deduped[idx] !== tag).length;
+    const changedCount = before.filter((tag, idx) => after[idx] !== tag).length;
 
     changedFiles += 1;
-    changedTags += replacedCount;
+    changedTags += changedCount;
 
     writeStdout(`- ${item.filePath}`);
     writeStdout(`  ${before.join(', ')}`);
@@ -255,7 +246,10 @@ async function applyTagRewrite(
     if (apply) {
       const newData = { ...item.rawData, tags: deduped };
       const output = matter.stringify(item.body, newData);
-      await fs.writeFile(path.join(process.cwd(), item.filePath), output, 'utf8');
+      const targetPath = path.join(process.cwd(), item.filePath);
+      const tmpPath = `${targetPath}.tmp`;
+      await fs.writeFile(tmpPath, output, 'utf8');
+      await fs.rename(tmpPath, targetPath);
     }
   }
 

@@ -100,4 +100,4 @@ Learn more about typical workflows, and many more topics, in the [documentation]
 
 ## About this app 
 
-Created by [Jonathan Hadida](https://github.com/jhadida) proudly with the help of GPT-5.3-Codex and minimal permissive dependencies (MIT/Apache-2.0 only for top-level dependencies).
+Created by [Jonathan Hadida](https://github.com/jhadida) proudly with the help of GPT-5.3-Codex and Sonnet 4.6 with minimal permissive dependencies (MIT/Apache-2.0 only for top-level dependencies).

@@ -8,10 +8,9 @@ import { replaceInternalLinks } from './internal-links';
 import { isLocalAssetReference, toPosixPath } from '../util';
 
 let initialized = false;
+let initError: Error | null = null;
 let shikiLightTheme = 'github-light';
 let shikiDarkTheme = 'github-dark';
-let parser: Marked | null = null;
-let headingSlugger = createSlugger();
 
 interface TocEntry {
   depth: number;
@@ -63,6 +62,41 @@ function createSlugger(): (input: string) => string {
     counts.set(base, seen + 1);
     return seen === 0 ? base : `${base}-${seen}`;
   };
+}
+
+function createParser(slugger: (text: string) => string): Marked {
+  const instance = new Marked({ gfm: true, breaks: false });
+  instance.use(
+    markedHighlight({
+      async: true,
+      highlight: async (code, lang) => {
+        const language = normalizeLang(lang);
+        try {
+          return await codeToHtml(code, {
+            lang: language,
+            themes: { light: shikiLightTheme, dark: shikiDarkTheme },
+            defaultColor: 'light'
+          });
+        } catch {
+          return await codeToHtml(code, {
+            lang: 'text',
+            themes: { light: 'github-light', dark: 'github-dark' },
+            defaultColor: 'light'
+          });
+        }
+      }
+    }),
+    {
+      renderer: {
+        heading(token: Tokens.Heading): string {
+          const id = slugger(token.text);
+          const text = this.parser.parseInline(token.tokens);
+          return `<h${token.depth} id="${id}">${text}</h${token.depth}>`;
+        }
+      }
+    }
+  );
+  return instance;
 }
 
 function normalizeFigureWidth(raw: string): string | null {
@@ -278,7 +312,7 @@ function unwrapNestedShiki(input: string): string {
 }
 
 export async function renderMarkdown(markdown: string, options: RenderMarkdownOptions = {}): Promise<string> {
-  await ensureParser();
+  await ensureInit();
 
   const mdWithLinks = replaceInternalLinks(markdown);
   const mdWithFigures = transformFigureSyntax(mdWithLinks);
@@ -288,12 +322,13 @@ export async function renderMarkdown(markdown: string, options: RenderMarkdownOp
 
   const tocId = createSlugger();
   const headings: TocEntry[] = [];
-  const tokens = parser!.lexer(footnotes.markdown) as unknown as Tokens.Generic[];
+  const headingSlugger = createSlugger();
+  const parser = createParser(headingSlugger);
+  const tokens = parser.lexer(footnotes.markdown) as unknown as Tokens.Generic[];
   collectHeadings(tokens, headings, tocId);
   const tocHtml = buildTocHtml(headings);
 
-  headingSlugger = createSlugger();
-  const out = await parser!.parse(footnotes.markdown, { async: true });
+  const out = await parser.parse(footnotes.markdown, { async: true });
   const html = typeof out === 'string' ? out : String(out);
   const withToc = injectToc(html, tocHtml, explicitToc);
   const withFootnotes = withToc + renderFootnotesHtml(footnotes);
@@ -303,52 +338,22 @@ export async function renderMarkdown(markdown: string, options: RenderMarkdownOp
 }
 
 export async function renderInlineMarkdown(markdown: string): Promise<string> {
-  await ensureParser();
-  const out = await parser!.parseInline(replaceInternalLinks(markdown), { async: true });
+  await ensureInit();
+  const parser = new Marked({ gfm: true, breaks: false });
+  const out = await parser.parseInline(replaceInternalLinks(markdown), { async: true });
   return typeof out === 'string' ? out : String(out);
 }
 
-async function ensureParser(): Promise<void> {
+async function ensureInit(): Promise<void> {
   if (initialized) return;
-
-  const config = await getSiteConfig();
-  shikiLightTheme = config.code_theme_light;
-  shikiDarkTheme = config.code_theme_dark;
-  parser = new Marked({ gfm: true, breaks: false });
-  parser.use(
-    markedHighlight({
-      async: true,
-      highlight: async (code, lang) => {
-        const language = normalizeLang(lang);
-        try {
-          return await codeToHtml(code, {
-            lang: language,
-            themes: {
-              light: shikiLightTheme,
-              dark: shikiDarkTheme
-            },
-            defaultColor: 'light'
-          });
-        } catch {
-          return await codeToHtml(code, {
-            lang: 'text',
-            themes: {
-              light: 'github-light',
-              dark: 'github-dark'
-            },
-            defaultColor: 'light'
-          });
-        }
-      }
-    }),
-    {
-      renderer: {
-        heading(token) {
-          const id = headingSlugger(token.text);
-          const text = this.parser.parseInline(token.tokens);
-          return `<h${token.depth} id="${id}">${text}</h${token.depth}>`;
-        }
-      }
-    });
-  initialized = true;
+  if (initError) throw initError;
+  try {
+    const config = await getSiteConfig();
+    shikiLightTheme = config.code_theme_light;
+    shikiDarkTheme = config.code_theme_dark;
+    initialized = true;
+  } catch (err) {
+    initError = err instanceof Error ? err : new Error(String(err));
+    throw initError;
+  }
 }

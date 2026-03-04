@@ -2,10 +2,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { getSiteConfig, type SiteTheme } from '../site-config';
+import { createLogger } from '../logger';
 import { formatTimestamp } from '../time';
 import { loadTimeline } from '../content/generated';
 import { isLocalAssetReference, pathExists } from '../util';
 import type { ExportContext } from './types';
+
+const logger = createLogger('export-html');
 
 async function copyDir(src: string, dst: string): Promise<void> {
   await fs.mkdir(dst, { recursive: true });
@@ -65,7 +68,7 @@ async function exportCss(): Promise<string> {
   }
 }`;
   } catch {
-    // Fallback for isolated test environments that do not include src/styles.
+    logger.warn('src/styles not found; using minimal fallback CSS for export. The exported file may not match the site appearance.');
     return `
 :root { --bg: #f5f4ef; --fg: #181818; --muted: #6b6b6b; --accent: #0b6e4f; --surface: #ffffff; }
 [data-theme="dark"] { --bg: #121212; --fg: #f3f3ef; --muted: #b0b0b0; --accent: #5ecfa7; --surface: #1e1e1e; }

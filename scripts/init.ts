@@ -171,7 +171,7 @@ async function copyFileRelative(rel: string, targetRoot: string): Promise<void> 
     throw new Error(`Required file missing in package and no fallback is defined: ${rel}`);
   }
 
-  await writeTextFile(dst, fallback);
+  await writeTextFile(path.join(targetRoot, rel), fallback);
 }
 
 async function copyDirRelative(rel: string, targetRoot: string): Promise<void> {

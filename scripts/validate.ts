@@ -1,18 +1,8 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import fg from 'fast-glob';
-import matter from 'gray-matter';
-import {
-  inferContentIdentity,
-  validateFrontmatter,
-  type ContentFrontmatter,
-  type ValidatedContent
-} from '../src/lib/content/schema';
+import { validateFrontmatter, type ContentFrontmatter, type ValidatedContent } from '../src/lib/content/schema';
 import { extractInternalLinks } from '../src/lib/content/internal-links';
-import { buildContentGlobs } from '../src/lib/content/files';
+import { loadRawContent, type RawContentFile } from '../src/lib/content/files';
 import { createLogger } from '../src/lib/logger';
 
-const ROOT = process.cwd();
 const logger = createLogger('validate');
 
 interface ItemError {
@@ -25,63 +15,29 @@ interface ItemWarning {
   warning: string;
 }
 
-async function loadAndValidateFile(filePath: string): Promise<{
+function validateRawFile(file: RawContentFile): {
   item?: ValidatedContent;
   issue?: ItemError;
   warning?: ItemWarning;
-}> {
-  const absPath = path.join(ROOT, filePath);
-  const raw = await fs.readFile(absPath, 'utf8');
-
-  let parsed: matter.GrayMatterFile<string>;
-  try {
-    parsed = matter(raw);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return {
-      issue: {
-        filePath,
-        errors: [`unable to parse frontmatter: ${message}`]
-      }
-    };
+} {
+  if (file.parseError) {
+    return { issue: { filePath: file.filePath, errors: [`unable to parse frontmatter: ${file.parseError}`] } };
   }
 
-  const identity = inferContentIdentity(absPath);
-  if (!identity) {
-    return {
-      issue: {
-        filePath,
-        errors: ['unable to infer content type from path.']
-      }
-    };
+  if (!file.identity) {
+    return { issue: { filePath: file.filePath, errors: ['unable to infer content type from path.'] } };
   }
 
-  if (!identity.validFileName) {
-    return {
-      warning: {
-        filePath,
-        warning: identity.warning ?? 'invalid filename.'
-      }
-    };
+  if (!file.identity.validFileName) {
+    return { warning: { filePath: file.filePath, warning: file.identity.warning ?? 'invalid filename.' } };
   }
 
-  const result = validateFrontmatter(parsed.data, filePath, identity.type, identity.id);
+  const result = validateFrontmatter(file.data, file.filePath, file.identity.type, file.identity.id);
   if (!result.value) {
-    return {
-      issue: {
-        filePath,
-        errors: result.errors
-      }
-    };
+    return { issue: { filePath: file.filePath, errors: result.errors } };
   }
 
-  return {
-    item: {
-      filePath,
-      body: parsed.content,
-      frontmatter: result.value
-    }
-  };
+  return { item: { filePath: file.filePath, body: file.content, frontmatter: result.value } };
 }
 
 function validateCrossReferences(items: ValidatedContent[]): ItemError[] {
@@ -161,19 +117,19 @@ function summarize(items: ValidatedContent[]): void {
 }
 
 async function main(): Promise<void> {
-  const files = await fg(buildContentGlobs(), { cwd: ROOT, onlyFiles: true });
+  const rawFiles = await loadRawContent();
 
   const issues: ItemError[] = [];
   const warnings: ItemWarning[] = [];
   const items: ValidatedContent[] = [];
 
-  if (files.length === 0) {
+  if (rawFiles.length === 0) {
     logger.info('no content files found under content/posts or content/snippets.');
     return;
   }
 
-  for (const filePath of files.sort()) {
-    const result = await loadAndValidateFile(filePath);
+  for (const file of rawFiles) {
+    const result = validateRawFile(file);
     if (result.issue) issues.push(result.issue);
     if (result.warning) warnings.push(result.warning);
     if (result.item) items.push(result.item);

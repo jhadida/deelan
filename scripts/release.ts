@@ -121,22 +121,21 @@ function compareSemver(a: Semver, b: Semver): number {
   return 0;
 }
 
-function readPackageVersion(): string {
+interface PackageJson {
+  name: string;
+  version: string;
+}
+
+function readPackageJson(): PackageJson {
   const raw = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8');
-  const pkg = JSON.parse(raw) as { version?: unknown };
+  const pkg = JSON.parse(raw) as { name?: unknown; version?: unknown };
   if (typeof pkg.version !== 'string' || !pkg.version.trim()) {
     fail('package.json version is missing or invalid');
   }
-  return pkg.version.trim();
-}
-
-function readPackageName(): string {
-  const raw = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8');
-  const pkg = JSON.parse(raw) as { name?: unknown };
   if (typeof pkg.name !== 'string' || !pkg.name.trim()) {
     fail('package.json name is missing or invalid');
   }
-  return pkg.name.trim();
+  return { name: pkg.name.trim(), version: pkg.version.trim() };
 }
 
 function highestTaggedVersion(): string | null {
@@ -251,13 +250,12 @@ function main(): void {
   const shouldPush = !flags.has('no-push');
   const targetSemver = parseSemver(version);
   if (!targetSemver) fail(`invalid semver version: ${version}`);
-  const packageName = readPackageName();
+  const { name: packageName, version: packageVersion } = readPackageJson();
 
   ensureCleanWorkingTree(allowDirty, 'before release checks');
 
   const tagName = `v${version}`;
   const existingTag = capture('git', ['tag', '--list', tagName]);
-  const packageVersion = readPackageVersion();
   const packageSemver = parseSemver(packageVersion);
   if (!packageSemver) fail(`current package.json version is invalid semver: ${packageVersion}`);
   const tagExists = existingTag === tagName;

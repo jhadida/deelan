@@ -1,5 +1,8 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { createLogger } from '../logger';
+
+const logger = createLogger('export-pdf');
 
 interface PlaywrightModule {
   chromium: {
@@ -58,7 +61,9 @@ export async function exportPdf(htmlPath: string, outDir: string, options?: { sc
   try {
     const page = await browser.newPage();
     await page.goto(pathToFileURL(absoluteHtmlPath).href, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch((err: unknown) => {
+      logger.warn(`page did not reach network idle within 10s; PDF may be incomplete. (${err instanceof Error ? err.message : String(err)})`);
+    });
     await page.emulateMedia({ media: 'print' });
     await page
       .evaluate(async () => {
@@ -70,7 +75,9 @@ export async function exportPdf(htmlPath: string, outDir: string, options?: { sc
           ]);
         }
       })
-      .catch(() => undefined);
+      .catch((err: unknown) => {
+        logger.warn(`MathJax typeset did not complete; math may not render correctly in PDF. (${err instanceof Error ? err.message : String(err)})`);
+      });
 
     await page.pdf({
       path: pdfPath,
