@@ -84,13 +84,13 @@ Commands:
   init                Scaffold a new Deelan project
   build               Run preflight + static build for current project
   serve               Serve built output for current project
+  version             Print installed Deelan version
   tags                Run tag management CLI
   export              Run export CLI
   validate            Validate content/frontmatter
-  --version           Print installed Deelan version
 
 Examples:
-  deelan --version
+  deelan version
   deelan init --help
   deelan init my-notebook --no-vscode
   deelan init my-notebook --with-src
@@ -192,11 +192,29 @@ function splitBuildArgs(args) {
 }
 
 function runBuild(args, logging) {
-  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
   if (args.includes('--help') || args.includes('-h')) {
-    runNode([astroCli, 'build', ...args], logging);
+    process.stdout.write(`Deelan build
+
+Runs the Deelan preflight pipeline then builds the static site.
+
+Usage:
+  deelan build [options]
+
+Deelan-specific options:
+  --include-subfolder <name>   Also include content/posts/<name>/ and content/snippets/<name>/ (repeatable)
+  --log-level <level>          Log level: error, warn, info, debug (default: info)
+  --log-file <path>            Write logs to file in addition to stdout
+
+All other options are forwarded to \`astro build\`.
+
+Examples:
+  deelan build
+  deelan build --include-subfolder drafts
+` + '\n');
+    process.exit(0);
   }
 
+  const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
   const { scriptArgs, astroArgs } = splitBuildArgs(args);
   const chain = [
     ['scripts/prepare-mathjax.ts'],
@@ -216,6 +234,23 @@ function runBuild(args, logging) {
 }
 
 function runServe(args, logging) {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write(`Deelan serve
+
+Serves the built site for local preview.
+
+Usage:
+  deelan serve [options]
+
+All options are forwarded to \`astro preview\`.
+
+Examples:
+  deelan serve
+  deelan serve --port 4321
+` + '\n');
+    process.exit(0);
+  }
+
   const astroCli = resolveRuntimeModule('astro/astro.js', 'astro', logging);
   runNode([astroCli, 'preview', ...args], logging);
 }
@@ -229,7 +264,7 @@ if (!command || command === 'help' || command === '--help' || command === '-h') 
   process.exit(0);
 }
 
-if (command === '--version' || command === '-v' || command === 'version') {
+if (command === 'version') {
   printVersion();
   process.exit(0);
 }

@@ -23,6 +23,28 @@ async function runValidate(cwd: string): Promise<{ stdout: string; stderr: strin
   }
 }
 
+async function runValidateHelp(cwd: string): Promise<{ stdout: string; stderr: string; code: number }> {
+  try {
+    const { stdout, stderr } = await execFileAsync(process.execPath, [CLI, 'validate', '--help'], { cwd });
+    return { stdout, stderr, code: 0 };
+  } catch (error: unknown) {
+    const e = error as { stdout?: string; stderr?: string; code?: number };
+    return { stdout: e.stdout ?? '', stderr: e.stderr ?? '', code: e.code ?? 1 };
+  }
+}
+
+test('validate --help prints usage even with no content files', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'deelan-validate-help-test-'));
+  try {
+    const result = await runValidateHelp(root);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /Deelan validate/);
+    assert.match(result.stdout, /--include-subfolder/);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test('validate reports unknown related_ids and internal links', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'deelan-validate-test-'));
 

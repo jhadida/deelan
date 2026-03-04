@@ -81,7 +81,7 @@ Recommended conventions as content grows:
 
 2. Use relative paths from the markdown file.
 
-    - `![Caption](./assets/example/figure-01.svg){width=65%}`
+    - `![Caption](./assets/showcase/figure-01.svg){width=65%}`
 
 3. Use deterministic file names.
 

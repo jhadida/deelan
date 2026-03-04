@@ -43,6 +43,11 @@ test('deelan init scaffolds minimal project and supports helper opt-out flags', 
 
     await assert.rejects(() => fs.access(path.join(target, '.vscode')));
     await assert.rejects(() => fs.access(path.join(target, '.frontmatter')));
+
+    const postsEntries = await fs.readdir(path.join(target, 'content', 'posts'));
+    const snippetsEntries = await fs.readdir(path.join(target, 'content', 'snippets'));
+    assert.equal(postsEntries.length, 0);
+    assert.equal(snippetsEntries.length, 0);
   } finally {
     await fs.rm(tmpRoot, { recursive: true, force: true });
   }

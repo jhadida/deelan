@@ -1,5 +1,5 @@
-import { validateTags } from '@/lib/tags/validate';
-import { toPosixPath } from '@/lib/util';
+import { validateTags } from '../tags/validate';
+import { toPosixPath } from '../util';
 
 export type ContentType = 'post' | 'snippet';
 

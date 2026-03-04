@@ -65,7 +65,7 @@ Open `http://localhost:4321`.
 
 ```bash
 deelan --help
-deelan --version
+deelan version
 deelan init --help
 deelan validate --help
 deelan build --help

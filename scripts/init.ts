@@ -33,7 +33,7 @@ const PACKAGE_ROOT = process.env.DEELAN_PACKAGE_ROOT
   : process.cwd();
 
 const REQUIRED_FILES = ['astro.config.mjs', 'tsconfig.json', 'deelan.config.yml'] as const;
-const REQUIRED_DIRS = ['content', 'public/js'] as const;
+const REQUIRED_DIRS = ['public/js'] as const;
 const OPTIONAL_SRC_DIRS = ['src/components', 'src/lib', 'src/pages', 'src/styles', 'src/schemas'] as const;
 
 const GITIGNORE_TEMPLATE = `.astro/
@@ -185,6 +185,11 @@ async function copyDirRelative(rel: string, targetRoot: string): Promise<void> {
   }
 }
 
+async function ensureContentSkeleton(targetRoot: string): Promise<void> {
+  await fs.mkdir(path.join(targetRoot, 'content', 'posts'), { recursive: true });
+  await fs.mkdir(path.join(targetRoot, 'content', 'snippets'), { recursive: true });
+}
+
 async function writeGitignore(targetRoot: string): Promise<void> {
   const gitignorePath = path.join(targetRoot, '.gitignore');
   await writeTextFile(gitignorePath, GITIGNORE_TEMPLATE);
@@ -260,6 +265,7 @@ async function main(): Promise<void> {
   for (const rel of REQUIRED_DIRS) {
     await copyDirRelative(rel, targetRoot);
   }
+  await ensureContentSkeleton(targetRoot);
 
   if (options.includeSrc) {
     for (const rel of OPTIONAL_SRC_DIRS) {

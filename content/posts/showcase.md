@@ -40,7 +40,7 @@ Another reference reusing the same footnote[^fn-demo].
 
 ## Figure
 
-![Minimal local SVG figure](./assets/example/figure-01-overview.svg){width=65%}
+![Minimal local SVG figure](./assets/showcase/figure-01-overview.svg){width=65%}
 
 Text continues below the figure block to demonstrate normal flow.
 

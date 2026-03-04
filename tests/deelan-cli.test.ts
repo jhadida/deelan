@@ -25,13 +25,13 @@ test('deelan wrapper prints help', async () => {
   const result = await runCli(['--help']);
   assert.equal(result.code, 0);
   assert.match(result.stdout, /Deelan CLI/);
+  assert.match(result.stdout, /deelan version/);
   assert.match(result.stdout, /deelan tags/);
   assert.match(result.stdout, /deelan export/);
-  assert.match(result.stdout, /--version/);
 });
 
 test('deelan wrapper prints version', async () => {
-  const result = await runCli(['--version']);
+  const result = await runCli(['version']);
   assert.equal(result.code, 0);
   assert.match(result.stdout.trim(), /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
 });

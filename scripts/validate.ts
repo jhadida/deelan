@@ -117,6 +117,28 @@ function summarize(items: ValidatedContent[]): void {
 }
 
 async function main(): Promise<void> {
+  const argv = process.argv.slice(2);
+  if (argv.includes('--help') || argv.includes('-h')) {
+    process.stdout.write(`Deelan validate
+
+Validates content frontmatter and cross-references.
+
+Usage:
+  deelan validate [options]
+
+Options:
+  --include-subfolder <name>   Include content under posts/<name>/ and snippets/<name>/ (repeatable)
+  --log-level <level>          Log level: error, warn, info, debug
+  --log-file <path>            Write logs to file in addition to stdout
+  --help, -h                   Show this help
+
+Examples:
+  deelan validate
+  deelan validate --include-subfolder synthetic
+` + '\n');
+    return;
+  }
+
   const rawFiles = await loadRawContent();
 
   const issues: ItemError[] = [];
