@@ -1,4 +1,4 @@
-const TAG_REGEX = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
+const TAG_REGEX = /^[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)*$/;
 
 export function isValidTag(tag: string): boolean {
   return TAG_REGEX.test(tag);
