@@ -42,6 +42,8 @@ const GITIGNORE_TEMPLATE = `.astro/
 exports/
 public/mathjax/
 public/content-assets/
+public/js/filter.js
+public/js/search-core.js
 node_modules/
 package.json
 package-lock.json
