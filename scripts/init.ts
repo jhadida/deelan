@@ -42,6 +42,9 @@ const GITIGNORE_TEMPLATE = `.astro/
 exports/
 public/mathjax/
 public/content-assets/
+node_modules/
+package.json
+package-lock.json
 `;
 
 const GITATTRIBUTES_LFS_TEMPLATE = `# Deelan optional Git LFS defaults
