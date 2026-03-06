@@ -17,7 +17,6 @@ blueprints/
 # VCS / editor / OS noise
 .git/
 .github/
-.vscode/
 .DS_Store
 
 # Tests and docs source (keep package lean for alpha)
