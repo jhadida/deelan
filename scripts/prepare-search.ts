@@ -5,6 +5,19 @@ import { createLogger } from '../src/lib/logger';
 
 const logger = createLogger('prepare-search');
 
+async function copyPublicJs(filename: string, root: string, packageRoot: string | null): Promise<void> {
+  if (!packageRoot) return; // dev repo: file is already in place
+  const src = path.join(packageRoot, 'public', 'js', filename);
+  if (!(await pathExists(src))) {
+    logger.warn(`package asset not found, skipping: public/js/${filename}`);
+    return;
+  }
+  const dst = path.join(root, 'public', 'js', filename);
+  await fs.mkdir(path.dirname(dst), { recursive: true });
+  await fs.copyFile(src, dst);
+  logger.debug(`copied ${path.relative(root, src) || src} -> public/js/${filename}`);
+}
+
 async function main(): Promise<void> {
   const root = process.cwd();
   const packageRoot = resolvePackageRoot(root);
@@ -18,6 +31,8 @@ async function main(): Promise<void> {
   await fs.mkdir(path.dirname(dst), { recursive: true });
   await fs.copyFile(src, dst);
   logger.debug(`copied ${path.relative(root, src) || src} -> public/js/search-core.js`);
+
+  await copyPublicJs('filter.js', root, packageRoot);
 }
 
 main().catch((error: unknown) => {
