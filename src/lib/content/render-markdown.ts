@@ -304,6 +304,29 @@ function rewriteLocalAssetUrls(html: string, sourceFilePath?: string): string {
   return out;
 }
 
+interface MathProtectionState {
+  prefix: string;
+  blocks: string[];
+}
+
+function extractDisplayMath(markdown: string): { markdown: string; state: MathProtectionState } {
+  const prefix = Math.random().toString(36).slice(2, 10).toUpperCase();
+  const blocks: string[] = [];
+  const result = markdown.replace(/\$\$([\s\S]*?)\$\$/g, (_full, inner: string) => {
+    const id = blocks.length;
+    blocks.push(`$$${inner}$$`);
+    return `<!-- DMATH_${prefix}_${id} -->`;
+  });
+  return { markdown: result, state: { prefix, blocks } };
+}
+
+function restoreDisplayMath(html: string, state: MathProtectionState): string {
+  const { prefix, blocks } = state;
+  return html.replace(new RegExp(`<!--\\s*DMATH_${prefix}_(\\d+)\\s*-->`, 'g'), (_full, id: string) => {
+    return blocks[parseInt(id, 10)] ?? _full;
+  });
+}
+
 function unwrapNestedShiki(input: string): string {
   return input.replace(
     /<pre><code class="language-[^"]*">([\s\S]*?<pre class="shiki[\s\S]*?<\/pre>[\s\S]*?)<\/code><\/pre>/g,
@@ -314,7 +337,8 @@ function unwrapNestedShiki(input: string): string {
 export async function renderMarkdown(markdown: string, options: RenderMarkdownOptions = {}): Promise<string> {
   await ensureInit();
 
-  const mdWithLinks = replaceInternalLinks(markdown);
+  const { markdown: mdProtected, state: mathState } = extractDisplayMath(markdown);
+  const mdWithLinks = replaceInternalLinks(mdProtected);
   const mdWithFigures = transformFigureSyntax(mdWithLinks);
   const mdWithMermaid = transformMermaidFences(mdWithFigures);
   const explicitToc = /\[\[(?:toc)\]\]|\[(?:toc)\]/i.test(mdWithMermaid);
@@ -334,7 +358,8 @@ export async function renderMarkdown(markdown: string, options: RenderMarkdownOp
   const withFootnotes = withToc + renderFootnotesHtml(footnotes);
   const withAdmonitions = transformAdmonitions(withFootnotes);
   const withAssets = rewriteLocalAssetUrls(withAdmonitions, options.sourceFilePath);
-  return unwrapNestedShiki(withAssets);
+  const withMath = restoreDisplayMath(withAssets, mathState);
+  return unwrapNestedShiki(withMath);
 }
 
 export async function renderInlineMarkdown(markdown: string): Promise<string> {
