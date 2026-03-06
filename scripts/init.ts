@@ -40,6 +40,8 @@ const GITIGNORE_TEMPLATE = `.astro/
 .generated/
 .site-deelan/
 exports/
+public/mathjax/
+public/content-assets/
 `;
 
 const GITATTRIBUTES_LFS_TEMPLATE = `# Deelan optional Git LFS defaults
