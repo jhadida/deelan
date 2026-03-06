@@ -37,7 +37,7 @@ function tokenize(input) {
 }
 
 function extractStructuredFilters(raw) {
-  const filters = { tags: [], from: null, to: null, titles: [] };
+  const filters = { tags: [], from: null, to: null, titles: [], ids: [] };
 
   const parts = raw.split(/\s+/).filter(Boolean);
   const remaining = [];
@@ -61,6 +61,11 @@ function extractStructuredFilters(raw) {
     if (part.startsWith('title:')) {
       const value = part.slice(6).trim();
       if (value) filters.titles.push(value.toLowerCase());
+      continue;
+    }
+    if (part.startsWith('id:')) {
+      const value = part.slice(3).trim();
+      if (value) filters.ids.push(value.toLowerCase());
       continue;
     }
     remaining.push(part);
@@ -188,20 +193,23 @@ function matchDate(filters, date) {
   return true;
 }
 
-function matchesFilters(filters, tags, date, title = '') {
+function matchesFilters(filters, tags, date, title = '', id = '') {
   const normalizedTags = tags.map(normalize);
   const tagsOk = filters.tags.every((queryTag) => matchTag(queryTag, normalizedTags));
   if (!tagsOk) return false;
   const titleNorm = normalize(title);
   const titleOk = filters.titles.every((queryTitle) => titleNorm.includes(normalize(queryTitle)));
   if (!titleOk) return false;
+  const idNorm = normalize(id);
+  const idOk = filters.ids.every((queryId) => idNorm.includes(normalize(queryId)));
+  if (!idOk) return false;
   return matchDate(filters, date);
 }
 
 function evaluateQuery(expression, filters, target) {
   return (
     evaluateExpression(expression, target.text) &&
-    matchesFilters(filters, target.tags, target.date, target.title || '')
+    matchesFilters(filters, target.tags, target.date, target.title || '', target.id || '')
   );
 }
 

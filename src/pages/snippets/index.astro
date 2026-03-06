@@ -107,6 +107,7 @@ const snippetDetails = await Promise.all(
             <li
               data-snippet-item
               data-key={snippet.id}
+              data-id={snippet.id}
               data-title={snippet.title}
               data-text={`${snippet.title} ${snippet.description ?? ''} ${snippet.content_text}`}
               data-tags={snippet.tags.join(',')}

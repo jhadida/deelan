@@ -11,7 +11,8 @@ test('parseQuery extracts structured filters and expression', () => {
     tags: ['data.pipeline.*'],
     from: '2026-01-01',
     to: '2026-12-31',
-    titles: []
+    titles: [],
+    ids: []
   });
 
   assert.ok(parsed.expression);
@@ -39,6 +40,27 @@ test('matchesFilters handles hierarchical tags', () => {
   const nope = matchesFilters(parsed.filters, ['python.pandas.groupby'], null);
 
   assert.equal(ok, true);
+  assert.equal(nope, false);
+});
+
+test('evaluateQuery filters by id: substring', () => {
+  const parsed = parseQuery('id:post--my-note');
+
+  const match = evaluateQuery(parsed.expression, parsed.filters, {
+    text: '',
+    tags: [],
+    date: null,
+    id: 'post--my-note'
+  });
+
+  const nope = evaluateQuery(parsed.expression, parsed.filters, {
+    text: '',
+    tags: [],
+    date: null,
+    id: 'post--other'
+  });
+
+  assert.equal(match, true);
   assert.equal(nope, false);
 });
 

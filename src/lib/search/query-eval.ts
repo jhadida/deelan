@@ -9,6 +9,7 @@ export interface QueryTarget {
   text: string;
   tags: string[];
   date: string | null;
+  id?: string;
 }
 
 export function evaluateExpression(ast: QueryAst | null, text: string): boolean {

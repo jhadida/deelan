@@ -82,6 +82,7 @@ function displayDate(value: string | null): string {
             <tr
               data-post-item
               data-key={post.id}
+              data-id={post.id}
               data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
               data-tags={post.tags.join(',')}
               data-title={post.title}
@@ -120,6 +121,7 @@ function displayDate(value: string | null): string {
                 class="panel"
                 data-post-item
                 data-key={post.id}
+                data-id={post.id}
                 data-text={`${post.title} ${post.description ?? ''} ${post.content_text}`}
                 data-tags={post.tags.join(',')}
                 data-title={post.title}

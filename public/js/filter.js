@@ -28,6 +28,7 @@ export function initFilter(config) {
     parsed.filters.from = null;
     parsed.filters.to = null;
     parsed.filters.titles = [];
+    parsed.filters.ids = [];
   }
 
   function detectMode() {
@@ -86,7 +87,8 @@ export function initFilter(config) {
           .map((value) => value.trim().toLowerCase())
           .filter(Boolean),
         date: item.getAttribute('data-date') || null,
-        title: item.getAttribute('data-title') || ''
+        title: item.getAttribute('data-title') || '',
+        id: item.getAttribute('data-id') || ''
       };
 
       const visible = evaluateQuery(parsed.expression, parsed.filters, target);

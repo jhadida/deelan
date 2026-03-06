@@ -11,6 +11,7 @@ export interface StructuredFilters {
   tags: string[];
   from: string | null;
   to: string | null;
+  ids: string[];
 }
 
 export interface ParsedQuery {
