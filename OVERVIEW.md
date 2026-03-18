@@ -72,6 +72,38 @@ Slug/file rules:
 
 Keep generated output out of source edits unless task explicitly targets them.
 
+## Planning & Roadmap
+
+- `blueprints/backlog.md`: prioritised backlog (P1–P3) with completed items log
+- `blueprints/roadmap-0.2.0.md`: current release roadmap (Commander CLI migration)
+
+## Search / Filter Architecture
+
+The search engine lives in two identical copies that must stay in sync:
+- `src/lib/search/search-core.js` — used server-side (tests, build)
+- `public/js/search-core.js` — used client-side (browser)
+
+Client wiring: `public/js/filter.js` calls `filterItems()` from the search core.
+Query language supports `tag:`, `title:`, `id:`, `from:`, `to:` filters plus `&`, `|`, `()` operators.
+
+## CSS Token Architecture
+
+- `src/styles/tokens.css` — design tokens (defaults / light theme values)
+- `src/styles/themes/dark.css` — dark theme overrides
+- `src/styles/global.css` — component styles consuming tokens via `var(--…)`
+
+## Release Workflow
+
+- CI runs checks only (lint, test, build) — it does **not** publish
+- Local publish: `npm run release -- <version> --execute`
+- Verify pack surface before publishing (see Packaging Notes)
+
+## Testing
+
+- Uses Node's built-in test runner (`node --test`)
+- Run with `npm test`
+- Tests live in `tests/` and cover CLI, lib, and script behaviours
+
 ## Quality Gates
 
 Before merge:
