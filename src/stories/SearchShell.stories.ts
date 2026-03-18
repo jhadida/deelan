@@ -5,12 +5,6 @@ const meta = {
   title: 'UI/SearchShell',
   component: SearchShellDemo,
   tags: ['autodocs'],
-  argTypes: {
-    mode: {
-      control: 'inline-radio',
-      options: ['simple', 'advanced']
-    }
-  },
   parameters: {
     layout: 'padded'
   }
@@ -19,14 +13,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Simple: Story = {
-  args: {
-    mode: 'simple'
-  }
-};
-
-export const Advanced: Story = {
-  args: {
-    mode: 'advanced'
-  }
+export const Default: Story = {
+  args: {}
 };

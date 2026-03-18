@@ -36,43 +36,75 @@ function tokenize(input) {
   return tokens;
 }
 
+function applyFilter(filters, prefix, value) {
+  switch (prefix) {
+    case 'tag':   if (value) filters.tags.push(value.toLowerCase()); break;
+    case 'from':  if (value) filters.from = value; break;
+    case 'to':    if (value) filters.to = value; break;
+    case 'title': if (value) filters.titles.push(value.toLowerCase()); break;
+    case 'id':    if (value) filters.ids.push(value.toLowerCase()); break;
+  }
+}
+
 function extractStructuredFilters(raw) {
   const filters = { tags: [], from: null, to: null, titles: [], ids: [] };
 
-  const parts = raw.split(/\s+/).filter(Boolean);
+  // First pass: extract quoted values (e.g. title:"foo bar")
+  let unquoted = raw.replace(/\b(tag|title|id|from|to):"([^"]*)"/g, (_, prefix, value) => {
+    applyFilter(filters, prefix, value.trim());
+    return '';
+  });
+
+  // Separate parentheses from adjacent tokens so filter prefixes are recognized
+  unquoted = unquoted.replace(/([()])/g, ' $1 ');
+
+  const parts = unquoted.split(/\s+/).filter(Boolean);
   const remaining = [];
 
   for (const part of parts) {
     if (part.startsWith('tag:')) {
-      const value = part.slice(4).trim();
-      if (value) filters.tags.push(value.toLowerCase());
+      applyFilter(filters, 'tag', part.slice(4).trim());
       continue;
     }
     if (part.startsWith('from:')) {
-      const value = part.slice(5).trim();
-      if (value) filters.from = value;
+      applyFilter(filters, 'from', part.slice(5).trim());
       continue;
     }
     if (part.startsWith('to:')) {
-      const value = part.slice(3).trim();
-      if (value) filters.to = value;
+      applyFilter(filters, 'to', part.slice(3).trim());
       continue;
     }
     if (part.startsWith('title:')) {
-      const value = part.slice(6).trim();
-      if (value) filters.titles.push(value.toLowerCase());
+      applyFilter(filters, 'title', part.slice(6).trim());
       continue;
     }
     if (part.startsWith('id:')) {
-      const value = part.slice(3).trim();
-      if (value) filters.ids.push(value.toLowerCase());
+      applyFilter(filters, 'id', part.slice(3).trim());
       continue;
     }
     remaining.push(part);
   }
 
+  // Clean operators and parens orphaned by filter extraction
+  const ops = new Set(['&', '|']);
+  let clean = remaining;
+  let len;
+  do {
+    len = clean.length;
+    clean = clean.filter((t, i, a) => {
+      if (ops.has(t) && (!a[i - 1] || !a[i + 1] || a[i - 1] === '(' || a[i + 1] === ')' || ops.has(a[i - 1]))) return false;
+      return true;
+    });
+    const tmp = [];
+    for (let i = 0; i < clean.length; i++) {
+      if (clean[i] === '(' && clean[i + 1] === ')') { i++; continue; }
+      tmp.push(clean[i]);
+    }
+    clean = tmp;
+  } while (clean.length < len);
+
   return {
-    textQuery: remaining.join(' '),
+    textQuery: clean.join(' '),
     filters
   };
 }
@@ -224,9 +256,74 @@ function parseQuery(raw) {
   };
 }
 
+function validateQuery(raw) {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return { valid: true, error: null };
+
+  const { textQuery } = extractStructuredFilters(trimmed);
+  const expr = textQuery.trim();
+  if (!expr) return { valid: true, error: null };
+
+  let depth = 0;
+  for (const ch of expr) {
+    if (ch === '(') {
+      depth++;
+    } else if (ch === ')') {
+      depth--;
+      if (depth < 0) return { valid: false, error: 'Unexpected )' };
+    }
+  }
+  if (depth !== 0) return { valid: false, error: 'Unclosed (' };
+
+  const tokens = tokenize(expr);
+  if (tokens.length === 0) return { valid: true, error: null };
+
+  const ops = new Set(['&', '|']);
+
+  if (ops.has(tokens[0])) return { valid: false, error: `Cannot start with '${tokens[0]}'` };
+  if (ops.has(tokens[tokens.length - 1])) return { valid: false, error: `Cannot end with '${tokens[tokens.length - 1]}'` };
+
+  for (let i = 0; i < tokens.length - 1; i++) {
+    const curr = tokens[i];
+    const next = tokens[i + 1];
+    if (ops.has(curr) && ops.has(next)) return { valid: false, error: `Consecutive operators: '${curr} ${next}'` };
+    if (curr === '(' && ops.has(next)) return { valid: false, error: `Operator after '('` };
+    if (ops.has(curr) && next === ')') return { valid: false, error: `Operator before ')'` };
+    if (curr === '(' && next === ')') return { valid: false, error: 'Empty parentheses' };
+  }
+
+  return { valid: true, error: null };
+}
+
+function filterItems(items, queryString) {
+  const raw = (queryString || '').trim();
+
+  if (!raw) {
+    return { visibleIds: new Set(items.map((item) => item.id)), valid: true, error: null };
+  }
+
+  const validation = validateQuery(raw);
+  if (!validation.valid) {
+    return { visibleIds: new Set(), valid: false, error: validation.error };
+  }
+
+  const { expression, filters } = parseQuery(raw);
+  const visibleIds = new Set();
+
+  for (const item of items) {
+    if (evaluateQuery(expression, filters, item)) {
+      visibleIds.add(item.id);
+    }
+  }
+
+  return { visibleIds, valid: true, error: null };
+}
+
 export {
   evaluateExpression,
   evaluateQuery,
+  filterItems,
   matchesFilters,
-  parseQuery
+  parseQuery,
+  validateQuery
 };

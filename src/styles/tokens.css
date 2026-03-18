@@ -12,6 +12,7 @@
   --line: #d8d4c6;
   --line-strong: #b9b39e;
   --focus-ring: #2f8a68;
+  --color-error: hsl(0 65% 50%);
   --overlay: rgba(0, 0, 0, 0.08);
 
   --font-body:

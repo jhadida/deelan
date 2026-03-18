@@ -1,110 +1,59 @@
-import { parseQuery, evaluateQuery } from '/js/search-core.js';
+import { filterItems, validateQuery } from '/js/search-core.js';
 
 export function initFilter(config) {
   const queryInput = document.querySelector(config.querySelector);
-  const tagInput = config.tagSelector ? document.querySelector(config.tagSelector) : null;
-  const titleInput = config.titleSelector ? document.querySelector(config.titleSelector) : null;
-  const fromInput = config.fromSelector ? document.querySelector(config.fromSelector) : null;
-  const toInput = config.toSelector ? document.querySelector(config.toSelector) : null;
   const items = Array.from(document.querySelectorAll(config.itemSelector));
   const countEl = config.countSelector ? document.querySelector(config.countSelector) : null;
-  const simplePanel = config.simplePanelSelector ? document.querySelector(config.simplePanelSelector) : null;
-  const advancedPanel = config.advancedPanelSelector
-    ? document.querySelector(config.advancedPanelSelector)
-    : null;
-  const simpleTab = config.simpleTabSelector ? document.querySelector(config.simpleTabSelector) : null;
-  const advancedTab = config.advancedTabSelector
-    ? document.querySelector(config.advancedTabSelector)
-    : null;
-  const simpleModeInput = config.simpleModeSelector
-    ? document.querySelector(config.simpleModeSelector)
-    : null;
-  const advancedModeInput = config.advancedModeSelector
-    ? document.querySelector(config.advancedModeSelector)
-    : null;
 
-  function clearStructuredFilters(parsed) {
-    parsed.filters.tags = [];
-    parsed.filters.from = null;
-    parsed.filters.to = null;
-    parsed.filters.titles = [];
-    parsed.filters.ids = [];
-  }
+  // Build item data array from DOM once at init
+  const itemData = items.map((el) => ({
+    id: el.getAttribute('data-id') || '',
+    text: el.getAttribute('data-text') || '',
+    tags: (el.getAttribute('data-tags') || '')
+      .split(',')
+      .map((v) => v.trim().toLowerCase())
+      .filter(Boolean),
+    date: el.getAttribute('data-date') || null,
+    title: el.getAttribute('data-title') || ''
+  }));
 
-  function detectMode() {
-    return advancedModeInput && advancedModeInput.checked ? 'advanced' : 'simple';
-  }
-
-  function syncModeUI(mode) {
-    if (simplePanel) {
-      const isSimple = mode === 'simple';
-      simplePanel.hidden = !isSimple;
-      simplePanel.style.display = isSimple ? '' : 'none';
-    }
-    if (advancedPanel) {
-      const isAdvanced = mode === 'advanced';
-      advancedPanel.hidden = !isAdvanced;
-      advancedPanel.style.display = isAdvanced ? '' : 'none';
-    }
-    if (simpleTab) simpleTab.setAttribute('aria-selected', String(mode === 'simple'));
-    if (advancedTab) advancedTab.setAttribute('aria-selected', String(mode === 'advanced'));
-    if (simpleModeInput) simpleModeInput.checked = mode === 'simple';
-    if (advancedModeInput) advancedModeInput.checked = mode === 'advanced';
-  }
+  const triggerBtn = queryInput
+    ? queryInput.closest('.search-panel')?.querySelector('.search-trigger-btn')
+    : null;
 
   function apply() {
-    const mode = detectMode();
-    syncModeUI(mode);
+    const raw = queryInput ? queryInput.value.trim() : '';
+    const { visibleIds, valid, error } = filterItems(itemData, raw);
 
-    const parsed = parseQuery((queryInput ? queryInput.value : '').trim());
+    if (!valid) {
+      console.warn(`[search] Invalid query: ${error}`);
+    }
 
-    if (mode === 'simple') {
-      clearStructuredFilters(parsed);
-      parsed.expression = null;
-
-      if (tagInput && tagInput.value.trim()) {
-        parsed.filters.tags.push(tagInput.value.trim().toLowerCase());
-      }
-      if (titleInput && titleInput.value.trim()) {
-        parsed.filters.titles.push(titleInput.value.trim().toLowerCase());
-      }
-      if (fromInput && fromInput.value) {
-        parsed.filters.from = fromInput.value;
-      }
-      if (toInput && toInput.value) {
-        parsed.filters.to = toInput.value;
+    if (queryInput) {
+      if (!valid && raw.length > 0) {
+        queryInput.setAttribute('aria-invalid', 'true');
+      } else {
+        queryInput.removeAttribute('aria-invalid');
       }
     }
 
+    // On invalid query fall back to showing all items
     let shown = 0;
     const visibleKeys = new Set();
 
-    for (const item of items) {
-      const target = {
-        text: item.getAttribute('data-text') || '',
-        tags: (item.getAttribute('data-tags') || '')
-          .split(',')
-          .map((value) => value.trim().toLowerCase())
-          .filter(Boolean),
-        date: item.getAttribute('data-date') || null,
-        title: item.getAttribute('data-title') || '',
-        id: item.getAttribute('data-id') || ''
-      };
-
-      const visible = evaluateQuery(parsed.expression, parsed.filters, target);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const id = itemData[i].id;
+      const visible = !valid || visibleIds.has(id);
       item.style.display = visible ? '' : 'none';
 
       if (visible) {
-        const key = item.getAttribute('data-key') || null;
-        if (key) visibleKeys.add(key);
-        else shown += 1;
+        if (id) visibleKeys.add(id);
+        else shown++;
       }
     }
 
-    if (visibleKeys.size > 0) {
-      shown = visibleKeys.size;
-    }
-
+    if (visibleKeys.size > 0) shown = visibleKeys.size;
     if (countEl) countEl.textContent = String(shown);
 
     if (typeof config.onAfterApply === 'function') {
@@ -112,25 +61,31 @@ export function initFilter(config) {
     }
   }
 
-  [queryInput, tagInput, titleInput, fromInput, toInput].forEach((el) => {
-    if (!el) return;
-    el.addEventListener('input', apply);
-    el.addEventListener('change', apply);
-  });
+  function applyWithFeedback() {
+    apply();
+    if (queryInput && queryInput.getAttribute('aria-invalid') === 'true') {
+      if (typeof window.showToast === 'function') window.showToast('Invalid query.');
+    }
+  }
 
-  if (simpleTab && advancedTab) {
-    simpleTab.addEventListener('click', apply);
-    advancedTab.addEventListener('click', apply);
+  if (queryInput) {
+    queryInput.addEventListener('input', apply);
+    queryInput.addEventListener('change', apply);
+    queryInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyWithFeedback();
+      }
+    });
   }
-  if (simpleModeInput && advancedModeInput) {
-    simpleModeInput.addEventListener('change', apply);
-    advancedModeInput.addEventListener('change', apply);
+
+  if (triggerBtn) {
+    triggerBtn.addEventListener('click', applyWithFeedback);
   }
+
   apply();
 
-  return {
-    apply
-  };
+  return { apply };
 }
 
 export function initViewToggle(config) {

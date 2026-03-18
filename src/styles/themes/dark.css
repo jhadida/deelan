@@ -10,5 +10,6 @@
   --line: hsl(var(--accent-hue) 16% 26%);
   --line-strong: hsl(var(--accent-hue) 16% 39%);
   --focus-ring: hsl(var(--accent-hue) 66% 72%);
+  --color-error: hsl(0 70% 65%);
   --overlay: hsl(var(--accent-hue) 24% 2% / 0.42);
 }

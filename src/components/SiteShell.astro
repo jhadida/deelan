@@ -86,7 +86,7 @@ const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config
       (() => {
         let toastTimer = null;
 
-        function showToast(message) {
+        window.showToast = function showToast(message) {
           let toast = document.getElementById('copy-toast');
           if (!(toast instanceof HTMLElement)) {
             toast = document.createElement('div');
@@ -98,7 +98,7 @@ const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config
           toast.classList.add('is-visible');
           if (toastTimer) window.clearTimeout(toastTimer);
           toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 1200);
-        }
+        };
 
         document.addEventListener('click', async (event) => {
           const target = event.target;

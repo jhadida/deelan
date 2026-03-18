@@ -149,20 +149,10 @@ function displayDate(value: string | null): string {
   </div>
 
   <script type="module">
-    import { initFilter, initViewToggle } from '/js/filter.js?v=20260305-1';
+    import { initFilter, initViewToggle } from '/js/filter.js?v=20260312-2';
 
     initFilter({
       querySelector: '#posts-query',
-      tagSelector: '#posts-tag',
-      titleSelector: '#posts-title',
-      fromSelector: '#posts-from',
-      toSelector: '#posts-to',
-      simpleTabSelector: '#posts-tab-simple',
-      advancedTabSelector: '#posts-tab-advanced',
-      simpleModeSelector: '#posts-mode-simple',
-      advancedModeSelector: '#posts-mode-advanced',
-      simplePanelSelector: '#posts-search-simple',
-      advancedPanelSelector: '#posts-search-advanced',
       itemSelector: '[data-post-item]',
       countSelector: '#posts-visible-count'
     });

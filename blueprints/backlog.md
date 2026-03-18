@@ -47,18 +47,16 @@
     - safe-by-default dry-run mode; `--execute` required for side effects
     - `release:check` script added for reproducible quality gates
     - CI workflows added (`ci.yml`, `release.yml`)
-
-## In Progress
-
-### 1. Release policy
-
-- Keep CI in checks-only operational mode until publish policy is finalized:
-    - keep local release publish path as source of truth (`npm run release -- <version> --execute`)
-    - decide if/when to enforce manual-approval gate for tag-driven publish workflow
+- Release policy decided: keep CI in checks-only mode; local publish path remains source of truth
+    - `npm run release -- <version> --execute` is canonical
+    - no manual-approval gate for tag-driven publish (not needed for sole-maintainer workflow)
+- Search bar UX: live red border on invalid query (via `aria-invalid` + CSS); trigger button + Enter key with "Invalid query." toast; placeholder updated to hint syntax
+- Design system: `--color-error` token defined in `tokens.css` (dark-mode override in `themes/dark.css`); hardcoded value replaced in `global.css`
+- Command output verbosity: resolved by existing logger infrastructure (`--log-level`, `DEELAN_LOG_LEVEL`, `logging.level` in config); no `npm_config_loglevel` bridge needed
 
 ## Remaining
 
-### 2. UI refinement
+### 1. UI refinement
 
 - [P2] Revisit posts list view feature-flag decision:
     - currently gated by `enable_posts_list_view` (default: `false`)
@@ -66,28 +64,20 @@
     - if retained, add "load more" incremental loading strategy for list view
     - evaluate optional infinite scroll only after keyboard/accessibility behavior is validated
 - [P2] UI blueprint phase 4.
-- [P2] Final vector mark package (SVG icon + lockup variants).
+- [P3] Final vector mark package (SVG icon + lockup variants).
 
-### 3. UX refinement
+### 2. UX refinement
 
-- [P1] Query-based search UX hardening:
-    - add an explicit trigger button next to the query field for query-mode execution
-    - bind `Enter` in query field to the same trigger action
-    - show red border on query field while pattern is invalid
-    - on `Enter` with invalid pattern, show "Invalid query" notification (same interaction style as "Permalink copied")
 - [P1] CLI framework migration to `commander`:
     - refactor top-level `deelan` routing and shared flag/help behavior
     - keep command contract backward compatible (`init`, `validate`, `build`, `serve`, `tags`, `export`, `--version`)
     - reduce custom arg parsing in favor of framework primitives
     - add regression tests for help, unknown-command handling, and packaged-install CLI behavior
-- [P2] Investigate command output verbosity controls:
-    - evaluate using `npm_config_loglevel` to reduce routine script trace output
-    - define a clean default vs debug mode convention for local workflows
 - [P2] Heading copy-link controls in rendered content.
 
-### 4. Feature enhancements
+### 3. Feature enhancements
 
-- [P1] Analytics blueprint phase 2.
+- [P2] Analytics blueprint phase 2.
 - [P2] Explore enterprise auth integration options (OIDC/SAML/SSO):
     - assess required runtime changes beyond static preview serving
     - define scope boundaries (viewer-only auth vs role-based permissions)

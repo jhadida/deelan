@@ -157,7 +157,7 @@ const snippetDetails = await Promise.all(
   </div>
 
   <script type="module">
-    import { initFilter, initSnippetExplorer } from '/js/filter.js?v=20260305-1';
+    import { initFilter, initSnippetExplorer } from '/js/filter.js?v=20260312-2';
 
     const explorer = initSnippetExplorer({
       listSelector: '#snippet-list',
@@ -171,16 +171,6 @@ const snippetDetails = await Promise.all(
 
     initFilter({
       querySelector: '#snippets-query',
-      tagSelector: '#snippets-tag',
-      titleSelector: '#snippets-title',
-      fromSelector: '#snippets-from',
-      toSelector: '#snippets-to',
-      simpleTabSelector: '#snippets-tab-simple',
-      advancedTabSelector: '#snippets-tab-advanced',
-      simpleModeSelector: '#snippets-mode-simple',
-      advancedModeSelector: '#snippets-mode-advanced',
-      simplePanelSelector: '#snippets-search-simple',
-      advancedPanelSelector: '#snippets-search-advanced',
       itemSelector: '[data-snippet-item]',
       countSelector: '#snippets-visible-count',
       onAfterApply: ({ visibleKeys }) => {
