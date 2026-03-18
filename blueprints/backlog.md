@@ -53,6 +53,11 @@
 - Search bar UX: live red border on invalid query (via `aria-invalid` + CSS); trigger button + Enter key with "Invalid query." toast; placeholder updated to hint syntax
 - Design system: `--color-error` token defined in `tokens.css` (dark-mode override in `themes/dark.css`); hardcoded value replaced in `global.css`
 - Command output verbosity: resolved by existing logger infrastructure (`--log-level`, `DEELAN_LOG_LEVEL`, `logging.level` in config); no `npm_config_loglevel` bridge needed
+- UI contrast and visual hierarchy review:
+    - increased separation between `--bg`, `--surface`, `--surface-elevated` tokens for better layer distinction
+    - stronger line colors for improved border visibility in both themes
+    - topbar accent glow and active nav link highlighting added
+    - search shell redesigned with rounded corners, lighter background, always-visible keyboard hints
 
 ## Remaining
 
