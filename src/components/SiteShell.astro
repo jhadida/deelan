@@ -11,6 +11,12 @@ const { pageTitle } = Astro.props;
 const config = await getSiteConfig();
 const fullTitle = pageTitle ? `${pageTitle} | ${config.blog_title}` : config.blog_title;
 const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config.content_max_width}; --detail-max: ${config.content_max_width};`;
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+};
 ---
 
 <html lang="en" data-theme={config.default_theme} style={rootStyle}>
@@ -29,9 +35,9 @@ const rootStyle = `--accent-hue: ${config.accent_hue}; --container-max: ${config
       <div class="topbar-inner">
         <a href="/" class="brand">{config.blog_title}</a>
         <nav class="nav-links" aria-label="Primary">
-          <a href="/posts">Posts</a>
-          <a href="/snippets">Snippets</a>
-          <a href="/analytics">Analytics</a>
+          <a href="/posts" aria-current={isActive('/posts') ? 'page' : undefined}>Posts</a>
+          <a href="/snippets" aria-current={isActive('/snippets') ? 'page' : undefined}>Snippets</a>
+          <a href="/analytics" aria-current={isActive('/analytics') ? 'page' : undefined}>Analytics</a>
         </nav>
         <ThemeToggle currentTheme={config.default_theme} />
       </div>

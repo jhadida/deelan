@@ -51,8 +51,9 @@
   --radius-lg: 16px;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 8px 24px -16px color-mix(in oklab, var(--overlay) 75%, transparent);
-  --shadow-card: 0 10px 24px -18px color-mix(in oklab, var(--overlay) 85%, transparent);
+  --shadow-soft: 0 8px 24px -12px color-mix(in oklab, var(--overlay) 90%, transparent);
+  --shadow-card: 0 4px 16px -6px color-mix(in oklab, var(--overlay) 95%, transparent),
+    0 12px 32px -12px color-mix(in oklab, var(--overlay) 70%, transparent);
 
   --container-max: 1100px;
   --reader-max: 72ch;

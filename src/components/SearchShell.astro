@@ -10,10 +10,12 @@ const {
   ariaLabel = 'Search',
   queryPlaceholder = 'tag:x  title:"foo bar"  id:x  from:date  to:date  &  |  ()'
 } = Astro.props;
+
+const hasHints = Astro.slots.has('hints');
 ---
 
 <section class="search-shell" aria-label={ariaLabel}>
-  <div class="panel section-block search-panel">
+  <div class="search-bar">
     <input
       id={`${idPrefix}-query`}
       class="search-query-input"
@@ -35,4 +37,9 @@ const {
       </svg>
     </button>
   </div>
+  {hasHints && (
+    <div class="search-hints">
+      <slot name="hints" />
+    </div>
+  )}
 </section>

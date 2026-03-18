@@ -157,8 +157,9 @@ button:disabled {
   top: 0;
   z-index: 10;
   backdrop-filter: blur(8px);
-  background: color-mix(in oklab, var(--surface-elevated) 90%, var(--bg));
+  background: color-mix(in oklab, var(--surface-elevated) 94%, var(--bg));
   border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 2px 0 color-mix(in oklab, var(--accent) 35%, transparent);
 }
 
 .topbar-inner {
@@ -196,6 +197,12 @@ button:disabled {
 
 .nav-links a:hover {
   background: color-mix(in oklab, var(--accent) 11%, transparent);
+}
+
+.nav-links a[aria-current='page'] {
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .theme-toggle {
@@ -600,6 +607,36 @@ button:disabled {
 .search-shell {
   display: grid;
   gap: 0;
+  background: color-mix(in oklab, var(--bg) 70%, var(--surface));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.search-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg) 85%, var(--surface));
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.search-hints span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: nowrap;
 }
 
 .search-panel {
@@ -764,25 +801,13 @@ button:disabled {
   box-shadow: var(--shadow-card);
 }
 
-.search-shell .search-panel,
-.search-shell .panel.search-panel {
-  border-radius: 0 !important;
-}
-
-.panel.search-panel {
-  border-radius: 0;
-}
 
 .panel input[type='search'] {
   margin: var(--space-2) 0 var(--space-4);
 }
 
-.search-shell .search-panel input[type='search'] {
+.search-bar input[type='search'] {
   margin: 0;
-}
-
-.search-shell .search-panel > * + * {
-  margin-top: 0;
 }
 
 .panel h2,
@@ -1132,44 +1157,6 @@ button:disabled {
   align-items: start;
 }
 
-.shortcuts-help h2 {
-  margin: 0;
-  font-size: var(--text-base);
-}
-
-.shortcuts-help summary {
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-weight: 600;
-}
-
-.shortcuts-help summary::marker {
-  color: var(--muted);
-  font-size: 0.78em;
-}
-
-.shortcuts-inline {
-  margin: var(--space-3) 0 0;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--space-2) var(--space-3);
-  align-items: center;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.shortcuts-inline span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.shortcuts-inline span + span::before {
-  content: '•';
-  color: var(--muted);
-  margin-right: 0.45rem;
-}
 
 kbd {
   display: inline-block;

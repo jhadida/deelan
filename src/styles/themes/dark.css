@@ -1,15 +1,15 @@
 :root[data-theme='dark'] {
-  --bg: hsl(var(--accent-hue) 20% 8%);
-  --fg: hsl(var(--accent-hue) 24% 92%);
-  --muted: hsl(var(--accent-hue) 14% 70%);
+  --bg: hsl(var(--accent-hue) 16% 6%);
+  --fg: hsl(var(--accent-hue) 20% 92%);
+  --muted: hsl(var(--accent-hue) 12% 58%);
   --accent-sat: 58%;
   --accent-light: 65%;
   --accent: hsl(var(--accent-hue) var(--accent-sat) var(--accent-light));
-  --surface: hsl(var(--accent-hue) 18% 12%);
-  --surface-elevated: hsl(var(--accent-hue) 18% 15%);
-  --line: hsl(var(--accent-hue) 16% 26%);
-  --line-strong: hsl(var(--accent-hue) 16% 39%);
+  --surface: hsl(var(--accent-hue) 14% 12%);
+  --surface-elevated: hsl(var(--accent-hue) 12% 18%);
+  --line: hsl(var(--accent-hue) 14% 24%);
+  --line-strong: hsl(var(--accent-hue) 16% 36%);
   --focus-ring: hsl(var(--accent-hue) 66% 72%);
   --color-error: hsl(0 70% 65%);
-  --overlay: hsl(var(--accent-hue) 24% 2% / 0.42);
+  --overlay: hsl(var(--accent-hue) 30% 0% / 0.55);
 }
