@@ -58,6 +58,11 @@
     - stronger line colors for improved border visibility in both themes
     - topbar accent glow and active nav link highlighting added
     - search shell redesigned with rounded corners, lighter background, always-visible keyboard hints
+- CLI framework migration to Commander (0.2.0):
+    - top-level `deelan` routing migrated from custom if/else to Commander
+    - `--version` flag added alongside backward-compatible `version` command
+    - auto-generated help with examples, unknown command suggestions
+    - 7 new CLI tests added (54 total)
 
 ## Remaining
 
@@ -73,11 +78,11 @@
 
 ### 2. UX refinement
 
-- [P1] CLI framework migration to `commander`:
-    - refactor top-level `deelan` routing and shared flag/help behavior
-    - keep command contract backward compatible (`init`, `validate`, `build`, `serve`, `tags`, `export`, `--version`)
-    - reduce custom arg parsing in favor of framework primitives
-    - add regression tests for help, unknown-command handling, and packaged-install CLI behavior
+- [P1] Harmonize subcommand arg parsing to use Commander:
+    - migrate `init`, `tags`, `export`, `validate` scripts from custom `parseCliArgs()` to Commander
+    - consistent help formatting across all commands
+    - potentially retire `src/lib/args.ts` custom parsing utilities
+    - see `blueprints/commander-cli.md` Phase 5 for details
 - [P2] Heading copy-link controls in rendered content.
 
 ### 3. Feature enhancements

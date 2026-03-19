@@ -2,64 +2,44 @@
 
 Target: ship a focused `0.2.0` quality and UX release on top of `0.1.x`.
 
+## Status: Released
+
 ## Release Goals
 
 - Improve search ergonomics and validation feedback.
 - Simplify and standardize CLI command behavior.
-- Keep release scope tight and avoid broad UI/platform churn.
+- Improve UI contrast and visual hierarchy.
 
-## Must-Have Scope (P1)
+## Completed Scope
 
-### 1) Query-based search UX hardening
+### 1) Query-based search UX hardening (P1) ✓
 
-Acceptance criteria:
+- Trigger button next to the query field for query-mode execution.
+- `Enter` in query field bound to the same trigger action.
+- Red border while query pattern is invalid.
+- `Invalid query` toast notification on `Enter` with invalid query.
 
-- Add a trigger button next to the query field for query-mode execution.
-- Bind `Enter` in query field to the same trigger action.
-- Show red border while query pattern is invalid.
-- Show `Invalid query` notification on `Enter` with invalid query (same interaction style as permalink copy feedback).
+### 2) CLI framework migration to Commander (P1) ✓
 
-Impact:
+- Top-level `deelan` command routing migrated to `commander`.
+- Existing command contract stable (`init`, `validate`, `build`, `serve`, `tags`, `export`, `--help`, `--version`).
+- Auto-generated help with examples, unknown command suggestions.
+- `--version` flag added alongside backward-compatible `version` command.
+- Migration-focused test coverage added (54 total tests).
 
-- Clearer user feedback for advanced query mode.
-- Fewer silent failures and less confusion around parser constraints.
+### 3) UI contrast and visual hierarchy (bonus) ✓
 
-### 2) CLI framework migration to Commander
+- Increased separation between background, surface, and elevated surface tokens.
+- Stronger line colors for improved border visibility in both themes.
+- Topbar accent glow and active nav link highlighting.
+- Search shell redesigned with rounded corners, lighter background, always-visible keyboard hints.
 
-Scope:
+### 4) Previously completed P2 items ✓
 
-- Refactor top-level `deelan` command routing to use `commander`.
-- Keep existing command contract stable (`init`, `validate`, `build`, `serve`, `tags`, `export`, `--help`, `--version`).
-- Normalize global help/usage formatting and error messages.
-- Reduce custom arg parsing where `commander` already provides equivalent behavior.
+- Command output verbosity: resolved by existing logger infrastructure.
+- Design system: `--color-error` token added.
 
-Acceptance criteria:
+## Deferred to 0.2.1
 
-- No breaking changes to documented user-facing commands.
-- Existing CLI tests pass; add migration-focused coverage for:
-  - consistent help output structure
-  - unknown-command behavior
-  - global flags handling
-- Packaged install smoke test still passes (`deelan init --help`, `deelan --version`).
-
-## Should-Have Scope (P2, only if P1 completes early)
-
-- Investigate command output verbosity policy (`npm_config_loglevel` vs current defaults).
+- Harmonize subcommand arg parsing to use Commander (init, tags, export, validate).
 - Heading copy-link controls in rendered content.
-
-## Explicitly Out of Scope for 0.2.0
-
-- Analytics phase 2 interactive expansion.
-- UI phase 4 mobile/accessibility hardening.
-- Enterprise auth integrations (OIDC/SAML/SSO).
-- Broad visual redesign work.
-
-## Validation Gate for 0.2.0
-
-Before release candidate:
-
-- `npm test`
-- `npm run validate`
-- `npm run build`
-- `npm run docs:build`
-- packaged CLI smoke check in separate test folder using local tarball (`npm run pack:local`).
