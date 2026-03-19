@@ -1,6 +1,6 @@
 {
   "name": "@jhadida/deelan",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "private": false,
   "description": "A private-first markdown notebook site builder for posts and snippets.",
   "license": "MIT",
