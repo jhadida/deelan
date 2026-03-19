@@ -59,3 +59,50 @@ test('deelan wrapper reports unknown command', async () => {
   assert.equal(result.code, 1);
   assert.match(result.stderr, /unknown command/i);
 });
+
+// ─── commander migration coverage ───────────────────────────
+
+test('deelan --version flag prints semver', async () => {
+  const result = await runCli(['--version']);
+  assert.equal(result.code, 0);
+  assert.match(result.stdout.trim(), /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+});
+
+test('deelan help lists all commands', async () => {
+  const result = await runCli(['--help']);
+  assert.equal(result.code, 0);
+  for (const cmd of ['version', 'build', 'serve', 'init', 'tags', 'export', 'validate']) {
+    assert.match(result.stdout, new RegExp(`\\b${cmd}\\b`), `help should list "${cmd}" command`);
+  }
+});
+
+test('deelan help <command> works for delegated commands', async () => {
+  const result = await runCli(['help', 'build']);
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /build/i);
+});
+
+test('deelan build --help shows custom help', async () => {
+  const result = await runCli(['build', '--help']);
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /--include-subfolder/);
+  assert.match(result.stdout, /astro build/);
+});
+
+test('deelan serve --help shows custom help', async () => {
+  const result = await runCli(['serve', '--help']);
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /astro preview/);
+});
+
+test('deelan unknown command suggests similar', async () => {
+  const result = await runCli(['buil']);
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /unknown command/i);
+});
+
+test('deelan with no arguments shows help', async () => {
+  const result = await runCli([]);
+  const output = result.stdout + result.stderr;
+  assert.match(output, /Deelan CLI/);
+});

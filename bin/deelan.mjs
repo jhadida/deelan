@@ -5,12 +5,15 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const require = createRequire(import.meta.url);
 const PACKAGE_JSON_PATH = path.join(ROOT, 'package.json');
+
+// ─── logging ────────────────────────────────────────────────
 
 const LOG_LEVEL_WEIGHT = {
   error: 0,
@@ -67,63 +70,21 @@ function writeLog(logging, level, message) {
   }
 }
 
-const SCRIPT_MAP = {
-  init: path.join(ROOT, 'scripts', 'init.ts'),
-  tags: path.join(ROOT, 'scripts', 'tags.ts'),
-  export: path.join(ROOT, 'scripts', 'export.ts'),
-  validate: path.join(ROOT, 'scripts', 'validate.ts')
-};
+// ─── version ────────────────────────────────────────────────
 
-function printHelp() {
-  process.stdout.write(`Deelan CLI
-
-Usage:
-  deelan <command> [...args]
-
-Commands:
-  init                Scaffold a new Deelan project
-  build               Run preflight + static build for current project
-  serve               Serve built output for current project
-  version             Print installed Deelan version
-  tags                Run tag management CLI
-  export              Run export CLI
-  validate            Validate content/frontmatter
-
-Examples:
-  deelan version
-  deelan init --help
-  deelan init my-notebook --no-vscode
-  deelan init my-notebook --with-src
-  deelan build
-  deelan build --include-subfolder synthetic
-  deelan serve --port 4321
-  deelan tags stats
-  deelan export --id post--partitioning-primer --format pdf --pdf-scale 0.95
-  deelan validate
-` + '\n');
-}
-
-function printVersion() {
+function readVersion() {
   try {
     const raw = fs.readFileSync(PACKAGE_JSON_PATH, 'utf8');
     const parsed = JSON.parse(raw);
-    const version = typeof parsed.version === 'string' ? parsed.version : null;
-    if (!version) throw new Error('missing version');
-    process.stdout.write(`${version}\n`);
+    const v = typeof parsed.version === 'string' ? parsed.version : null;
+    if (!v) throw new Error('missing version');
+    return v;
   } catch {
-    writeLog(resolveLogging([]), 'error', 'could not resolve package version');
-    process.exit(1);
+    return null;
   }
 }
 
-function resolveRuntimeModule(specifier, dependencyName, logging) {
-  try {
-    return require.resolve(specifier);
-  } catch {
-    writeLog(logging, 'error', `missing runtime dependency "${dependencyName}". Reinstall package and retry.`);
-    process.exit(1);
-  }
-}
+// ─── runtime resolution ─────────────────────────────────────
 
 function resolveAstroCli(logging) {
   let astroPackageJsonPath;
@@ -171,6 +132,8 @@ function resolveTsxLoader(logging) {
   process.exit(1);
 }
 
+// ─── execution helpers ──────────────────────────────────────
+
 function runNode(args, logging) {
   const result = spawnSync(process.execPath, args, {
     cwd: process.cwd(),
@@ -195,6 +158,8 @@ function runTsScript(scriptPath, args = []) {
   });
   if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
 }
+
+// ─── build / serve ──────────────────────────────────────────
 
 function splitBuildArgs(args) {
   const scriptArgs = [];
@@ -289,33 +254,84 @@ Examples:
   runNode([astroCli, 'preview', ...args], logging);
 }
 
-const argv = process.argv.slice(2);
-const logging = resolveLogging(argv);
-const command = argv[0];
+// ─── CLI program ────────────────────────────────────────────
 
-if (!command || command === 'help' || command === '--help' || command === '-h') {
-  printHelp();
-  process.exit(0);
+const SCRIPT_MAP = {
+  init: { script: path.join(ROOT, 'scripts', 'init.ts'), description: 'Scaffold a new Deelan project' },
+  tags: { script: path.join(ROOT, 'scripts', 'tags.ts'), description: 'Run tag management CLI' },
+  export: { script: path.join(ROOT, 'scripts', 'export.ts'), description: 'Run export CLI' },
+  validate: { script: path.join(ROOT, 'scripts', 'validate.ts'), description: 'Validate content/frontmatter' }
+};
+
+const version = readVersion();
+const logging = resolveLogging(process.argv.slice(2));
+
+const program = new Command();
+
+program
+  .name('deelan')
+  .description('Deelan CLI')
+  .showSuggestionAfterError();
+
+if (version) {
+  program.version(version, '-V, --version', 'Print installed Deelan version');
 }
 
-if (command === 'version') {
-  printVersion();
-  process.exit(0);
+program.addHelpText('after', `
+Examples:
+  deelan version
+  deelan init --help
+  deelan init my-notebook --no-vscode
+  deelan init my-notebook --with-src
+  deelan build
+  deelan build --include-subfolder synthetic
+  deelan serve --port 4321
+  deelan tags stats
+  deelan export --id post--partitioning-primer --format pdf --pdf-scale 0.95
+  deelan validate`);
+
+// Backward-compatible 'version' command
+program
+  .command('version')
+  .description('Print installed Deelan version')
+  .action(() => {
+    if (!version) {
+      writeLog(logging, 'error', 'could not resolve package version');
+      process.exit(1);
+    }
+    process.stdout.write(`${version}\n`);
+  });
+
+// Build command — handles its own --help and forwards unknown options to Astro
+program
+  .command('build')
+  .description('Run preflight + static build for current project')
+  .helpOption(false)
+  .allowUnknownOption()
+  .action(() => {
+    runBuild(process.argv.slice(3), logging);
+  });
+
+// Serve command — handles its own --help and forwards options to Astro preview
+program
+  .command('serve')
+  .description('Serve built output for local preview')
+  .helpOption(false)
+  .allowUnknownOption()
+  .action(() => {
+    runServe(process.argv.slice(3), logging);
+  });
+
+// Delegated commands — forward all args to their TS scripts
+for (const [name, { script, description }] of Object.entries(SCRIPT_MAP)) {
+  program
+    .command(name)
+    .description(description)
+    .helpOption(false)
+    .allowUnknownOption()
+    .action(() => {
+      runTsScript(script, process.argv.slice(3));
+    });
 }
 
-if (command === 'build') {
-  runBuild(argv.slice(1), logging);
-}
-
-if (command === 'serve') {
-  runServe(argv.slice(1), logging);
-}
-
-const scriptPath = SCRIPT_MAP[command];
-if (!scriptPath) {
-  writeLog(logging, 'error', `unknown command "${command}"`);
-  writeLog(logging, 'error', 'Run `deelan --help` for available commands.');
-  process.exit(1);
-}
-
-runTsScript(scriptPath, argv.slice(1));
+program.parse();
